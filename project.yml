@@ -1,0 +1,13 @@
+name: PackageDSLKit
+settings:
+  LINT_MODE: ${LINT_MODE}
+packages:
+  PackageDSLKit:
+    path: .
+aggregateTargets:
+  Lint:
+    buildScripts:
+      - path: Scripts/lint.sh
+        name: Lint
+        basedOnDependencyAnalysis: false
+    schemes: {}
