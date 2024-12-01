@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:PackageDSLKit}",
+            "name": "Debug package",
+            "program": "${workspaceFolder:PackageDSLKit}/.build/debug/package",
+            "preLaunchTask": "swift: Build Debug package"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:PackageDSLKit}",
+            "name": "Release package",
+            "program": "${workspaceFolder:PackageDSLKit}/.build/release/package",
+            "preLaunchTask": "swift: Build Release package"
+        }
+    ]
+}
