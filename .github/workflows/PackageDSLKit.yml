@@ -13,7 +13,7 @@ jobs:
     if: "!contains(github.event.head_commit.message, 'ci skip')"
     runs-on: ubuntu-latest
     container:
-      image: swiftlang/swift:nightly-6.0-jammy
+      image: swift:6.0-noble
     steps:
       - uses: actions/checkout@v4
       - name: Cache swift package modules
@@ -106,3 +106,41 @@ jobs:
           files: ${{ join(fromJSON(steps.coverage-files-spm.outputs.files), ',') }} 
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: macOS,${{ env.XCODE_NAME }},${{ matrix.runs-on }}
+  build-docc:
+    name: Build DocC
+    needs: [build-macos, build-ubuntu]
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.0-noble
+      volumes:
+        - ${{ github.workspace }}:/workspace
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache swift package modules
+        id: cache-spm-linux
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-spm
+        with:
+          path: .build
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.swift-version }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.swift-version }}-
+            ${{ runner.os }}-${{ env.cache-name }}-
+      - name: Build DocC
+        run: swift package generate-documentation --platform "name=macos,version=15.1" --transform-for-static-hosting --hosting-base-path "swift-docc" --disable-indexing --product "PackageDSLKit"
+      - name: Package DocArchive
+        working-directory: .build/plugins/Swift-DocC/outputs
+        run: tar -cf PackageDSLKit.doccarchive.tar PackageDSLKit.doccarchive
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          path: /workspace/.build/plugins/Swift-DocC/outputs/PackageDSLKit.doccarchive.tar
+          retention-days: 1
+      - uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PACKAGEDSL_TOKEN }}
+          repository: brightdigit/PackageDSLDocs
+          event-type: docc-update
+          client-payload: '{"run_id": "${{ github.run_id }}"}' 
