@@ -90,6 +90,7 @@ extension Package {
         try self.settings.fileManager.createDirectory(
           at: self.settings.dslSourcesURL, withIntermediateDirectories: true, attributes: nil)
       }
+      PackageSpecifications()
       // let currentDirectoryURL = URL(fileURLWithPath: self.settings.fileManager.currentDirectoryPath)
       // let packageName = currentDirectoryURL.lastPathComponent
       let packageSwiftURL = self.settings.dslSourcesURL.appending(path: "Index.swift")

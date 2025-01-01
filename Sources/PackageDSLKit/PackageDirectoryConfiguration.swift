@@ -87,6 +87,16 @@ extension PackageDirectoryConfiguration {
       index: index, products: products, dependencies: dependencies, targets: targets,
       testTargets: testTargets, supportedPlatforms: supportedPlatforms)
   }
+
+  func createComponents() -> [Component] {
+    var components: [Component] = []
+    components.append(contentsOf: products.map { $0.createComponent() })
+    components.append(contentsOf: dependencies.map { $0.createComponent() })
+    components.append(contentsOf: targets.map { $0.createComponent() })
+    components.append(contentsOf: testTargets.map { $0.createComponent() })
+    components.append(self.supportedPlatforms.createComponent())
+    return components
+  }
 }
 
 enum SourceType: CaseIterable {
@@ -124,6 +134,9 @@ public struct MissingSource: Sendable {
 }
 
 extension PackageDirectoryConfiguration {
+  public init(specifications: PackageSpecifications) {
+    fatalError()
+  }
   func validateDependencies() -> [MissingSource] {
     let dependencyNames = Set(
       self.dependencies.map {

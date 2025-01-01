@@ -88,6 +88,10 @@ extension Product: ComponentBuildable {
       productType: productType
     )
   }
+
+  func createComponent() -> Component {
+    fatalError()
+  }
 }
 
 extension Dependency: ComponentBuildable {
@@ -111,6 +115,10 @@ extension Dependency: ComponentBuildable {
       typeName: component.name, type: dependencyType,
       dependency: component.properties["dependency"]?.code.first, package: package)
   }
+
+  func createComponent() -> Component {
+    fatalError()
+  }
 }
 //
 extension Target: ComponentBuildable {
@@ -127,6 +135,10 @@ extension Target: ComponentBuildable {
       } ?? []
     self.init(typeName: component.name, dependencies: dependencies)
   }
+
+  func createComponent() -> Component {
+    fatalError()
+  }
 }
 //
 extension TestTarget: ComponentBuildable {
@@ -142,6 +154,10 @@ extension TestTarget: ComponentBuildable {
           }))
       } ?? []
     self.init(typeName: component.name, dependencies: dependencies)
+  }
+
+  func createComponent() -> Component {
+    fatalError()
   }
 }
 //
@@ -169,6 +185,10 @@ extension Set: ComponentBuildable where Element == SupportedPlatform {
     //            ?.code, !body.isEmpty else {
     //      return nil
     //    }
+  }
+
+  func createComponent() -> Component {
+    fatalError()
   }
 }
 //
