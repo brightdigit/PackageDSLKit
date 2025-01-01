@@ -90,7 +90,18 @@ extension Product: ComponentBuildable {
   }
 
   func createComponent() -> Component {
-    fatalError()
+    return .init(
+      name: typeName,
+      inheritedTypes: ["Product", "Target"],
+      properties: [
+        "name" : .init(name: "name", type: "String", code: [name]),
+        "dependencies" : .init(name: "dependencies", type: "any Dependencies", code: dependencies.map{$0.asFunctionCall()}),
+        "productType" : .init(name: "productType", type: "ProductType", code: [productType.map{
+          ".\($0.rawValue)"
+        }])
+      ].compactMapValues { $0 }
+
+    )
   }
 }
 
@@ -100,11 +111,6 @@ extension Dependency: ComponentBuildable {
       (component.properties["dependencies"]?.code.first?.filter({ character in
         character.isLetter || character.isNumber
       })).map(DependencyRef.init)
-    //      .map{ line in
-    //      DependencyRef(name: line.filter({ character in
-    //        character.isLetter || character.isNumber
-    //      }))
-    //    }
     guard let dependencyType = DependencyType(strings: component.inheritedTypes) else {
       return nil
     }
@@ -112,12 +118,30 @@ extension Dependency: ComponentBuildable {
       return nil
     }
     self.init(
-      typeName: component.name, type: dependencyType,
-      dependency: component.properties["dependency"]?.code.first, package: package)
+      typeName: component.name,
+      type: dependencyType,
+      dependency: component.properties["dependency"]?.code.first,
+      package: package
+    )
   }
 
   func createComponent() -> Component {
-    fatalError()
+    var properties = [String: Property]()
+    let inheritedTypes: [String]
+    let name : String
+    
+    name = typeName
+    inheritedTypes = self.type.asInheritedTypes()
+    
+    if let dependency {
+      properties["dependency"] = Property(name: "dependency", type: "Package.Dependency", code: [dependency])
+    }
+    
+    if let package {
+      properties["package"] = Property(name: "package", type: "PackageDependency", code: [package.asFunctionCall()])
+    }
+    
+    return .init(name: name, inheritedTypes: inheritedTypes, properties: properties)
   }
 }
 //
@@ -137,7 +161,12 @@ extension Target: ComponentBuildable {
   }
 
   func createComponent() -> Component {
-    fatalError()
+    
+    return .init(
+      name: self.typeName,
+      inheritedTypes: ["Target"],
+      properties:  ["dependencies" : .init(name: "dependencies", type: "any Dependencies", code: dependencies.map{$0.asFunctionCall()})]
+    )
   }
 }
 //
@@ -157,10 +186,17 @@ extension TestTarget: ComponentBuildable {
   }
 
   func createComponent() -> Component {
-    fatalError()
+    
+    return .init(
+      name: self.typeName,
+      inheritedTypes: ["TestTarget"],
+      properties:  ["dependencies" : .init(name: "dependencies", type: "any Dependencies", code: dependencies.map{$0.asFunctionCall()})]
+    )
   }
 }
 //
+
+// TODO: need to create a new type
 extension Set: ComponentBuildable where Element == SupportedPlatform {
   init?(component: Component) {
     guard component.inheritedTypes.contains("PlatformSet") else {

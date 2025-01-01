@@ -26,6 +26,23 @@
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
+extension Int {
+    func powerOfTwoExponents() -> [Int] {
+        var number = self
+        var exponents: [Int] = []
+        var currentExponent = 0
+        
+        while number > 0 {
+            if number & 1 == 1 {
+                exponents.append(currentExponent)
+            }
+            number >>= 1
+            currentExponent += 1
+        }
+        
+        return exponents
+    }
+}
 
 public struct Dependency: TypeSource {
   public let typeName: String
@@ -54,6 +71,10 @@ public struct Dependency: TypeSource {
       assert(rawValues.count == indicies.count)
       let rawValue = rawValues.reduce(0) { $0 + $1 }
       self.init(rawValue: rawValue)
+    }
+    
+    func asInheritedTypes() -> [String] {
+      return rawValue.powerOfTwoExponents().map { Self.strings[$0] }
     }
   }
 

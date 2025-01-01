@@ -31,6 +31,12 @@ protocol TypeReference {
   var name: String { get }
 }
 
+extension TypeReference {
+  public func asFunctionCall() -> String {
+    "\(name)()"
+  }
+}
+
 public struct BasicTypeReference: TypeReference {
   public let name: String
 }

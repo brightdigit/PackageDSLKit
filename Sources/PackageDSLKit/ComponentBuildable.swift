@@ -31,3 +31,4 @@ protocol ComponentBuildable {
   init?(component: Component)
   func createComponent() -> Component
 }
+

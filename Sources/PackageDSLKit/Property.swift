@@ -28,9 +28,23 @@
 //
 
 public struct Property {
+  public init(name: String, type: String, code: [String]) {
+    self.name = name
+    self.type = type
+    self.code = code
+  }
+  
   public let name: String
   public let type: String
   public let code: [String]
+}
+
+extension Property {
+  init?(name: String, type: String,  code: [String?]) {
+    let code = code.compactMap(\.self)
+    guard !code.isEmpty else { return nil }
+    self.init(name: name, type: type, code: code)
+  }
 }
 
 extension Property {
