@@ -30,14 +30,14 @@
 public struct PackageDirectoryConfiguration {
   internal init(
     index: Index, products: [Product] = [], dependencies: [Dependency] = [], targets: [Target] = [],
-    testTargets: [TestTarget] = [], supportedPlatforms: Set<SupportedPlatform> = .init()
+    testTargets: [TestTarget] = [], supportedPlatformSets: [SupportedPlatformSet] = []
   ) {
     self.index = index
     self.products = products
     self.dependencies = dependencies
     self.targets = targets
     self.testTargets = testTargets
-    self.supportedPlatforms = supportedPlatforms
+    self.supportedPlatformSets = supportedPlatformSets
   }
 
   public let index: Index
@@ -45,7 +45,7 @@ public struct PackageDirectoryConfiguration {
   public let dependencies: [Dependency]
   public let targets: [Target]
   public let testTargets: [TestTarget]
-  public let supportedPlatforms: Set<SupportedPlatform>
+  public let supportedPlatformSets: [SupportedPlatformSet]
 }
 
 extension PackageDirectoryConfiguration {
@@ -55,7 +55,7 @@ extension PackageDirectoryConfiguration {
     var dependencies: [Dependency] = []
     var targets: [Target] = []
     var testTargets: [TestTarget] = []
-    var supportedPlatforms: Set<SupportedPlatform> = .init()
+    var supportedPlatformSets: [SupportedPlatformSet] = []
     for result in results {
       switch result {
       case .packageIndex(let newItems, let modifiers):
@@ -73,8 +73,8 @@ extension PackageDirectoryConfiguration {
           targets.append(target)
         } else if let testTarget = TestTarget(component: component) {
           testTargets.append(testTarget)
-        } else if let supportedPlatform = Set<SupportedPlatform>(component: component) {
-          supportedPlatforms.formUnion(supportedPlatform)
+        } else if let supportedPlatforms = SupportedPlatformSet(component: component) {
+          supportedPlatformSets.append(supportedPlatforms)
         } else {
           assertionFailure()
         }
@@ -85,7 +85,7 @@ extension PackageDirectoryConfiguration {
     }
     self.init(
       index: index, products: products, dependencies: dependencies, targets: targets,
-      testTargets: testTargets, supportedPlatforms: supportedPlatforms)
+      testTargets: testTargets, supportedPlatformSets: supportedPlatformSets)
   }
 
   func createComponents() -> [Component] {
@@ -94,7 +94,7 @@ extension PackageDirectoryConfiguration {
     components.append(contentsOf: dependencies.map { $0.createComponent() })
     components.append(contentsOf: targets.map { $0.createComponent() })
     components.append(contentsOf: testTargets.map { $0.createComponent() })
-    components.append(self.supportedPlatforms.createComponent())
+    components.append(contentsOf: supportedPlatformSets.map { $0.createComponent() })
     return components
   }
 }
@@ -199,20 +199,20 @@ extension PackageDirectoryConfiguration {
 public struct PackageSpecifications {
   public init(
     products: [Product] = [], dependencies: [Dependency] = [], targets: [Target] = [],
-    testTargets: [TestTarget] = [], supportedPlatforms: Set<SupportedPlatform> = .init()
+    testTargets: [TestTarget] = [], supportedPlatformSets: [SupportedPlatformSet] = []
   ) {
     self.products = products
     self.dependencies = dependencies
     self.targets = targets
     self.testTargets = testTargets
-    self.supportedPlatforms = supportedPlatforms
+    self.supportedPlatformSets = supportedPlatformSets
   }
 
   public let products: [Product]
   public let dependencies: [Dependency]
   public let targets: [Target]
   public let testTargets: [TestTarget]
-  public let supportedPlatforms: Set<SupportedPlatform>
+  public let supportedPlatformSets: [SupportedPlatformSet]
 }
 
 extension PackageSpecifications {
@@ -222,6 +222,6 @@ extension PackageSpecifications {
     self.dependencies = directoryConfiguration.dependencies
     self.targets = directoryConfiguration.targets
     self.testTargets = directoryConfiguration.testTargets
-    self.supportedPlatforms = directoryConfiguration.supportedPlatforms
+    self.supportedPlatformSets = directoryConfiguration.supportedPlatformSets
   }
 }

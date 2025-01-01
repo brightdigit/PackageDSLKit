@@ -1,5 +1,5 @@
 //
-//  ComponentBuildable.swift
+//  TypeSource.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,24 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-protocol ComponentBuildable {
-  associatedtype Requirements = Void
-  init(component: Component, requirements: Requirements)
-  func createComponent() -> Component
-  static func requirements(from component: Component) -> Requirements?
-}
-
-extension ComponentBuildable {
-  init?(component: Component) {
-    guard let requirements = Self.requirements(from: component) else { return nil }
-    self.init(component: component, requirements: requirements)
-  }
-  
-  
-}
-
-extension Component {
-  func isType<T: ComponentBuildable>(of type: T.Type) -> Bool {
-    return type.requirements(from: self) != nil
-  }
+protocol TypeSource {
+  var typeName: String { get }
 }

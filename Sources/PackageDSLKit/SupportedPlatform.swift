@@ -36,3 +36,34 @@ public struct SupportedPlatform: Hashable {
     hasher.combine(version)
   }
 }
+extension SupportedPlatform {
+  var code: String {
+    "SupportedPlatform.\(osName)(.v\(version)"
+  }
+  init?(string: String) {
+    // Remove any whitespace and optional "SupportedPlatform." prefix
+    let cleanString = string.trimmingCharacters(in: .whitespaces)
+      .replacingOccurrences(of: "SupportedPlatform.", with: "")
+
+    // Split into platform and version parts
+    // Example: "macOS(.v14)" -> ["macOS", "v14"]
+    guard let platformRange = cleanString.range(of: "("),
+      let versionEndRange = cleanString.range(of: ")", options: .backwards)
+    else {
+      return nil
+    }
+
+    let osName = String(cleanString[..<platformRange.lowerBound])
+
+    // Extract version number
+    let versionString = cleanString[platformRange.upperBound..<versionEndRange.lowerBound]
+      .trimmingCharacters(in: .whitespaces)
+      .replacingOccurrences(of: ".v", with: "")
+
+    guard let version = Int(versionString) else {
+      return nil
+    }
+
+    self.init(osName: osName, version: version)
+  }
+}

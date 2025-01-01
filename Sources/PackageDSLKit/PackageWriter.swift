@@ -97,9 +97,19 @@ public struct PackageIndexWriter {
 }
 
 public struct PackageWriter {
-
+  let indexWriter: PackageIndexWriter = .init()
   func write(_ specification: PackageSpecifications, to url: URL) throws(PackageDSLError) {
     let configuration = PackageDirectoryConfiguration(specifications: specification)
+
+    let indexFileURL = url.appending(component: "Index.swift")
+    do {
+      try indexWriter.writeIndex(configuration.index).write(
+        to: indexFileURL, atomically: true, encoding: .utf8)
+    } catch {
+      throw .other(error)
+    }
     let components = configuration.createComponents()
+    for component in components {
+    }
   }
 }

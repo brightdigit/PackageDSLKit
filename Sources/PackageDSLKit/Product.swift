@@ -27,9 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-protocol TypeSource {
-  var typeName: String { get }
-}
 public struct Product: TypeSource {
   public let typeName: String
   public let name: String?

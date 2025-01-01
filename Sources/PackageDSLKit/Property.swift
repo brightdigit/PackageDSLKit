@@ -33,14 +33,14 @@ public struct Property {
     self.type = type
     self.code = code
   }
-  
+
   public let name: String
   public let type: String
   public let code: [String]
 }
 
 extension Property {
-  init?(name: String, type: String,  code: [String?]) {
+  init?(name: String, type: String, code: [String?]) {
     let code = code.compactMap(\.self)
     guard !code.isEmpty else { return nil }
     self.init(name: name, type: type, code: code)
