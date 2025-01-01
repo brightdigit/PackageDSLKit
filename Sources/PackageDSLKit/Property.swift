@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct Property {
+public struct Property : Sendable {
   public init(name: String, type: String, code: [String]) {
     self.name = name
     self.type = type

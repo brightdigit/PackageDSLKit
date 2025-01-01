@@ -97,6 +97,7 @@ public struct PackageIndexWriter {
 }
 
 public struct PackageWriter {
+  let fileManager : FileManager = .default
   let indexWriter: PackageIndexWriter = .init()
   func write(_ specification: PackageSpecifications, to url: URL) throws(PackageDSLError) {
     let configuration = PackageDirectoryConfiguration(specifications: specification)
@@ -109,7 +110,21 @@ public struct PackageWriter {
       throw .other(error)
     }
     let components = configuration.createComponents()
+    var directoryCreated = [URL : Void]()
     for component in components {
+      let directoryURL : URL
+      if component.isType(of: Product.self) {
+        directoryURL = Product.directoryURL(relativeTo: url)
+      } else {
+        throw .custom("Unsupported component", component)
+      }
+      if directoryCreated[directoryURL] == nil {
+        do {
+          try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+        } catch {
+          throw .other(error)
+        }
+      }
     }
   }
 }

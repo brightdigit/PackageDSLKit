@@ -26,12 +26,13 @@
 //  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
-
+import Foundation
 protocol ComponentBuildable {
   associatedtype Requirements = Void
   init(component: Component, requirements: Requirements)
   func createComponent() -> Component
   static func requirements(from component: Component) -> Requirements?
+  static var directoryName: String { get }
 }
 
 extension ComponentBuildable {
@@ -40,7 +41,9 @@ extension ComponentBuildable {
     self.init(component: component, requirements: requirements)
   }
   
-  
+  static func directoryURL(relativeTo packageDSLURL: URL) -> URL {
+    packageDSLURL.appending(path: self.directoryName, directoryHint: .isDirectory)
+  }
 }
 
 extension Component {

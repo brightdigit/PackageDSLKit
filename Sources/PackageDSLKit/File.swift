@@ -28,6 +28,7 @@
 //
 
 extension Product: ComponentBuildable {
+  static let directoryName: String = "Products"
   static func requirements(from component: Component) -> ()? {
     guard component.inheritedTypes.contains("Product") else {
       return nil
@@ -77,6 +78,7 @@ extension Product: ComponentBuildable {
 }
 
 extension Dependency: ComponentBuildable {
+  static let directoryName: String = "Dependencies"
   typealias Requirements = DependencyType
 
   static func requirements(from component: Component) -> DependencyType? {
@@ -125,6 +127,7 @@ extension Dependency: ComponentBuildable {
 }
 //
 extension Target: ComponentBuildable {
+  static let directoryName: String = "Targets"
   static func requirements(from component: Component) -> ()? {
     guard component.inheritedTypes.contains("Target") else {
       return nil
@@ -156,6 +159,7 @@ extension Target: ComponentBuildable {
 }
 //
 extension TestTarget: ComponentBuildable {
+  static let directoryName: String = "Tests"
   static func requirements(from component: Component) -> ()? {
     guard component.inheritedTypes.contains("TestTarget") else {
       return nil

@@ -28,6 +28,7 @@
 //
 
 public struct SupportedPlatformSet: TypeSource, ComponentBuildable {
+  static let directoryName: String = "Platforms"
   static func requirements(from component: Component) -> Property? {
     guard component.inheritedTypes.contains("PlatformSet") else {
       return nil
