@@ -90,7 +90,12 @@ extension Package {
         try self.settings.fileManager.createDirectory(
           at: self.settings.dslSourcesURL, withIntermediateDirectories: true, attributes: nil)
       }
-      let spec = PackageSpecifications()
+      
+      let spec = PackageSpecifications(products: [
+        .init(typeName: "ProductA", dependencies: [DependencyRef(name: "Vapor")])
+      ], dependencies: [
+        PackageDSLKit.Dependency(typeName: "Vapor", type: [.package, .target], dependency: ".package(url: \"https://github.com/vapor/vapor.git\", from: \"4.50.0\")", package: nil)
+      ])
       let writer = PackageWriter()
       try writer.write(spec, to: self.settings.dslSourcesURL)
       // let currentDirectoryURL = URL(fileURLWithPath: self.settings.fileManager.currentDirectoryPath)

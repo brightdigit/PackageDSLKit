@@ -33,19 +33,23 @@ import SwiftSyntaxBuilder
 
 public struct PropertyWriter {
   func node(from property:Property) -> VariableDeclSyntax {
+    
     let codeBlocks = property.code.map(CodeBlockItemSyntax.init)
     let codeBlockList = CodeBlockItemListSyntax(codeBlocks)
-    let pattern = PatternSyntax(codeBlockList)!
-    
-    let patternBinding = PatternBindingSyntax(pattern)!
-    let patternBindingList = PatternBindingListSyntax(patternBinding)!
+//    let accessorBlock = AccessorBlockSyntax(codeBlockList)
+//    let typeAnnotation = TypeAnnotationSyntax(type: SomeOrAnyTypeSyntax(someOrAnySpecifier: .keyword(.any), constraint: IdentifierTypeSyntax(name: .identifier("D"))))
+//    let pattern = PatternSyntax(codeBlockList)!
+//    
+//    let patternBinding = PatternBindingSyntax(pattern)!
+//    let patternBindingList = PatternBindingListSyntax(patternBinding)!
     return try! VariableDeclSyntax(
      """
       var \(raw: property.name): \(raw: property.type) {
-        
+        \(codeBlockList)
       }
     """
-    ).with(\.bindings, patternBindingList)
+    )
+    //.with(\.bindings, patternBindingList)
   }
 }
 
@@ -53,14 +57,25 @@ public struct ComponentWriter {
   let propertyWriter = PropertyWriter()
   func node(from component: Component) -> StructDeclSyntax {
     let memberBlockList = MemberBlockItemListSyntax(
-      component.properties.values.map(propertyWriter.node(from:)).map(MemberBlockItemSyntax.init).map{$0!}
+      component.properties.values.map(propertyWriter.node(from:)).map{
+        MemberBlockItemSyntax(decl: $0)
+        }
     )
-    let inheritedTypes = component.inheritedTypes.map{TokenSyntax.identifier($0)}.map(InheritedTypeSyntax.init).map{$0!}
+    let inheritedTypes = component.inheritedTypes.map{TokenSyntax.identifier($0)}.map{
+      IdentifierTypeSyntax(name: $0)
+    }.map{
+      InheritedTypeSyntax(type: $0)
+    }.reversed().enumerated().map{ index, expression in
+      if index == 0 {
+        return expression
+      }
+      return expression.with(\.trailingComma, .commaToken())
+    }.reversed()
     let inheritedTypeList = InheritedTypeListSyntax(inheritedTypes)
     let clause = InheritanceClauseSyntax(inheritedTypes: inheritedTypeList)
     let memberBlock = MemberBlockSyntax(members: memberBlockList)
     return StructDeclSyntax(
-      name: .identifier(component.name),
+      name: .identifier(component.name, leadingTrivia: .space),
       inheritanceClause: clause,
       memberBlock: memberBlock
     )
@@ -68,8 +83,11 @@ public struct ComponentWriter {
 }
 
 public struct PackageIndexWriter {
-  public func labeledExpression(for name: String, items: [String]) -> LabeledExprSyntax {
-    LabeledExprSyntax(
+  public func labeledExpression(for name: String, items: [String]) -> LabeledExprSyntax? {
+    if items.isEmpty {
+      return nil
+    }
+    return LabeledExprSyntax(
       leadingTrivia: .newline,
       label: .identifier(name),
       colon: .colonToken(trailingTrivia: .space),
@@ -105,7 +123,12 @@ public struct PackageIndexWriter {
       self.labeledExpression(for: "dependencies", items: index.dependencies.map(\.name)),
       self.labeledExpression(for: "testTargets", items: index.testTargets.map(\.name)),
       self.labeledExpression(for: "swiftSettings", items: index.swiftSettings.map(\.name))
-    ]
+    ].compactMap { $0 }.reversed().enumerated().map{ index, expression in
+      if index == 0 {
+        return expression
+      }
+      return expression.with(\.trailingComma, .commaToken())
+    }.reversed()
     let packageDecl = VariableDeclSyntax(
       leadingTrivia: .newline,
       bindingSpecifier: .keyword(.let),
@@ -144,6 +167,12 @@ public struct PackageWriter {
   let fileManager : FileManager = .default
   let indexWriter: PackageIndexWriter = .init()
   let componentWriter: ComponentWriter = .init()
+  static let compoenentTypes : [ any ComponentBuildable.Type] = [
+    Product.self,
+    Dependency.self,
+    TestTarget.self,
+    SupportedPlatformSet.self
+  ]
   public func write(_ specification: PackageSpecifications, to url: URL) throws(PackageDSLError) {
     let configuration = PackageDirectoryConfiguration(specifications: specification)
 
@@ -156,13 +185,17 @@ public struct PackageWriter {
     }
     let components = configuration.createComponents()
     var directoryCreated = [URL : Void]()
+    
+    
     for component in components {
       let directoryURL : URL
-      if component.isType(of: Product.self) {
-        directoryURL = Product.directoryURL(relativeTo: url)
-      } else {
+      let componentType = Self.compoenentTypes.first(where: { component.isType(of: $0) })
+      guard let componentType else {
         throw .custom("Unsupported component", component)
       }
+      
+        directoryURL = componentType.directoryURL(relativeTo: url)
+      
       if directoryCreated[directoryURL] == nil {
         do {
           try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)

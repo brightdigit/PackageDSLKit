@@ -28,6 +28,13 @@
 //
 
 public struct Product: TypeSource {
+  public init(typeName: String, name: String? = nil, dependencies: [DependencyRef] = [], productType: ProductType? = nil) {
+    self.typeName = typeName
+    self.name = name
+    self.dependencies = dependencies
+    self.productType = productType
+  }
+  
   public let typeName: String
   public let name: String?
   public let dependencies: [DependencyRef]

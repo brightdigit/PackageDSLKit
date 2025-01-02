@@ -38,6 +38,10 @@ extension TypeReference {
 }
 
 public struct BasicTypeReference: TypeReference {
+  public init(name: String) {
+    self.name = name
+  }
+  
   public let name: String
 }
 
