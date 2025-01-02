@@ -72,6 +72,10 @@ extension Package {
 
     @Option
     var name: String?
+    
+    
+    @Option
+    var swiftVersion: String?
 
     var packageName: String {
       self.name ?? self.settings.pathURL.lastPathComponent
@@ -98,12 +102,13 @@ extension Package {
       ])
       let writer = PackageWriter()
       try writer.write(spec, to: self.settings.dslSourcesURL)
-      // let currentDirectoryURL = URL(fileURLWithPath: self.settings.fileManager.currentDirectoryPath)
-      // let packageName = currentDirectoryURL.lastPathComponent
-     // let packageSwiftURL = self.settings.dslSourcesURL.appending(path: "Index.swift")
-      //      try PackageDSLKit.run()
-      //        .write(to: packageSwiftURL, atomically: true, encoding: .utf8)
       print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
+      
+      
+      //Bundle.module
+      //guard let exportPathURL = settings.exportPathURL else { return }
+     //try? settings.fileManager.createDirectory(at: exportPathURL, withIntermediateDirectories: true, attributes: nil)
+      
     }
   }
 }
