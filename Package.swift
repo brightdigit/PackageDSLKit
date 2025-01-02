@@ -28,6 +28,11 @@ let package = Package(
         .product(name: "SwiftParser", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax")
         
+      ],
+      
+      resources: [
+        .copy("Resources/PackageDSL.lz4")
+        
       ]
     ),
     .executableTarget(

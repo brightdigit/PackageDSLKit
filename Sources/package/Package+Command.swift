@@ -30,6 +30,35 @@
 import ArgumentParser
 import Foundation
 import PackageDSLKit
+extension FileManager {
+   func readDirectoryContents(at path: String, fileExtension: String = "swift") throws -> [String] {
+       var contents: [String] = []
+       let items = try contentsOfDirectory(atPath: path)
+       
+       // Process subdirectories (post-order)
+       for item in items {
+           let itemPath = (path as NSString).appendingPathComponent(item)
+           var isDirectory: ObjCBool = false
+           fileExists(atPath: itemPath, isDirectory: &isDirectory)
+           
+           if isDirectory.boolValue {
+               contents += try readDirectoryContents(at: itemPath, fileExtension: fileExtension)
+           }
+       }
+       
+       // Process files
+       for item in items where item.hasSuffix(".\(fileExtension)") {
+           let itemPath = (path as NSString).appendingPathComponent(item)
+           if let fileContents = try? String(contentsOfFile: itemPath, encoding: .utf8) {
+               contents.append(fileContents)
+           }
+       }
+       
+       return contents
+   }
+}
+
+// Usage
 
 // package init
 // package target add "name" --product ""
@@ -104,11 +133,20 @@ extension Package {
       try writer.write(spec, to: self.settings.dslSourcesURL)
       print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
       
+      let contents = try! settings.fileManager.readDirectoryContents(at: self.settings.pathURL.path(), fileExtension: "swift")
       
+      let support = Support()
       //Bundle.module
-      //guard let exportPathURL = settings.exportPathURL else { return }
-     //try? settings.fileManager.createDirectory(at: exportPathURL, withIntermediateDirectories: true, attributes: nil)
-      
+      guard let exportPathURL = settings.exportPathURL else { return }
+      try? settings.fileManager.createDirectory(at: exportPathURL, withIntermediateDirectories: true, attributes: nil)
+      let packageFileURL = exportPathURL.appendingPathComponent("Package.swift")
+      let strings = [
+        "// swift-tools-version: 6.0",
+        support.syntax.trimmedDescription
+      ] + contents
+      let data = strings.joined(separator: "\n").data(using: .utf8)!
+      settings.fileManager.createFile(atPath: packageFileURL.path(), contents: data)
+      print(exportPathURL)
     }
   }
 }
