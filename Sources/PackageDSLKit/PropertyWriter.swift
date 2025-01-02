@@ -1,5 +1,5 @@
 //
-//  Component.swift
+//  PropertyWriter.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,8 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal struct Component: Sendable {
-  internal let name: String
-  internal let inheritedTypes: [String]
-  internal let properties: [String: Property]
+import SwiftSyntax
+
+internal struct PropertyWriter {
+  internal func node(from property: Property) -> VariableDeclSyntax {
+    let codeBlocks = property.code.map(CodeBlockItemSyntax.init)
+    let codeBlockList = CodeBlockItemListSyntax(codeBlocks)
+    // swiftlint:disable:next force_try
+    return try! VariableDeclSyntax(
+      """
+        var \(raw: property.name): \(raw: property.type) {
+          \(codeBlockList)
+        }
+      """
+    )
+  }
 }

@@ -1,5 +1,5 @@
 //
-//  Component.swift
+//  TypeSource.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,8 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal struct Component: Sendable {
-  internal let name: String
-  internal let inheritedTypes: [String]
-  internal let properties: [String: Property]
+public protocol TypeSource {
+  var typeName: String { get }
 }

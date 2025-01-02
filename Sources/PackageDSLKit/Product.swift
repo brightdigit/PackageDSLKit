@@ -27,12 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-protocol TypeSource {
-  var typeName: String { get }
-}
 public struct Product: TypeSource {
   public let typeName: String
   public let name: String?
   public let dependencies: [DependencyRef]
   public let productType: ProductType?
+  public init(
+    typeName: String,
+    name: String? = nil,
+    dependencies: [DependencyRef] = [],
+    productType: ProductType? = nil
+  ) {
+    self.typeName = typeName
+    self.name = name
+    self.dependencies = dependencies
+    self.productType = productType
+  }
 }

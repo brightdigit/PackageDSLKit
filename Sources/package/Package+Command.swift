@@ -31,6 +31,8 @@ import ArgumentParser
 import Foundation
 import PackageDSLKit
 
+// Usage
+
 // package init
 // package target add "name" --product ""
 // package product add "name"
@@ -73,6 +75,9 @@ extension Package {
     @Option
     var name: String?
 
+    @Option
+    var swiftVersion: String?
+
     var packageName: String {
       self.name ?? self.settings.pathURL.lastPathComponent
     }
@@ -90,12 +95,42 @@ extension Package {
         try self.settings.fileManager.createDirectory(
           at: self.settings.dslSourcesURL, withIntermediateDirectories: true, attributes: nil)
       }
-      // let currentDirectoryURL = URL(fileURLWithPath: self.settings.fileManager.currentDirectoryPath)
-      // let packageName = currentDirectoryURL.lastPathComponent
-      let packageSwiftURL = self.settings.dslSourcesURL.appending(path: "Index.swift")
-      //      try PackageDSLKit.run()
-      //        .write(to: packageSwiftURL, atomically: true, encoding: .utf8)
+
+      let spec = PackageSpecifications(
+        products: [
+          .init(typeName: "ProductA", dependencies: [DependencyRef(name: "Vapor")])
+        ],
+        dependencies: [
+          PackageDSLKit.Dependency(
+            typeName: "Vapor", type: [.package, .target],
+            dependency: ".package(url: \"https://github.com/vapor/vapor.git\", from: \"4.50.0\")",
+            package: nil)
+        ])
+      let writer = PackageWriter()
+      try writer.write(spec, to: self.settings.dslSourcesURL)
       print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
+
+      // swiftlint:disable:next force_try
+      let contents = try! settings.fileManager.readDirectoryContents(
+        at: self.settings.pathURL.path(),
+        fileExtension: "swift"
+      )
+
+      // Bundle.module
+      guard let exportPathURL = settings.exportPathURL else { return }
+      try? settings.fileManager.createDirectory(
+        at: exportPathURL, withIntermediateDirectories: true, attributes: nil)
+      let packageFileURL = exportPathURL.appendingPathComponent("Package.swift")
+      let strings =
+        [
+          "// swift-tools-version: 6.0",
+
+          SupportCodeBlock.syntaxNode.trimmedDescription,
+        ] + contents
+      let data = strings.joined(separator: "\n").data(using: .utf8)!
+      settings.fileManager.createFile(atPath: packageFileURL.path(), contents: data)
+      print(exportPathURL)
+      // TODO: Added Other Nessecary Files (Sources, Tests, etc...)
     }
   }
 }

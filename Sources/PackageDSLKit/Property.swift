@@ -27,23 +27,43 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct Property {
+public struct Property: Sendable {
   public let name: String
   public let type: String
   public let code: [String]
+  public init(
+    name: String,
+    type: String,
+    code: [String]
+  ) {
+    self.name = name
+    self.type = type
+    self.code = code
+  }
 }
 
 extension Property {
-  struct MissingFieldsError: OptionSet, Error {
-    var rawValue: Int
+  internal init?(name: String, type: String, code: [String?]) {
+    let code = code.compactMap(\.self)
+    guard !code.isEmpty else {
+      return nil
+    }
+    self.init(name: name, type: type, code: code)
+  }
+}
 
-    typealias RawValue = Int
+extension Property {
+  internal struct MissingFieldsError: OptionSet, Error {
+    internal var rawValue: Int
 
-    static let name = MissingFieldsError(rawValue: 1)
-    static let type = MissingFieldsError(rawValue: 2)
+    internal typealias RawValue = Int
+
+    internal static let name = MissingFieldsError(rawValue: 1)
+    internal static let type = MissingFieldsError(rawValue: 2)
     // static let code = MissingFieldsError(rawValue: 4)
   }
-  init(name: String?, type: String?, code: [String]) throws(MissingFieldsError) {
+
+  internal init(name: String?, type: String?, code: [String]) throws(MissingFieldsError) {
     var error: MissingFieldsError = []
     if name == nil {
       error.insert(.name)

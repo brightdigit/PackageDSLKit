@@ -1,5 +1,5 @@
 //
-//  Component.swift
+//  SupportCodeBlock.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,8 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal struct Component: Sendable {
-  internal let name: String
-  internal let inheritedTypes: [String]
-  internal let properties: [String: Property]
+import Foundation
+import SwiftSyntax
+
+public enum SupportCodeBlock {
+  nonisolated(unsafe) public static var syntaxNode: any SyntaxProtocol = {
+    readSyntaxNode()
+  }()
+
+  // swift-format-ignore NeverForceUnwrap NeverUseForceTry
+  private static func readSyntaxNode() -> any SyntaxProtocol {
+    // swiftlint:disable force_try force_unwrapping
+    let url = Bundle.module.url(forResource: "PackageDSL", withExtension: "lz4")!
+    let text = try! String(contentsOf: url)
+    // swiftlint:enable force_try force_unwrapping
+    return SourceFileSyntax(stringLiteral: text)
+  }
 }

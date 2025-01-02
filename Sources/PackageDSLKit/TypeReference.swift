@@ -27,15 +27,30 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-protocol TypeReference {
-  var name: String { get }
-}
-
 public struct BasicTypeReference: TypeReference {
   public let name: String
+  public init(name: String) {
+    self.name = name
+  }
 }
 
 public typealias EntryRef = BasicTypeReference
 public typealias DependencyRef = BasicTypeReference
 public typealias TestTargetRef = BasicTypeReference
 public typealias SwiftSettingRef = BasicTypeReference
+
+public protocol TypeReference {
+  var name: String { get }
+}
+
+extension TypeReference {
+  public func asFunctionCall() -> String {
+    "\(name)()"
+  }
+}
+
+extension BasicTypeReference {
+  public init(source: TypeSource) {
+    self.init(name: source.typeName)
+  }
+}

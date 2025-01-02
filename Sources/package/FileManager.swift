@@ -1,5 +1,5 @@
 //
-//  Component.swift
+//  FileManager.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,8 +27,34 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal struct Component: Sendable {
-  internal let name: String
-  internal let inheritedTypes: [String]
-  internal let properties: [String: Property]
+import Foundation
+
+extension FileManager {
+  internal func readDirectoryContents(at path: String, fileExtension: String = "swift") throws
+    -> [String]
+  {
+    var contents: [String] = []
+    let items = try contentsOfDirectory(atPath: path)
+
+    // Process subdirectories (post-order)
+    for item in items {
+      let itemPath = (path as NSString).appendingPathComponent(item)
+      var isDirectory: ObjCBool = false
+      fileExists(atPath: itemPath, isDirectory: &isDirectory)
+
+      if isDirectory.boolValue {
+        contents += try readDirectoryContents(at: itemPath, fileExtension: fileExtension)
+      }
+    }
+
+    // Process files
+    for item in items where item.hasSuffix(".\(fileExtension)") {
+      let itemPath = (path as NSString).appendingPathComponent(item)
+
+      let fileContents = try String(contentsOfFile: itemPath, encoding: .utf8)
+      contents.append(fileContents)
+    }
+
+    return contents
+  }
 }

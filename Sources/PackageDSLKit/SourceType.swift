@@ -1,5 +1,5 @@
 //
-//  Component.swift
+//  SourceType.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,8 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal struct Component: Sendable {
-  internal let name: String
-  internal let inheritedTypes: [String]
-  internal let properties: [String: Property]
+public enum SourceType: CaseIterable, Sendable {
+  case product
+  case dependency
+  case testTarget
+
+  internal func sources(from configuration: PackageDirectoryConfiguration) -> [any TypeSource] {
+    switch self {
+    case .product: return configuration.products
+    case .dependency: return configuration.dependencies
+    case .testTarget: return configuration.testTargets
+    }
+  }
+  internal func indexReferences(from index: Index) -> [any TypeReference] {
+    switch self {
+    case .product: return index.entries
+
+    case .dependency: return index.dependencies
+    case .testTarget: return index.testTargets
+    }
+  }
 }

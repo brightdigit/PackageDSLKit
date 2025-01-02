@@ -28,21 +28,27 @@
 //
 
 import SwiftSyntax
-//
-//  StructureStrategy.swift
-//  PackageDSLKit
-//
-//  Created by Leo Dion on 12/31/24.
-//
-import os
+
+#if canImport(os)
+  import os
+#elseif canImport(Logging)
+  import Logging
+#endif
 
 // Strategy for structure parsing
-class StructureStrategy: ParsingStrategy {
+internal class StructureStrategy: ParsingStrategy {
   private var name: String?
   private var inheritedTypes: [String] = []
 
   private var properties = [Property]()
-  func finalize() -> ParsingResult? {
+
+  #if canImport(os)
+    private let logger = Logger(subsystem: "packagedsl", category: "structure")
+  #elseif canImport(Logging)
+    private let logger = Logger(label: "structure")
+  #endif
+
+  internal func finalize() -> ParsingResult? {
     let propertyDictionary = Dictionary(grouping: self.properties) { property in
       property.name
     }.compactMapValues { properties in
@@ -58,15 +64,15 @@ class StructureStrategy: ParsingStrategy {
     )
   }
 
-  func reset() {
+  internal func reset() {
     name = nil
     inheritedTypes = []
     properties = []
     // structureData.removeAll()
   }
-  private let logger = Logger(subsystem: "packagedsl", category: "structure")
-
-  func shouldActivate(_ node: some SyntaxProtocol, currentStrategy: ParsingStrategy?) -> Bool {
+  internal func shouldActivate(_ node: some SyntaxProtocol, currentStrategy: ParsingStrategy?)
+    -> Bool
+  {
     // Don't activate if there's already a StructureStrategy
     if currentStrategy is StructureStrategy {
       return false
@@ -75,7 +81,7 @@ class StructureStrategy: ParsingStrategy {
     return node.is(StructDeclSyntax.self)
   }
 
-  func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
     let visitor = PropertyVisitor(viewMode: .fixedUp)
     let property: Property
     do {
@@ -88,12 +94,12 @@ class StructureStrategy: ParsingStrategy {
     return .skipChildren
   }
 
-  func visit(_ node: InheritedTypeSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: InheritedTypeSyntax) -> SyntaxVisitorContinueKind {
     self.inheritedTypes.append(node.type.trimmedDescription)
     return .skipChildren
   }
 
-  func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
     self.name = node.name.text
     return .visitChildren
   }

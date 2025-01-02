@@ -1,5 +1,5 @@
 //
-//  Index.swift
+//  PackageSpecifications.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,57 +27,43 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftSyntax
-
-public struct Index {
-  public let entries: [EntryRef]
-  public let dependencies: [DependencyRef]
-  public let testTargets: [TestTargetRef]
+public struct PackageSpecifications {
+  public let products: [Product]
+  public let dependencies: [Dependency]
+  public let targets: [Target]
+  public let testTargets: [TestTarget]
+  public let supportedPlatformSets: [SupportedPlatformSet]
   public let swiftSettings: [SwiftSettingRef]
   public let modifiers: [Modifier]
+
   public init(
-    entries: [EntryRef],
-    dependencies: [DependencyRef],
-    testTargets: [TestTargetRef],
-    swiftSettings: [SwiftSettingRef],
-    modifiers: [Modifier]
+    products: [Product] = [],
+    dependencies: [Dependency] = [],
+    targets: [Target] = [],
+    testTargets: [TestTarget] = [],
+    supportedPlatformSets: [SupportedPlatformSet] = [],
+    swiftSettings: [SwiftSettingRef] = [],
+    modifiers: [Modifier] = []
   ) {
-    self.entries = entries
+    self.products = products
     self.dependencies = dependencies
+    self.targets = targets
     self.testTargets = testTargets
+    self.supportedPlatformSets = supportedPlatformSets
     self.swiftSettings = swiftSettings
     self.modifiers = modifiers
   }
 }
 
-extension Index {
-  internal init(
-    items: [(PackageIndexStrategy.ExpressionKind, String)],
-    modifiers: [ModifierType: [String]]
-  ) {
-    var entries: [EntryRef] = []
-    var dependencies: [DependencyRef] = []
-    var testTargets: [TestTargetRef] = []
-    var swiftSettings: [SwiftSettingRef] = []
-    for item in items {
-      switch item.0 {
-      case .entries:
-        entries.append(.init(name: item.1))
-      case .dependencies:
-        dependencies.append(.init(name: item.1))
-      case .testTargets:
-        testTargets.append(.init(name: item.1))
-      case .swiftSettings:
-        swiftSettings.append(.init(name: item.1))
-      }
-    }
-
-    self.init(
-      entries: entries,
-      dependencies: dependencies,
-      testTargets: testTargets,
-      swiftSettings: swiftSettings,
-      modifiers: modifiers.map(Modifier.init)
-    )
+extension PackageSpecifications {
+  public init(from directoryConfiguration: PackageDirectoryConfiguration) throws(PackageDSLError) {
+    try directoryConfiguration.validate()
+    self.products = directoryConfiguration.products
+    self.dependencies = directoryConfiguration.dependencies
+    self.targets = directoryConfiguration.targets
+    self.testTargets = directoryConfiguration.testTargets
+    self.swiftSettings = directoryConfiguration.index.swiftSettings
+    self.supportedPlatformSets = directoryConfiguration.supportedPlatformSets
+    self.modifiers = directoryConfiguration.index.modifiers
   }
 }

@@ -28,34 +28,37 @@
 //
 
 public struct PackageDirectoryConfiguration {
-  internal init(
-    index: Index, products: [Product] = [], dependencies: [Dependency] = [], targets: [Target] = [],
-    testTargets: [TestTarget] = [], supportedPlatforms: Set<SupportedPlatform> = .init()
+  public let index: Index
+  public let products: [Product]
+  public let dependencies: [Dependency]
+  public let targets: [Target]
+  public let testTargets: [TestTarget]
+  public let supportedPlatformSets: [SupportedPlatformSet]
+  public init(
+    index: Index,
+    products: [Product] = [],
+    dependencies: [Dependency] = [],
+    targets: [Target] = [],
+    testTargets: [TestTarget] = [],
+    supportedPlatformSets: [SupportedPlatformSet] = []
   ) {
     self.index = index
     self.products = products
     self.dependencies = dependencies
     self.targets = targets
     self.testTargets = testTargets
-    self.supportedPlatforms = supportedPlatforms
+    self.supportedPlatformSets = supportedPlatformSets
   }
-
-  public let index: Index
-  public let products: [Product]
-  public let dependencies: [Dependency]
-  public let targets: [Target]
-  public let testTargets: [TestTarget]
-  public let supportedPlatforms: Set<SupportedPlatform>
 }
 
 extension PackageDirectoryConfiguration {
-  init(from results: [ParsingResult]) throws(PackageDSLError) {
+  internal init(from results: [ParsingResult]) throws(PackageDSLError) {
     var index: Index?
     var products: [Product] = []
     var dependencies: [Dependency] = []
     var targets: [Target] = []
     var testTargets: [TestTarget] = []
-    var supportedPlatforms: Set<SupportedPlatform> = .init()
+    var supportedPlatformSets: [SupportedPlatformSet] = []
     for result in results {
       switch result {
       case .packageIndex(let newItems, let modifiers):
@@ -73,8 +76,8 @@ extension PackageDirectoryConfiguration {
           targets.append(target)
         } else if let testTarget = TestTarget(component: component) {
           testTargets.append(testTarget)
-        } else if let supportedPlatform = Set<SupportedPlatform>(component: component) {
-          supportedPlatforms.formUnion(supportedPlatform)
+        } else if let supportedPlatforms = SupportedPlatformSet(component: component) {
+          supportedPlatformSets.append(supportedPlatforms)
         } else {
           assertionFailure()
         }
@@ -84,54 +87,58 @@ extension PackageDirectoryConfiguration {
       throw .custom("Missing Index", nil)
     }
     self.init(
-      index: index, products: products, dependencies: dependencies, targets: targets,
-      testTargets: testTargets, supportedPlatforms: supportedPlatforms)
+      index: index,
+      products: products,
+      dependencies: dependencies,
+      targets: targets,
+      testTargets: testTargets,
+      supportedPlatformSets: supportedPlatformSets
+    )
   }
-}
 
-enum SourceType: CaseIterable {
-  case product
-  case dependency
-  case testTarget
-
-  func sources(from configuration: PackageDirectoryConfiguration) -> [any TypeSource] {
-    switch self {
-    case .product: return configuration.products
-    case .dependency: return configuration.dependencies
-    case .testTarget: return configuration.testTargets
-    }
+  internal func createComponents() -> [Component] {
+    var components: [Component] = []
+    components.append(contentsOf: products.map { $0.createComponent() })
+    components.append(contentsOf: dependencies.map { $0.createComponent() })
+    components.append(contentsOf: targets.map { $0.createComponent() })
+    components.append(contentsOf: testTargets.map { $0.createComponent() })
+    components.append(contentsOf: supportedPlatformSets.map { $0.createComponent() })
+    return components
   }
-  func indexReferences(from index: Index) -> [any TypeReference] {
-    switch self {
-    case .product: return index.entries
-
-    case .dependency: return index.dependencies
-    case .testTarget: return index.testTargets
-    }
-  }
-}
-
-enum Source {
-  case index
-  case product(String)
-  case target(String)
-}
-
-public struct MissingSource: Sendable {
-  let source: Source
-  let sourceType: SourceType
-  let name: String
 }
 
 extension PackageDirectoryConfiguration {
-  func validateDependencies() -> [MissingSource] {
+  public init(specifications: PackageSpecifications) {
+    let entries = specifications.products.map(EntryRef.init)
+    let dependencies = specifications.dependencies.map(DependencyRef.init)
+    let testTargets = specifications.testTargets.map(TestTargetRef.init)
+    let swiftSettings = specifications.swiftSettings
+    let index = Index(
+      entries: entries,
+      dependencies: dependencies,
+      testTargets: testTargets,
+      swiftSettings: swiftSettings,
+      modifiers: specifications.modifiers
+    )
+
+    self.init(
+      index: index,
+      products: specifications.products,
+      dependencies: specifications.dependencies,
+      targets: specifications.targets,
+      testTargets: specifications.testTargets,
+      supportedPlatformSets: specifications.supportedPlatformSets
+    )
+  }
+  private func validateDependencies() -> [MissingSource] {
     let dependencyNames = Set(
       self.dependencies.map {
         $0.typeName
       }
         + self.targets.map {
           $0.typeName
-        })
+        }
+    )
 
     var missingSources: [MissingSource] = []
 
@@ -139,7 +146,8 @@ extension PackageDirectoryConfiguration {
       let productNames = Set(
         product.dependencies.map {
           $0.name
-        })
+        }
+      )
       let missingDependencies = productNames.subtracting(dependencyNames)
       missingSources.append(
         contentsOf: missingDependencies.map({ dependencyName in
@@ -148,7 +156,8 @@ extension PackageDirectoryConfiguration {
             sourceType: .dependency,
             name: dependencyName
           )
-        }))
+        })
+      )
     }
 
     for target in self.targets {
@@ -160,7 +169,8 @@ extension PackageDirectoryConfiguration {
             sourceType: .dependency,
             name: dependencyName
           )
-        }))
+        })
+      )
     }
     return missingSources
   }
@@ -174,41 +184,11 @@ extension PackageDirectoryConfiguration {
     }
   }
 
-  func validateSourceType(sourceType: SourceType) -> [MissingSource] {
+  private func validateSourceType(sourceType: SourceType) -> [MissingSource] {
     let references = sourceType.indexReferences(from: self.index).map(\.name)
     let sources = sourceType.sources(from: self).map(\.typeName)
     return Set(references).subtracting(sources).map {
       MissingSource(source: .index, sourceType: sourceType, name: $0)
     }
-  }
-}
-
-public struct PackageSpecifications {
-  public init(
-    products: [Product] = [], dependencies: [Dependency] = [], targets: [Target] = [],
-    testTargets: [TestTarget] = [], supportedPlatforms: Set<SupportedPlatform> = .init()
-  ) {
-    self.products = products
-    self.dependencies = dependencies
-    self.targets = targets
-    self.testTargets = testTargets
-    self.supportedPlatforms = supportedPlatforms
-  }
-
-  public let products: [Product]
-  public let dependencies: [Dependency]
-  public let targets: [Target]
-  public let testTargets: [TestTarget]
-  public let supportedPlatforms: Set<SupportedPlatform>
-}
-
-extension PackageSpecifications {
-  public init(from directoryConfiguration: PackageDirectoryConfiguration) throws(PackageDSLError) {
-    try directoryConfiguration.validate()
-    self.products = directoryConfiguration.products
-    self.dependencies = directoryConfiguration.dependencies
-    self.targets = directoryConfiguration.targets
-    self.testTargets = directoryConfiguration.testTargets
-    self.supportedPlatforms = directoryConfiguration.supportedPlatforms
   }
 }

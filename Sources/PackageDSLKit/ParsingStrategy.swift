@@ -30,7 +30,7 @@
 import SwiftSyntax
 
 // Protocol for different parsing strategies
-protocol ParsingStrategy {
+internal protocol ParsingStrategy {
   // Return true if this strategy should handle the current context
   func shouldActivate(_ node: some SyntaxProtocol, currentStrategy: ParsingStrategy?) -> Bool
 
@@ -52,35 +52,35 @@ protocol ParsingStrategy {
 
 // Default implementations
 extension ParsingStrategy {
-  func visit(_ node: CodeBlockItemSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: CodeBlockItemSyntax) -> SyntaxVisitorContinueKind {
     .visitChildren
   }
 
-  func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
     .visitChildren
   }
 
-  func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
     .visitChildren
   }
 
-  func visit(_ node: DeclReferenceExprSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: DeclReferenceExprSyntax) -> SyntaxVisitorContinueKind {
     .visitChildren
   }
 
-  func visit(_ node: LabeledExprSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: LabeledExprSyntax) -> SyntaxVisitorContinueKind {
     .visitChildren
   }
 
-  func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
     .visitChildren
   }
 
-  func visit(_ node: InheritedTypeSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: InheritedTypeSyntax) -> SyntaxVisitorContinueKind {
     .visitChildren
   }
 
-  func visitPost(_ node: LabeledExprSyntax) {}
+  internal func visitPost(_ node: LabeledExprSyntax) {}
 
-  func reset() {}
+  internal func reset() {}
 }
