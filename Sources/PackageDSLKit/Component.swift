@@ -27,11 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-struct Component : Sendable {
+struct Component: Sendable {
   let name: String
   let inheritedTypes: [String]
   let properties: [String: Property]
 }
-
-
-

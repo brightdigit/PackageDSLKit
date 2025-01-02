@@ -27,19 +27,17 @@ let package = Package(
         .product(name: "SwiftSyntax", package: "swift-syntax"),
         .product(name: "SwiftParser", package: "swift-syntax"),
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax")
-        
       ],
-      
+
       resources: [
         .copy("Resources/PackageDSL.lz4")
-        
       ]
     ),
     .executableTarget(
       name: "package",
       dependencies: [
         "PackageDSLKit",
-        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "ArgumentParser", package: "swift-argument-parser")
       ]
     ),
     .testTarget(

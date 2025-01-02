@@ -37,7 +37,7 @@ struct Settings: ParsableArguments, FileManaging {
 
   @Option
   var path: String?
-  
+
   @Option
   var exportPath: String?
 
@@ -48,7 +48,7 @@ struct Settings: ParsableArguments, FileManaging {
       return URL(fileURLWithPath: self.fileManager.currentDirectoryPath)
     }
   }
-  
+
   var exportPathURL: URL? {
     guard let exportPath = self.exportPath else {
       return nil

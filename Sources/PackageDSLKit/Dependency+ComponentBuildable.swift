@@ -1,5 +1,5 @@
 //
-//  SupportedPlatformSet.swift
+//  Dependency+ComponentBuildable.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,53 +27,51 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct SupportedPlatformSet: TypeSource, ComponentBuildable {
-  static let directoryName: String = "Platforms"
-  static func requirements(from component: Component) -> Property? {
-    guard component.inheritedTypes.contains("PlatformSet") else {
-      return nil
-    }
-    guard let body = component.properties["body"] else {
-      return nil
-    }
-    guard
-      body.type.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
-        == "any SupportedPlatforms"
-    else {
-      return nil
-    }
-    guard !body.code.isEmpty else {
-      return nil
-    }
-    return body
-  }
+extension Dependency: ComponentBuildable {
+  static let directoryName: String = "Dependencies"
+  typealias Requirements = DependencyType
 
-  public init(typeName: String, platforms: Set<SupportedPlatform>) {
-    self.typeName = typeName
-    self.platforms = platforms
+  static func requirements(from component: Component) -> DependencyType? {
+    guard let dependencyType = DependencyType(strings: component.inheritedTypes) else {
+      return nil
+    }
+    guard dependencyType.rawValue > 0 else {
+      return nil
+    }
+    return dependencyType
   }
-
   init(component: Component, requirements: Requirements) {
-    let platformValues = requirements.code.map(SupportedPlatform.init)
-    let platforms = platformValues.compactMap { $0 }
-    assert(platforms.count == platformValues.count)
+    let package =
+      (component.properties["dependencies"]?.code.first?.filter({ character in
+        character.isLetter || character.isNumber
+      })).map(DependencyRef.init)
+
     self.init(
       typeName: component.name,
-      platforms: .init(platforms)
+      type: requirements,
+      dependency: component.properties["dependency"]?.code.first,
+      package: package
     )
   }
 
   func createComponent() -> Component {
-    .init(
-      name: self.typeName,
-      inheritedTypes: ["PlatformSet"],
-      properties: [
-        "body": .init(
-          name: "body", type: "any SupportedPlatforms", code: self.platforms.map(\.code))
-      ]
-    )
-  }
+    var properties = [String: Property]()
+    let inheritedTypes: [String]
+    let name: String
 
-  public let typeName: String
-  public let platforms: Set<SupportedPlatform>
+    name = typeName
+    inheritedTypes = self.type.asInheritedTypes()
+
+    if let dependency {
+      properties["dependency"] = Property(
+        name: "dependency", type: "Package.Dependency", code: [dependency])
+    }
+
+    if let package {
+      properties["package"] = Property(
+        name: "package", type: "PackageDependency", code: [package.asFunctionCall()])
+    }
+
+    return .init(name: name, inheritedTypes: inheritedTypes, properties: properties)
+  }
 }

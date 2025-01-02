@@ -1,5 +1,5 @@
 //
-//  ComponentBuildable.swift
+//  Target+ComponentBuildable.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,29 +27,34 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-
-protocol ComponentBuildable {
-  associatedtype Requirements = Void
-  init(component: Component, requirements: Requirements)
-  func createComponent() -> Component
-  static func requirements(from component: Component) -> Requirements?
-  static var directoryName: String { get }
-}
-
-extension ComponentBuildable {
-  init?(component: Component) {
-    guard let requirements = Self.requirements(from: component) else { return nil }
-    self.init(component: component, requirements: requirements)
+extension Target: ComponentBuildable {
+  static let directoryName: String = "Targets"
+  static func requirements(from component: Component) -> ()? {
+    guard component.inheritedTypes.contains("Target") else {
+      return nil
+    }
+    return ()
+  }
+  init(component: Component, requirements: Void) {
+    let dependencies =
+      component.properties["dependencies"]?.code.map { line in
+        DependencyRef(
+          name: line.filter({ character in
+            character.isLetter || character.isNumber
+          }))
+      } ?? []
+    self.init(typeName: component.name, dependencies: dependencies)
   }
 
-  static func directoryURL(relativeTo packageDSLURL: URL) -> URL {
-    packageDSLURL.appending(path: self.directoryName, directoryHint: .isDirectory)
-  }
-}
-
-extension Component {
-  func isType<T: ComponentBuildable>(of type: T.Type) -> Bool {
-    type.requirements(from: self) != nil
+  func createComponent() -> Component {
+    .init(
+      name: self.typeName,
+      inheritedTypes: ["Target"],
+      properties: [
+        "dependencies": .init(
+          name: "dependencies", type: "any Dependencies",
+          code: dependencies.map { $0.asFunctionCall() })
+      ]
+    )
   }
 }

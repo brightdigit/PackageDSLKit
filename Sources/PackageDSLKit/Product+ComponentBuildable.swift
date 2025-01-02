@@ -1,5 +1,5 @@
 //
-//  SupportedPlatformSet.swift
+//  Product+ComponentBuildable.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,53 +27,52 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct SupportedPlatformSet: TypeSource, ComponentBuildable {
-  static let directoryName: String = "Platforms"
-  static func requirements(from component: Component) -> Property? {
-    guard component.inheritedTypes.contains("PlatformSet") else {
+extension Product: ComponentBuildable {
+  static let directoryName: String = "Products"
+  static func requirements(from component: Component) -> ()? {
+    guard component.inheritedTypes.contains("Product") else {
       return nil
     }
-    guard let body = component.properties["body"] else {
-      return nil
-    }
-    guard
-      body.type.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
-        == "any SupportedPlatforms"
-    else {
-      return nil
-    }
-    guard !body.code.isEmpty else {
-      return nil
-    }
-    return body
+    return ()
   }
+  init(component: Component, requirements: Void) {
+    let dependencies =
+      component.properties["dependencies"]?.code.map { line in
+        DependencyRef(
+          name: line.filter({ character in
+            character.isLetter || character.isNumber
+          }))
+      } ?? []
+    let name = component.properties["name"]?.code.first
+    let productType = component.properties["productType"]?.code.compactMap(
+      ProductType.init(rawValue:)
+    ).first
 
-  public init(typeName: String, platforms: Set<SupportedPlatform>) {
-    self.typeName = typeName
-    self.platforms = platforms
-  }
-
-  init(component: Component, requirements: Requirements) {
-    let platformValues = requirements.code.map(SupportedPlatform.init)
-    let platforms = platformValues.compactMap { $0 }
-    assert(platforms.count == platformValues.count)
     self.init(
       typeName: component.name,
-      platforms: .init(platforms)
+      name: name,
+      dependencies: dependencies,
+      productType: productType
     )
   }
 
   func createComponent() -> Component {
     .init(
-      name: self.typeName,
-      inheritedTypes: ["PlatformSet"],
+      name: typeName,
+      inheritedTypes: ["Product", "Target"],
       properties: [
-        "body": .init(
-          name: "body", type: "any SupportedPlatforms", code: self.platforms.map(\.code))
-      ]
+        "name": .init(name: "name", type: "String", code: [name]),
+        "dependencies": .init(
+          name: "dependencies", type: "any Dependencies",
+          code: dependencies.map { $0.asFunctionCall() }),
+        "productType": .init(
+          name: "productType", type: "ProductType",
+          code: [
+            productType.map {
+              ".\($0.rawValue)"
+            }
+          ]),
+      ].compactMapValues { $0 }
     )
   }
-
-  public let typeName: String
-  public let platforms: Set<SupportedPlatform>
 }

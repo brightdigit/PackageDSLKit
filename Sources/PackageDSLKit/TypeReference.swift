@@ -41,7 +41,7 @@ public struct BasicTypeReference: TypeReference {
   public init(name: String) {
     self.name = name
   }
-  
+
   public let name: String
 }
 
@@ -51,7 +51,7 @@ public typealias TestTargetRef = BasicTypeReference
 public typealias SwiftSettingRef = BasicTypeReference
 
 extension BasicTypeReference {
-  init(source : TypeSource) {
+  init(source: TypeSource) {
     self.init(name: source.typeName)
   }
 }

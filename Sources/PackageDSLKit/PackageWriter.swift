@@ -32,24 +32,17 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 
 public struct PropertyWriter {
-  func node(from property:Property) -> VariableDeclSyntax {
-    
+  func node(from property: Property) -> VariableDeclSyntax {
     let codeBlocks = property.code.map(CodeBlockItemSyntax.init)
     let codeBlockList = CodeBlockItemListSyntax(codeBlocks)
-//    let accessorBlock = AccessorBlockSyntax(codeBlockList)
-//    let typeAnnotation = TypeAnnotationSyntax(type: SomeOrAnyTypeSyntax(someOrAnySpecifier: .keyword(.any), constraint: IdentifierTypeSyntax(name: .identifier("D"))))
-//    let pattern = PatternSyntax(codeBlockList)!
-//    
-//    let patternBinding = PatternBindingSyntax(pattern)!
-//    let patternBindingList = PatternBindingListSyntax(patternBinding)!
+    // swiftlint:disable:next force_try
     return try! VariableDeclSyntax(
-     """
-      var \(raw: property.name): \(raw: property.type) {
-        \(codeBlockList)
-      }
-    """
+      """
+        var \(raw: property.name): \(raw: property.type) {
+          \(codeBlockList)
+        }
+      """
     )
-    //.with(\.bindings, patternBindingList)
   }
 }
 
@@ -57,15 +50,15 @@ public struct ComponentWriter {
   let propertyWriter = PropertyWriter()
   func node(from component: Component) -> StructDeclSyntax {
     let memberBlockList = MemberBlockItemListSyntax(
-      component.properties.values.map(propertyWriter.node(from:)).map{
+      component.properties.values.map(propertyWriter.node(from:)).map {
         MemberBlockItemSyntax(decl: $0)
-        }
+      }
     )
-    let inheritedTypes = component.inheritedTypes.map{TokenSyntax.identifier($0)}.map{
+    let inheritedTypes = component.inheritedTypes.map { TokenSyntax.identifier($0) }.map {
       IdentifierTypeSyntax(name: $0)
-    }.map{
+    }.map {
       InheritedTypeSyntax(type: $0)
-    }.reversed().enumerated().map{ index, expression in
+    }.reversed().enumerated().map { index, expression in
       if index == 0 {
         return expression
       }
@@ -122,8 +115,8 @@ public struct PackageIndexWriter {
       self.labeledExpression(for: "entries", items: index.entries.map(\.name)),
       self.labeledExpression(for: "dependencies", items: index.dependencies.map(\.name)),
       self.labeledExpression(for: "testTargets", items: index.testTargets.map(\.name)),
-      self.labeledExpression(for: "swiftSettings", items: index.swiftSettings.map(\.name))
-    ].compactMap { $0 }.reversed().enumerated().map{ index, expression in
+      self.labeledExpression(for: "swiftSettings", items: index.swiftSettings.map(\.name)),
+    ].compactMap { $0 }.reversed().enumerated().map { index, expression in
       if index == 0 {
         return expression
       }
@@ -163,15 +156,15 @@ public struct PackageIndexWriter {
 public struct PackageWriter {
   public init() {
   }
-  
-  let fileManager : FileManager = .default
+
+  let fileManager: FileManager = .default
   let indexWriter: PackageIndexWriter = .init()
   let componentWriter: ComponentWriter = .init()
-  static let compoenentTypes : [ any ComponentBuildable.Type] = [
+  static let compoenentTypes: [any ComponentBuildable.Type] = [
     Product.self,
     Dependency.self,
     TestTarget.self,
-    SupportedPlatformSet.self
+    SupportedPlatformSet.self,
   ]
   public func write(_ specification: PackageSpecifications, to url: URL) throws(PackageDSLError) {
     let configuration = PackageDirectoryConfiguration(specifications: specification)
@@ -184,18 +177,17 @@ public struct PackageWriter {
       throw .other(error)
     }
     let components = configuration.createComponents()
-    var directoryCreated = [URL : Void]()
-    
-    
+    var directoryCreated = [URL: Void]()
+
     for component in components {
-      let directoryURL : URL
+      let directoryURL: URL
       let componentType = Self.compoenentTypes.first(where: { component.isType(of: $0) })
       guard let componentType else {
         throw .custom("Unsupported component", component)
       }
-      
-        directoryURL = componentType.directoryURL(relativeTo: url)
-      
+
+      directoryURL = componentType.directoryURL(relativeTo: url)
+
       if directoryCreated[directoryURL] == nil {
         do {
           try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
@@ -204,16 +196,16 @@ public struct PackageWriter {
         }
         directoryCreated[directoryURL] = ()
       }
-      
-      let filePath = directoryURL
+
+      let filePath =
+        directoryURL
         .appending(path: component.name)
         .appendingPathExtension("swift")
         .standardizedFileURL
-      
+
       let node = componentWriter.node(from: component)
       do {
         try node.description.write(to: filePath, atomically: true, encoding: .utf8)
-        
       } catch {
         throw .other(error)
       }

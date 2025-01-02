@@ -1,5 +1,5 @@
 //
-//  ComponentBuildable.swift
+//  SupportCodeBlock.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -28,28 +28,21 @@
 //
 
 import Foundation
+import SwiftSyntax
 
-protocol ComponentBuildable {
-  associatedtype Requirements = Void
-  init(component: Component, requirements: Requirements)
-  func createComponent() -> Component
-  static func requirements(from component: Component) -> Requirements?
-  static var directoryName: String { get }
-}
+public enum SupportCodeBlock {
+  nonisolated(unsafe) public static var syntaxNode: any SyntaxProtocol = {
+    readSyntaxNode()
+  }()
 
-extension ComponentBuildable {
-  init?(component: Component) {
-    guard let requirements = Self.requirements(from: component) else { return nil }
-    self.init(component: component, requirements: requirements)
-  }
-
-  static func directoryURL(relativeTo packageDSLURL: URL) -> URL {
-    packageDSLURL.appending(path: self.directoryName, directoryHint: .isDirectory)
-  }
-}
-
-extension Component {
-  func isType<T: ComponentBuildable>(of type: T.Type) -> Bool {
-    type.requirements(from: self) != nil
+  // swift-format-ignore NeverForceUnwrap NeverUseForceTry
+  private static func readSyntaxNode() -> any SyntaxProtocol {
+    // swiftlint:disable force_try force_unwrapping
+    let url = Bundle.module.url(forResource: "PackageDSL", withExtension: "lz4")!
+    let data = try! Data(contentsOf: url)
+    let decompressed = try! (data as NSData).decompressed(using: .lz4)
+    // swiftlint:enable force_try force_unwrapping
+    let text = String(decoding: decompressed, as: UTF8.self)
+    return SourceFileSyntax(stringLiteral: text)
   }
 }

@@ -46,13 +46,16 @@ extension Int {
 }
 
 public struct Dependency: TypeSource {
-  public init(typeName: String, type: Dependency.DependencyType, dependency: String? = nil, package: DependencyRef? = nil) {
+  public init(
+    typeName: String, type: Dependency.DependencyType, dependency: String? = nil,
+    package: DependencyRef? = nil
+  ) {
     self.typeName = typeName
     self.type = type
     self.dependency = dependency
     self.package = package
   }
-  
+
   public let typeName: String
 
   public struct DependencyType: OptionSet, Sendable {

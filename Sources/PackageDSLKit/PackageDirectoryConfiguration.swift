@@ -142,12 +142,11 @@ extension PackageDirectoryConfiguration {
     let index = Index(
       entries: entries,
       dependencies: dependencies,
-      testTargets:  testTargets,
+      testTargets: testTargets,
       swiftSettings: swiftSettings,
       modifiers: specifications.modifiers
     )
 
-    
     self.init(
       index: index,
       products: specifications.products,
@@ -220,7 +219,7 @@ public struct PackageSpecifications {
   public init(
     products: [Product] = [], dependencies: [Dependency] = [], targets: [Target] = [],
     testTargets: [TestTarget] = [], supportedPlatformSets: [SupportedPlatformSet] = [],
-    swiftSettings : [SwiftSettingRef] = [],
+    swiftSettings: [SwiftSettingRef] = [],
     modifiers: [Modifier] = []
   ) {
     self.products = products
@@ -238,7 +237,7 @@ public struct PackageSpecifications {
   public let testTargets: [TestTarget]
   public let supportedPlatformSets: [SupportedPlatformSet]
   public let swiftSettings: [SwiftSettingRef]
-  public let modifiers : [Modifier]
+  public let modifiers: [Modifier]
 }
 
 extension PackageSpecifications {
