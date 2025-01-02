@@ -43,9 +43,9 @@ public struct Property: Sendable {
 }
 
 extension Property {
-  internal init?(name: String, type: String, code: [String?]) {
+  internal init?(name: String, type: String, code: [String?], disallowEmpty: Bool) {
     let code = code.compactMap(\.self)
-    guard !code.isEmpty else {
+    guard !code.isEmpty || !disallowEmpty else {
       return nil
     }
     self.init(name: name, type: type, code: code)

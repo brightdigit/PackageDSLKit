@@ -38,9 +38,6 @@ internal struct Settings: ParsableArguments, FileManaging {
   @Option
   internal var path: String?
 
-  @Option
-  internal var exportPath: String?
-
   internal var pathURL: URL {
     if let path = self.path {
       return URL(fileURLWithPath: path)
@@ -48,16 +45,9 @@ internal struct Settings: ParsableArguments, FileManaging {
       return URL(fileURLWithPath: self.fileManager.currentDirectoryPath)
     }
   }
-  
-  internal var rootName : String {
-    return self.pathURL.lastPathComponent
-  }
 
-  internal var exportPathURL: URL? {
-    guard let exportPath = self.exportPath else {
-      return nil
-    }
-    return URL(fileURLWithPath: exportPath)
+  internal var rootName: String {
+    self.pathURL.lastPathComponent
   }
 
   internal var dslSourcesURL: URL {

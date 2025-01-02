@@ -69,95 +69,6 @@ extension Package {
   }
 }
 
-struct SwiftVersion : Sendable, Equatable, ExpressibleByStringLiteral, ExpressibleByArgument {
-  internal init(major: Int, minor: Int) {
-    self.major = major
-    self.minor = minor
-  }
-  init(argument value: String) {
-    let components = value.components(separatedBy: ".")
-    let major :Int = .init( components[0])!
-    let minor :Int = .init( components[1])!
-    self.init(major: major, minor: minor)
-  }
-  
-  init(stringLiteral value: String) {
-    let components = value.components(separatedBy: ".")
-    let major :Int = .init( components[0])!
-    let minor :Int = .init( components[1])!
-    self.init(major: major, minor: minor)
-  }
-  
-  let major : Int
-  let minor : Int
-}
-extension Package {
-  struct Initialize: ParsableCommand {
-    enum PackageType : String, ExpressibleByArgument{
-      case empty
-      case library
-      case executable
-    }
-    
-    @OptionGroup var settings: Settings
-
-    @Option
-    var name: String?
-
-    @Option
-    var swiftVersion: SwiftVersion = "6.0"
-    
-    @Option
-    var packageType: PackageType = .empty
-
-    var packageName: String {
-      self.name ?? self.settings.pathURL.lastPathComponent
-    }
-
-    var shouldCreateDirectory: Bool {
-      self.settings.path != nil
-    }
-
-    static let configuration: CommandConfiguration = .init(
-      commandName: "init"
-    )
-
-    func run() throws {
-      if shouldCreateDirectory {
-        try self.settings.fileManager.createDirectory(
-          at: self.settings.dslSourcesURL, withIntermediateDirectories: true, attributes: nil)
-      }
-
-      let spec = PackageSpecifications(name: name ?? settings.rootName, type: self.packageType)
-      let writer = PackageWriter()
-      try writer.write(spec, to: self.settings.dslSourcesURL)
-      print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
-
-      // swiftlint:disable:next force_try
-      let contents = try! settings.fileManager.readDirectoryContents(
-        at: self.settings.pathURL.path(),
-        fileExtension: "swift"
-      )
-
-      // Bundle.module
-      guard let exportPathURL = settings.exportPathURL else { return }
-      try? settings.fileManager.createDirectory(
-        at: exportPathURL, withIntermediateDirectories: true, attributes: nil)
-      let packageFileURL = exportPathURL.appendingPathComponent("Package.swift")
-      let strings =
-        [
-          "// swift-tools-version: \(self.swiftVersion)",
-
-          SupportCodeBlock.syntaxNode.trimmedDescription,
-        ] + contents
-      let data = strings.joined(separator: "\n").data(using: .utf8)!
-      settings.fileManager.createFile(atPath: packageFileURL.path(), contents: data)
-      print(exportPathURL)
-      // TODO: Added Other Nessecary Files (Sources, Tests, etc...)
-    }
-  }
-}
-
 extension Package {
   struct Target: ParsableCommand {
   }
@@ -166,10 +77,8 @@ extension Package {
 extension Package.Target {
   struct Add: ParsableCommand {
     @Argument var name: String
-    
+
     @OptionGroup var settings: Settings
-    
-    
   }
 }
 

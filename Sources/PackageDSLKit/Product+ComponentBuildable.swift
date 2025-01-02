@@ -62,11 +62,12 @@ extension Product: ComponentBuildable {
       name: typeName,
       inheritedTypes: ["Product", "Target"],
       properties: [
-        "name": .init(name: "name", type: "String", code: [name]),
+        "name": .init(name: "name", type: "String", code: [name], disallowEmpty: true),
         "dependencies": .init(
           name: "dependencies",
           type: "any Dependencies",
-          code: dependencies.map { $0.asFunctionCall() }
+          code: dependencies.map { $0.asFunctionCall() },
+          disallowEmpty: true
         ),
         "productType": .init(
           name: "productType",
@@ -75,7 +76,8 @@ extension Product: ComponentBuildable {
             productType.map {
               ".\($0.rawValue)"
             }
-          ]
+          ],
+          disallowEmpty: true
         ),
       ].compactMapValues { $0 }
     )

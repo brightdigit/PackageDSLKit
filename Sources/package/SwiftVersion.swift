@@ -1,5 +1,5 @@
 //
-//  ComponentWriter.swift
+//  SwiftVersion.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,40 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftSyntax
+import ArgumentParser
 
-internal struct ComponentWriter: Sendable {
-  private let propertyWriter = PropertyWriter()
-  internal func node(from component: Component) -> StructDeclSyntax {
-    let memberBlockList = MemberBlockItemListSyntax(
-      component.properties.values.map(propertyWriter.node(from:)).map {
-        MemberBlockItemSyntax(decl: $0)
-      }
-    )
-    let inheritedTypes = component.inheritedTypes
-      .map { TokenSyntax.identifier($0) }
-      .map {
-        IdentifierTypeSyntax(name: $0)
-      }
-      .map {
-        InheritedTypeSyntax(type: $0)
-      }
-      .reversed()
-      .enumerated()
-      .map { index, expression in
-        if index == 0 {
-          return expression
-        }
-        return expression.with(\.trailingComma, .commaToken())
-      }
-      .reversed()
-    let inheritedTypeList = InheritedTypeListSyntax(inheritedTypes)
-    let clause = InheritanceClauseSyntax(inheritedTypes: inheritedTypeList)
-    let memberBlock = MemberBlockSyntax(members: memberBlockList)
-    return StructDeclSyntax(
-      name: .identifier(component.name, leadingTrivia: .space),
-      inheritanceClause: clause,
-      memberBlock: memberBlock
-    )
+struct SwiftVersion: Sendable, Equatable, ExpressibleByStringLiteral, CustomStringConvertible,
+  ExpressibleByArgument
+{
+  internal init(major: Int, minor: Int) {
+    self.major = major
+    self.minor = minor
+  }
+  init(argument value: String) {
+    let components = value.components(separatedBy: ".")
+    let major: Int = .init(components[0])!
+    let minor: Int = .init(components[1])!
+    self.init(major: major, minor: minor)
+  }
+
+  init(stringLiteral value: String) {
+    let components = value.components(separatedBy: ".")
+    let major: Int = .init(components[0])!
+    let minor: Int = .init(components[1])!
+    self.init(major: major, minor: minor)
+  }
+
+  let major: Int
+  let minor: Int
+
+  var description: String {
+    [major, minor].map(\.description).joined(separator: ".")
   }
 }
