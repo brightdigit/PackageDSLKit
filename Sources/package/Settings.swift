@@ -48,6 +48,10 @@ internal struct Settings: ParsableArguments, FileManaging {
       return URL(fileURLWithPath: self.fileManager.currentDirectoryPath)
     }
   }
+  
+  internal var rootName : String {
+    return self.pathURL.lastPathComponent
+  }
 
   internal var exportPathURL: URL? {
     guard let exportPath = self.exportPath else {

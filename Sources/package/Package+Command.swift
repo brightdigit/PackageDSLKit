@@ -68,15 +68,47 @@ extension Package {
     }
   }
 }
+
+struct SwiftVersion : Sendable, Equatable, ExpressibleByStringLiteral, ExpressibleByArgument {
+  internal init(major: Int, minor: Int) {
+    self.major = major
+    self.minor = minor
+  }
+  init(argument value: String) {
+    let components = value.components(separatedBy: ".")
+    let major :Int = .init( components[0])!
+    let minor :Int = .init( components[1])!
+    self.init(major: major, minor: minor)
+  }
+  
+  init(stringLiteral value: String) {
+    let components = value.components(separatedBy: ".")
+    let major :Int = .init( components[0])!
+    let minor :Int = .init( components[1])!
+    self.init(major: major, minor: minor)
+  }
+  
+  let major : Int
+  let minor : Int
+}
 extension Package {
   struct Initialize: ParsableCommand {
+    enum PackageType : String, ExpressibleByArgument{
+      case empty
+      case library
+      case executable
+    }
+    
     @OptionGroup var settings: Settings
 
     @Option
     var name: String?
 
     @Option
-    var swiftVersion: String?
+    var swiftVersion: SwiftVersion = "6.0"
+    
+    @Option
+    var packageType: PackageType = .empty
 
     var packageName: String {
       self.name ?? self.settings.pathURL.lastPathComponent
@@ -96,16 +128,7 @@ extension Package {
           at: self.settings.dslSourcesURL, withIntermediateDirectories: true, attributes: nil)
       }
 
-      let spec = PackageSpecifications(
-        products: [
-          .init(typeName: "ProductA", dependencies: [DependencyRef(name: "Vapor")])
-        ],
-        dependencies: [
-          PackageDSLKit.Dependency(
-            typeName: "Vapor", type: [.package, .target],
-            dependency: ".package(url: \"https://github.com/vapor/vapor.git\", from: \"4.50.0\")",
-            package: nil)
-        ])
+      let spec = PackageSpecifications(name: name ?? settings.rootName, type: self.packageType)
       let writer = PackageWriter()
       try writer.write(spec, to: self.settings.dslSourcesURL)
       print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
@@ -123,7 +146,7 @@ extension Package {
       let packageFileURL = exportPathURL.appendingPathComponent("Package.swift")
       let strings =
         [
-          "// swift-tools-version: 6.0",
+          "// swift-tools-version: \(self.swiftVersion)",
 
           SupportCodeBlock.syntaxNode.trimmedDescription,
         ] + contents
@@ -142,6 +165,11 @@ extension Package {
 
 extension Package.Target {
   struct Add: ParsableCommand {
+    @Argument var name: String
+    
+    @OptionGroup var settings: Settings
+    
+    
   }
 }
 
