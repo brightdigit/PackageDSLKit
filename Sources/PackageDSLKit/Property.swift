@@ -52,12 +52,12 @@ extension Property {
 
 extension Property {
   internal struct MissingFieldsError: OptionSet, Error {
-    var rawValue: Int
+    internal var rawValue: Int
 
-    typealias RawValue = Int
+    internal typealias RawValue = Int
 
-    static let name = MissingFieldsError(rawValue: 1)
-    static let type = MissingFieldsError(rawValue: 2)
+    internal static let name = MissingFieldsError(rawValue: 1)
+    internal static let type = MissingFieldsError(rawValue: 2)
     // static let code = MissingFieldsError(rawValue: 4)
   }
 

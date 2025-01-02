@@ -49,7 +49,7 @@ extension ComponentBuildable {
 }
 
 extension Component {
-  func isType<T: ComponentBuildable>(of type: T.Type) -> Bool {
+  internal func isType<T: ComponentBuildable>(of type: T.Type) -> Bool {
     type.requirements(from: self) != nil
   }
 }

@@ -28,7 +28,7 @@
 //
 
 extension Dependency: ComponentBuildable {
-  typealias Requirements = DependencyType
+  internal typealias Requirements = DependencyType
   public static let directoryName: String = "Dependencies"
 
   internal static func requirements(from component: Component) -> DependencyType? {

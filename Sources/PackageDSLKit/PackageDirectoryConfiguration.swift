@@ -52,7 +52,7 @@ public struct PackageDirectoryConfiguration {
 }
 
 extension PackageDirectoryConfiguration {
-  init(from results: [ParsingResult]) throws(PackageDSLError) {
+  internal init(from results: [ParsingResult]) throws(PackageDSLError) {
     var index: Index?
     var products: [Product] = []
     var dependencies: [Dependency] = []
@@ -130,7 +130,7 @@ extension PackageDirectoryConfiguration {
       supportedPlatformSets: specifications.supportedPlatformSets
     )
   }
-  func validateDependencies() -> [MissingSource] {
+  private func validateDependencies() -> [MissingSource] {
     let dependencyNames = Set(
       self.dependencies.map {
         $0.typeName
@@ -180,7 +180,7 @@ extension PackageDirectoryConfiguration {
     }
   }
 
-  func validateSourceType(sourceType: SourceType) -> [MissingSource] {
+  private func validateSourceType(sourceType: SourceType) -> [MissingSource] {
     let references = sourceType.indexReferences(from: self.index).map(\.name)
     let sources = sourceType.sources(from: self).map(\.typeName)
     return Set(references).subtracting(sources).map {

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal enum SourceType: CaseIterable {
+public enum SourceType: CaseIterable {
   case product
   case dependency
   case testTarget

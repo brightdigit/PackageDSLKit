@@ -29,9 +29,9 @@
 
 import SwiftSyntax
 
-public struct ComponentWriter {
-  let propertyWriter = PropertyWriter()
-  func node(from component: Component) -> StructDeclSyntax {
+internal struct ComponentWriter {
+  private let propertyWriter = PropertyWriter()
+  internal func node(from component: Component) -> StructDeclSyntax {
     let memberBlockList = MemberBlockItemListSyntax(
       component.properties.values.map(propertyWriter.node(from:)).map {
         MemberBlockItemSyntax(decl: $0)

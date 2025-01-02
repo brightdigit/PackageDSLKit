@@ -35,8 +35,8 @@ public enum SupportCodeBlock {
     readSyntaxNode()
   }()
 
+  // swift-format-ignore NeverForceUnwrap NeverUseForceTry
   private static func readSyntaxNode() -> any SyntaxProtocol {
-    // swift-format-ignore NeverForceUnwrap NeverUseForceTry
     // swiftlint:disable force_try force_unwrapping
     let url = Bundle.module.url(forResource: "PackageDSL", withExtension: "lz4")!
     let text = try! String(contentsOf: url)

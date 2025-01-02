@@ -35,10 +35,10 @@ public struct PackageWriter {
   public init() {
   }
 
-  let fileManager: FileManager = .default
-  let indexWriter: PackageIndexWriter = .init()
-  let componentWriter: ComponentWriter = .init()
-  static let compoenentTypes: [any ComponentBuildable.Type] = [
+  private let fileManager: FileManager = .default
+  private let indexWriter: PackageIndexWriter = .init()
+  private let componentWriter: ComponentWriter = .init()
+  private static let compoenentTypes: [any ComponentBuildable.Type] = [
     Product.self,
     Dependency.self,
     TestTarget.self,
@@ -50,7 +50,10 @@ public struct PackageWriter {
     let indexFileURL = url.appending(component: "Index.swift")
     do {
       try indexWriter.writeIndex(configuration.index).write(
-        to: indexFileURL, atomically: true, encoding: .utf8)
+        to: indexFileURL,
+        atomically: true,
+        encoding: .utf8
+      )
     } catch {
       throw .other(error)
     }

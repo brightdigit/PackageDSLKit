@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal enum Source {
+public enum Source {
   case index
   case product(String)
   case target(String)

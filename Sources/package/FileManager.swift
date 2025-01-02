@@ -30,7 +30,9 @@
 import Foundation
 
 extension FileManager {
-  func readDirectoryContents(at path: String, fileExtension: String = "swift") throws -> [String] {
+  internal func readDirectoryContents(at path: String, fileExtension: String = "swift") throws
+    -> [String]
+  {
     var contents: [String] = []
     let items = try contentsOfDirectory(atPath: path)
 

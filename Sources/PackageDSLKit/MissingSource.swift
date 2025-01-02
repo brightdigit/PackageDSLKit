@@ -28,7 +28,7 @@
 //
 
 public struct MissingSource: Sendable {
-  let source: Source
-  let sourceType: SourceType
-  let name: String
+  public let source: Source
+  public let sourceType: SourceType
+  public let name: String
 }

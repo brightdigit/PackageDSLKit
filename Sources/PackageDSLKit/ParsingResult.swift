@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-enum ParsingResult {
+internal enum ParsingResult {
   case packageIndex([(PackageIndexStrategy.ExpressionKind, String)], [ModifierType: [String]])
   case structure(Component)  // Add appropriate structure data
 }
