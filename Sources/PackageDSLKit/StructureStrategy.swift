@@ -41,6 +41,13 @@ internal class StructureStrategy: ParsingStrategy {
   private var inheritedTypes: [String] = []
 
   private var properties = [Property]()
+
+  #if canImport(os)
+    private let logger = Logger(subsystem: "packagedsl", category: "structure")
+  #elseif canImport(Logging)
+    private let logger = Logger(label: "structure")
+  #endif
+
   internal func finalize() -> ParsingResult? {
     let propertyDictionary = Dictionary(grouping: self.properties) { property in
       property.name
@@ -63,13 +70,6 @@ internal class StructureStrategy: ParsingStrategy {
     properties = []
     // structureData.removeAll()
   }
-
-  #if canImport(os)
-    private let logger = Logger(subsystem: "packagedsl", category: "structure")
-  #elseif canImport(Logging)
-    private let logger = Logger(label: "structure")
-  #endif
-
   internal func shouldActivate(_ node: some SyntaxProtocol, currentStrategy: ParsingStrategy?)
     -> Bool
   {

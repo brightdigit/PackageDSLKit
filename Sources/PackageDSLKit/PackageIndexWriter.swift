@@ -70,12 +70,17 @@ public struct PackageIndexWriter {
       self.labeledExpression(for: "dependencies", items: index.dependencies.map(\.name)),
       self.labeledExpression(for: "testTargets", items: index.testTargets.map(\.name)),
       self.labeledExpression(for: "swiftSettings", items: index.swiftSettings.map(\.name)),
-    ].compactMap { $0 }.reversed().enumerated().map { index, expression in
+    ]
+    .compactMap { $0 }
+    .reversed()
+    .enumerated()
+    .map { index, expression in
       if index == 0 {
         return expression
       }
       return expression.with(\.trailingComma, .commaToken())
-    }.reversed()
+    }
+    .reversed()
     let packageDecl = VariableDeclSyntax(
       leadingTrivia: .newline,
       bindingSpecifier: .keyword(.let),

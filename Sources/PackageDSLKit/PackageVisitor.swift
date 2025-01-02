@@ -38,6 +38,8 @@ import SwiftSyntax
 internal class PackageVisitor: SyntaxVisitor {
   private var currentStrategy: ParsingStrategy?
   private let availableStrategies: [ParsingStrategy]
+
+  private var results: [ParsingResult] = []
   #if canImport(os)
     private let logger = Logger(subsystem: "packagedsl", category: "structure")
   #elseif canImport(Logging)
@@ -52,8 +54,6 @@ internal class PackageVisitor: SyntaxVisitor {
     self.currentStrategy = nil
     super.init(viewMode: viewMode)
   }
-
-  private var results: [ParsingResult] = []
 
   internal func parse(_ node: some SyntaxProtocol) -> [ParsingResult] {
     super.walk(node)

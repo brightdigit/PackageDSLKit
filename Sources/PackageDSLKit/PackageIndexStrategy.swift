@@ -62,7 +62,9 @@ internal class PackageIndexStrategy: ParsingStrategy {
   #endif
 
   internal func finalize() -> ParsingResult? {
-    guard !items.isEmpty else { return nil }
+    guard !items.isEmpty else {
+      return nil
+    }
     let result = ParsingResult.packageIndex(items, modifiers)
     return result
   }

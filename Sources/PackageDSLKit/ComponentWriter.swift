@@ -37,16 +37,23 @@ internal struct ComponentWriter {
         MemberBlockItemSyntax(decl: $0)
       }
     )
-    let inheritedTypes = component.inheritedTypes.map { TokenSyntax.identifier($0) }.map {
-      IdentifierTypeSyntax(name: $0)
-    }.map {
-      InheritedTypeSyntax(type: $0)
-    }.reversed().enumerated().map { index, expression in
-      if index == 0 {
-        return expression
+    let inheritedTypes = component.inheritedTypes
+      .map { TokenSyntax.identifier($0) }
+      .map {
+        IdentifierTypeSyntax(name: $0)
       }
-      return expression.with(\.trailingComma, .commaToken())
-    }.reversed()
+      .map {
+        InheritedTypeSyntax(type: $0)
+      }
+      .reversed()
+      .enumerated()
+      .map { index, expression in
+        if index == 0 {
+          return expression
+        }
+        return expression.with(\.trailingComma, .commaToken())
+      }
+      .reversed()
     let inheritedTypeList = InheritedTypeListSyntax(inheritedTypes)
     let clause = InheritanceClauseSyntax(inheritedTypes: inheritedTypeList)
     let memberBlock = MemberBlockSyntax(members: memberBlockList)

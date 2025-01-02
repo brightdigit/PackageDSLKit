@@ -31,15 +31,17 @@ import Foundation
 
 internal protocol ComponentBuildable {
   associatedtype Requirements = Void
-  init(component: Component, requirements: Requirements)
-  func createComponent() -> Component
-  static func requirements(from component: Component) -> Requirements?
   static var directoryName: String { get }
+  init(component: Component, requirements: Requirements)
+  static func requirements(from component: Component) -> Requirements?
+  func createComponent() -> Component
 }
 
 extension ComponentBuildable {
   internal init?(component: Component) {
-    guard let requirements = Self.requirements(from: component) else { return nil }
+    guard let requirements = Self.requirements(from: component) else {
+      return nil
+    }
     self.init(component: component, requirements: requirements)
   }
 

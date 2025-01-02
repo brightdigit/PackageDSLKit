@@ -27,6 +27,18 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+public struct BasicTypeReference: TypeReference {
+  public let name: String
+  public init(name: String) {
+    self.name = name
+  }
+}
+
+public typealias EntryRef = BasicTypeReference
+public typealias DependencyRef = BasicTypeReference
+public typealias TestTargetRef = BasicTypeReference
+public typealias SwiftSettingRef = BasicTypeReference
+
 public protocol TypeReference {
   var name: String { get }
 }
@@ -36,19 +48,6 @@ extension TypeReference {
     "\(name)()"
   }
 }
-
-public struct BasicTypeReference: TypeReference {
-  public init(name: String) {
-    self.name = name
-  }
-
-  public let name: String
-}
-
-public typealias EntryRef = BasicTypeReference
-public typealias DependencyRef = BasicTypeReference
-public typealias TestTargetRef = BasicTypeReference
-public typealias SwiftSettingRef = BasicTypeReference
 
 extension BasicTypeReference {
   public init(source: TypeSource) {

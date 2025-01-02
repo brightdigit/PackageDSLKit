@@ -32,18 +32,18 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 
 public struct PackageWriter {
-  public init() {
-  }
-
-  private let fileManager: FileManager = .default
-  private let indexWriter: PackageIndexWriter = .init()
-  private let componentWriter: ComponentWriter = .init()
   private static let compoenentTypes: [any ComponentBuildable.Type] = [
     Product.self,
     Dependency.self,
     TestTarget.self,
     SupportedPlatformSet.self,
   ]
+  private let fileManager: FileManager = .default
+  private let indexWriter: PackageIndexWriter = .init()
+  private let componentWriter: ComponentWriter = .init()
+
+  public init() {
+  }
   public func write(_ specification: PackageSpecifications, to url: URL) throws(PackageDSLError) {
     let configuration = PackageDirectoryConfiguration(specifications: specification)
 

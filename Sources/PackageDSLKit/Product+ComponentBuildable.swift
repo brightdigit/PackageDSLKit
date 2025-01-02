@@ -29,19 +29,14 @@
 
 extension Product: ComponentBuildable {
   public static let directoryName: String = "Products"
-  internal static func requirements(from component: Component) -> ()? {
-    guard component.inheritedTypes.contains("Product") else {
-      return nil
-    }
-    return ()
-  }
   internal init(component: Component, requirements: Void) {
     let dependencies =
       component.properties["dependencies"]?.code.map { line in
         DependencyRef(
           name: line.filter({ character in
             character.isLetter || character.isNumber
-          }))
+          })
+        )
       } ?? []
     let name = component.properties["name"]?.code.first
     let productType = component.properties["productType"]?.code.compactMap(
@@ -56,6 +51,12 @@ extension Product: ComponentBuildable {
     )
   }
 
+  internal static func requirements(from component: Component) -> ()? {
+    guard component.inheritedTypes.contains("Product") else {
+      return nil
+    }
+    return ()
+  }
   internal func createComponent() -> Component {
     .init(
       name: typeName,
@@ -63,15 +64,19 @@ extension Product: ComponentBuildable {
       properties: [
         "name": .init(name: "name", type: "String", code: [name]),
         "dependencies": .init(
-          name: "dependencies", type: "any Dependencies",
-          code: dependencies.map { $0.asFunctionCall() }),
+          name: "dependencies",
+          type: "any Dependencies",
+          code: dependencies.map { $0.asFunctionCall() }
+        ),
         "productType": .init(
-          name: "productType", type: "ProductType",
+          name: "productType",
+          type: "ProductType",
           code: [
             productType.map {
               ".\($0.rawValue)"
             }
-          ]),
+          ]
+        ),
       ].compactMapValues { $0 }
     )
   }

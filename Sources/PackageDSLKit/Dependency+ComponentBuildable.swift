@@ -31,15 +31,6 @@ extension Dependency: ComponentBuildable {
   internal typealias Requirements = DependencyType
   public static let directoryName: String = "Dependencies"
 
-  internal static func requirements(from component: Component) -> DependencyType? {
-    guard let dependencyType = DependencyType(strings: component.inheritedTypes) else {
-      return nil
-    }
-    guard dependencyType.rawValue > 0 else {
-      return nil
-    }
-    return dependencyType
-  }
   internal init(component: Component, requirements: Requirements) {
     let package =
       (component.properties["dependencies"]?.code.first?.filter({ character in
@@ -54,6 +45,16 @@ extension Dependency: ComponentBuildable {
     )
   }
 
+  internal static func requirements(from component: Component) -> DependencyType? {
+    guard let dependencyType = DependencyType(strings: component.inheritedTypes) else {
+      return nil
+    }
+    guard dependencyType.rawValue > 0 else {
+      return nil
+    }
+    return dependencyType
+  }
+
   internal func createComponent() -> Component {
     var properties = [String: Property]()
     let inheritedTypes: [String]
@@ -64,7 +65,8 @@ extension Dependency: ComponentBuildable {
 
     if let dependency {
       properties["dependency"] = Property(
-        name: "dependency", type: "Package.Dependency", code: [dependency])
+        name: "dependency", type: "Package.Dependency", code: [dependency]
+      )
     }
 
     if let package {

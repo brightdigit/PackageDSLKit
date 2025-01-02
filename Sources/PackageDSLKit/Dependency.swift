@@ -65,7 +65,9 @@ public struct Dependency: TypeSource {
   public let package: DependencyRef?
 
   public init(
-    typeName: String, type: Dependency.DependencyType, dependency: String? = nil,
+    typeName: String,
+    type: Dependency.DependencyType,
+    dependency: String? = nil,
     package: DependencyRef? = nil
   ) {
     self.typeName = typeName

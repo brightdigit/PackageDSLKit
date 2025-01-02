@@ -137,7 +137,8 @@ extension PackageDirectoryConfiguration {
       }
         + self.targets.map {
           $0.typeName
-        })
+        }
+    )
 
     var missingSources: [MissingSource] = []
 
@@ -145,7 +146,8 @@ extension PackageDirectoryConfiguration {
       let productNames = Set(
         product.dependencies.map {
           $0.name
-        })
+        }
+      )
       let missingDependencies = productNames.subtracting(dependencyNames)
       missingSources.append(
         contentsOf: missingDependencies.map({ dependencyName in
@@ -154,7 +156,8 @@ extension PackageDirectoryConfiguration {
             sourceType: .dependency,
             name: dependencyName
           )
-        }))
+        })
+      )
     }
 
     for target in self.targets {
@@ -166,7 +169,8 @@ extension PackageDirectoryConfiguration {
             sourceType: .dependency,
             name: dependencyName
           )
-        }))
+        })
+      )
     }
     return missingSources
   }

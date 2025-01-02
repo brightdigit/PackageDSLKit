@@ -29,21 +29,22 @@
 
 extension TestTarget: ComponentBuildable {
   internal static let directoryName: String = "Tests"
-  internal static func requirements(from component: Component) -> ()? {
-    guard component.inheritedTypes.contains("TestTarget") else {
-      return nil
-    }
-    return ()
-  }
   internal init(component: Component, requirements: Void) {
     let dependencies =
       component.properties["dependencies"]?.code.map { line in
         DependencyRef(
           name: line.filter({ character in
             character.isLetter || character.isNumber
-          }))
+          })
+        )
       } ?? []
     self.init(typeName: component.name, dependencies: dependencies)
+  }
+  internal static func requirements(from component: Component) -> ()? {
+    guard component.inheritedTypes.contains("TestTarget") else {
+      return nil
+    }
+    return ()
   }
 
   internal func createComponent() -> Component {
@@ -52,8 +53,10 @@ extension TestTarget: ComponentBuildable {
       inheritedTypes: ["TestTarget"],
       properties: [
         "dependencies": .init(
-          name: "dependencies", type: "any Dependencies",
-          code: dependencies.map { $0.asFunctionCall() })
+          name: "dependencies",
+          type: "any Dependencies",
+          code: dependencies.map { $0.asFunctionCall() }
+        )
       ]
     )
   }
