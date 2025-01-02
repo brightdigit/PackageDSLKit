@@ -27,6 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-protocol TypeSource {
+public protocol TypeSource {
   var typeName: String { get }
 }

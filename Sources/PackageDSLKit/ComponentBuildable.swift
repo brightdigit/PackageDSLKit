@@ -29,7 +29,7 @@
 
 import Foundation
 
-protocol ComponentBuildable {
+internal protocol ComponentBuildable {
   associatedtype Requirements = Void
   init(component: Component, requirements: Requirements)
   func createComponent() -> Component
@@ -38,12 +38,12 @@ protocol ComponentBuildable {
 }
 
 extension ComponentBuildable {
-  init?(component: Component) {
+  internal init?(component: Component) {
     guard let requirements = Self.requirements(from: component) else { return nil }
     self.init(component: component, requirements: requirements)
   }
 
-  static func directoryURL(relativeTo packageDSLURL: URL) -> URL {
+  internal static func directoryURL(relativeTo packageDSLURL: URL) -> URL {
     packageDSLURL.appending(path: self.directoryName, directoryHint: .isDirectory)
   }
 }

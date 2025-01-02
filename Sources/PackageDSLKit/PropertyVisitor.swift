@@ -29,37 +29,37 @@
 
 import SwiftSyntax
 
-class PropertyVisitor: SyntaxVisitor {
-  var name: String?
-  var type: String?
-  var code: [String] = []
+internal class PropertyVisitor: SyntaxVisitor {
+  internal private(set) var name: String?
+  internal private(set) var type: String?
+  internal private(set) var code: [String] = []
 
-  func parse(_ node: VariableDeclSyntax) throws -> Property {
+  internal func parse(_ node: VariableDeclSyntax) throws -> Property {
     self.walk(node)
     return try Property(name: name, type: type, code: code)
   }
 
-  override func visit(_ node: CodeBlockItemSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: CodeBlockItemSyntax) -> SyntaxVisitorContinueKind {
     self.code.append(node.trimmedDescription)
     return .skipChildren
   }
 
-  override func visit(_ node: IdentifierPatternSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: IdentifierPatternSyntax) -> SyntaxVisitorContinueKind {
     self.name = node.identifier.text
     return .skipChildren
   }
 
-  override func visit(_ node: TypeAnnotationSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: TypeAnnotationSyntax) -> SyntaxVisitorContinueKind {
     self.type = node.trimmedDescription
     return .skipChildren
   }
 
-  override func visit(_ node: MemberTypeSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: MemberTypeSyntax) -> SyntaxVisitorContinueKind {
     self.type = node.trimmedDescription
     return .skipChildren
   }
 
-  override func visit(_ node: SomeOrAnyTypeSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: SomeOrAnyTypeSyntax) -> SyntaxVisitorContinueKind {
     self.type = node.trimmedDescription
     return .skipChildren
   }

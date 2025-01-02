@@ -1,5 +1,5 @@
 //
-//  SupportCodeBlock.swift
+//  PropertyWriter.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,20 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
 import SwiftSyntax
 
-public enum SupportCodeBlock {
-  nonisolated(unsafe) public static var syntaxNode: any SyntaxProtocol = {
-    readSyntaxNode()
-  }()
-
-  private static func readSyntaxNode() -> any SyntaxProtocol {
-    // swift-format-ignore NeverForceUnwrap NeverUseForceTry
-    // swiftlint:disable force_try force_unwrapping
-    let url = Bundle.module.url(forResource: "PackageDSL", withExtension: "lz4")!
-    let text = try! String(contentsOf: url)
-    // swiftlint:enable force_try force_unwrapping
-    return SourceFileSyntax(stringLiteral: text)
+internal struct PropertyWriter {
+  internal func node(from property: Property) -> VariableDeclSyntax {
+    let codeBlocks = property.code.map(CodeBlockItemSyntax.init)
+    let codeBlockList = CodeBlockItemListSyntax(codeBlocks)
+    // swiftlint:disable:next force_try
+    return try! VariableDeclSyntax(
+      """
+        var \(raw: property.name): \(raw: property.type) {
+          \(codeBlockList)
+        }
+      """
+    )
   }
 }

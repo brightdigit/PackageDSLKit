@@ -1,5 +1,5 @@
 //
-//  SupportCodeBlock.swift
+//  FileManager.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -28,19 +28,31 @@
 //
 
 import Foundation
-import SwiftSyntax
 
-public enum SupportCodeBlock {
-  nonisolated(unsafe) public static var syntaxNode: any SyntaxProtocol = {
-    readSyntaxNode()
-  }()
+extension FileManager {
+  func readDirectoryContents(at path: String, fileExtension: String = "swift") throws -> [String] {
+    var contents: [String] = []
+    let items = try contentsOfDirectory(atPath: path)
 
-  private static func readSyntaxNode() -> any SyntaxProtocol {
-    // swift-format-ignore NeverForceUnwrap NeverUseForceTry
-    // swiftlint:disable force_try force_unwrapping
-    let url = Bundle.module.url(forResource: "PackageDSL", withExtension: "lz4")!
-    let text = try! String(contentsOf: url)
-    // swiftlint:enable force_try force_unwrapping
-    return SourceFileSyntax(stringLiteral: text)
+    // Process subdirectories (post-order)
+    for item in items {
+      let itemPath = (path as NSString).appendingPathComponent(item)
+      var isDirectory: ObjCBool = false
+      fileExists(atPath: itemPath, isDirectory: &isDirectory)
+
+      if isDirectory.boolValue {
+        contents += try readDirectoryContents(at: itemPath, fileExtension: fileExtension)
+      }
+    }
+
+    // Process files
+    for item in items where item.hasSuffix(".\(fileExtension)") {
+      let itemPath = (path as NSString).appendingPathComponent(item)
+
+      let fileContents = try String(contentsOfFile: itemPath, encoding: .utf8)
+      contents.append(fileContents)
+    }
+
+    return contents
   }
 }

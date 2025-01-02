@@ -29,7 +29,9 @@
 
 public struct Product: TypeSource {
   public init(
-    typeName: String, name: String? = nil, dependencies: [DependencyRef] = [],
+    typeName: String,
+    name: String? = nil,
+    dependencies: [DependencyRef] = [],
     productType: ProductType? = nil
   ) {
     self.typeName = typeName

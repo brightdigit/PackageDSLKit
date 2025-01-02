@@ -31,33 +31,6 @@ import ArgumentParser
 import Foundation
 import PackageDSLKit
 
-extension FileManager {
-  func readDirectoryContents(at path: String, fileExtension: String = "swift") throws -> [String] {
-    var contents: [String] = []
-    let items = try contentsOfDirectory(atPath: path)
-
-    // Process subdirectories (post-order)
-    for item in items {
-      let itemPath = (path as NSString).appendingPathComponent(item)
-      var isDirectory: ObjCBool = false
-      fileExists(atPath: itemPath, isDirectory: &isDirectory)
-
-      if isDirectory.boolValue {
-        contents += try readDirectoryContents(at: itemPath, fileExtension: fileExtension)
-      }
-    }
-
-    // Process files
-    for item in items where item.hasSuffix(".\(fileExtension)") {
-      let itemPath = (path as NSString).appendingPathComponent(item)
-      let fileContents = try String(contentsOfFile: itemPath, encoding: .utf8)
-      contents.append(fileContents)
-    }
-
-    return contents
-  }
-}
-
 // Usage
 
 // package init
@@ -151,11 +124,13 @@ extension Package {
       let strings =
         [
           "// swift-tools-version: 6.0",
+
           SupportCodeBlock.syntaxNode.trimmedDescription,
         ] + contents
       let data = strings.joined(separator: "\n").data(using: .utf8)!
       settings.fileManager.createFile(atPath: packageFileURL.path(), contents: data)
       print(exportPathURL)
+      // TODO: Added Other Nessecary Files (Sources, Tests, etc...)
     }
   }
 }

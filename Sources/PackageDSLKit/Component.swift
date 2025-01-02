@@ -27,8 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-struct Component: Sendable {
-  let name: String
-  let inheritedTypes: [String]
-  let properties: [String: Property]
+internal struct Component: Sendable {
+  internal let name: String
+  internal let inheritedTypes: [String]
+  internal let properties: [String: Property]
 }

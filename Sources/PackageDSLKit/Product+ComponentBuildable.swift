@@ -28,14 +28,14 @@
 //
 
 extension Product: ComponentBuildable {
-  static let directoryName: String = "Products"
-  static func requirements(from component: Component) -> ()? {
+  public static let directoryName: String = "Products"
+  internal static func requirements(from component: Component) -> ()? {
     guard component.inheritedTypes.contains("Product") else {
       return nil
     }
     return ()
   }
-  init(component: Component, requirements: Void) {
+  internal init(component: Component, requirements: Void) {
     let dependencies =
       component.properties["dependencies"]?.code.map { line in
         DependencyRef(
@@ -56,7 +56,7 @@ extension Product: ComponentBuildable {
     )
   }
 
-  func createComponent() -> Component {
+  internal func createComponent() -> Component {
     .init(
       name: typeName,
       inheritedTypes: ["Product", "Target"],

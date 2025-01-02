@@ -28,35 +28,22 @@
 //
 
 import SwiftSyntax
-import os
 
-enum ModifierType: String {
-  case supportedPlatforms
-  case defaultLocalization
-}
+#if canImport(os)
+  import os
+#elseif canImport(Logging)
+  import Logging
+#endif
 
-// Strategy for package index parsing
-class PackageIndexStrategy: ParsingStrategy {
-  // Add finalize and reset methods
-  func finalize() -> ParsingResult? {
-    guard !items.isEmpty else { return nil }
-    let result = ParsingResult.packageIndex(items, modifiers)
-    return result
-  }
-
-  func reset() {
-    items.removeAll()
-    modifiers.removeAll()
-    currentState = .root
-  }
-  enum ExpressionKind: String {
+internal class PackageIndexStrategy: ParsingStrategy {
+  internal enum ExpressionKind: String {
     case entries
     case dependencies
     case testTargets
     case swiftSettings
   }
 
-  enum VisitorState: Equatable {
+  private enum VisitorState: Equatable {
     case root
     case variable
     case functionCall
@@ -68,9 +55,27 @@ class PackageIndexStrategy: ParsingStrategy {
   private var items = [(ExpressionKind, String)]()
   private var modifiers = [ModifierType: [String]]()
   private var currentState: VisitorState = .root
-  private let logger = Logger(subsystem: "packagedsl", category: "package-index")
+  #if canImport(os)
+    private let logger = Logger(subsystem: "packagedsl", category: "structure")
+  #elseif canImport(Logging)
+    private let logger = Logger(label: "structure")
+  #endif
 
-  func shouldActivate(_ node: some SyntaxProtocol, currentStrategy: ParsingStrategy?) -> Bool {
+  internal func finalize() -> ParsingResult? {
+    guard !items.isEmpty else { return nil }
+    let result = ParsingResult.packageIndex(items, modifiers)
+    return result
+  }
+
+  internal func reset() {
+    items.removeAll()
+    modifiers.removeAll()
+    currentState = .root
+  }
+
+  internal func shouldActivate(_ node: some SyntaxProtocol, currentStrategy: ParsingStrategy?)
+    -> Bool
+  {
     // Don't activate if there's already a PackageIndexStrategy
     if currentStrategy is PackageIndexStrategy {
       return false
@@ -85,7 +90,7 @@ class PackageIndexStrategy: ParsingStrategy {
     return false
   }
 
-  func visit(_ node: CodeBlockItemSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: CodeBlockItemSyntax) -> SyntaxVisitorContinueKind {
     switch (currentState, node.item) {
     case (.modifier(let index), .expr):
       assert(self.modifiers[index] != nil)
@@ -103,7 +108,7 @@ class PackageIndexStrategy: ParsingStrategy {
     return .skipChildren
   }
 
-  func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
     guard let patternBinding = node.bindings.first,
       patternBinding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text == "package"
     else {
@@ -113,7 +118,7 @@ class PackageIndexStrategy: ParsingStrategy {
     return .visitChildren
   }
 
-  func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
     if node.calledExpression.is(MemberAccessExprSyntax.self)
       || node.calledExpression.is(DeclReferenceExprSyntax.self)
     {
@@ -122,7 +127,7 @@ class PackageIndexStrategy: ParsingStrategy {
     return .skipChildren
   }
 
-  func visit(_ node: DeclReferenceExprSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: DeclReferenceExprSyntax) -> SyntaxVisitorContinueKind {
     switch (currentState, node.baseName.identifier?.name) {
     case (.functionCall, "Package"):
       return .visitChildren
@@ -143,7 +148,7 @@ class PackageIndexStrategy: ParsingStrategy {
   }
 
   // add visit ClosureExpression
-  func visit(_ node: LabeledExprSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: LabeledExprSyntax) -> SyntaxVisitorContinueKind {
     guard currentState == .variable,
       let name = node.label?.identifier?.name,
       let expressionType = ExpressionKind(rawValue: name)
@@ -154,11 +159,11 @@ class PackageIndexStrategy: ParsingStrategy {
     return .visitChildren
   }
 
-  func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+  internal func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
     .skipChildren
   }
 
-  func visitPost(_ node: LabeledExprSyntax) {
+  internal func visitPost(_ node: LabeledExprSyntax) {
     if case let .modifier(modifier) = currentState, !node.trimmedDescription.isEmpty {
       assert(self.modifiers[modifier] != nil)
       self.modifiers[modifier]?.append(node.trimmedDescription)

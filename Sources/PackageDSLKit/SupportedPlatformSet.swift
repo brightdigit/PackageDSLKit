@@ -28,8 +28,27 @@
 //
 
 public struct SupportedPlatformSet: TypeSource, ComponentBuildable {
-  static let directoryName: String = "Platforms"
-  static func requirements(from component: Component) -> Property? {
+  public static let directoryName: String = "Platforms"
+
+  public let typeName: String
+  public let platforms: Set<SupportedPlatform>
+
+  public init(typeName: String, platforms: Set<SupportedPlatform>) {
+    self.typeName = typeName
+    self.platforms = platforms
+  }
+
+  internal init(component: Component, requirements: Requirements) {
+    let platformValues = requirements.code.map(SupportedPlatform.init)
+    let platforms = platformValues.compactMap { $0 }
+    assert(platforms.count == platformValues.count)
+    self.init(
+      typeName: component.name,
+      platforms: .init(platforms)
+    )
+  }
+
+  internal static func requirements(from component: Component) -> Property? {
     guard component.inheritedTypes.contains("PlatformSet") else {
       return nil
     }
@@ -48,32 +67,15 @@ public struct SupportedPlatformSet: TypeSource, ComponentBuildable {
     return body
   }
 
-  public init(typeName: String, platforms: Set<SupportedPlatform>) {
-    self.typeName = typeName
-    self.platforms = platforms
-  }
-
-  init(component: Component, requirements: Requirements) {
-    let platformValues = requirements.code.map(SupportedPlatform.init)
-    let platforms = platformValues.compactMap { $0 }
-    assert(platforms.count == platformValues.count)
-    self.init(
-      typeName: component.name,
-      platforms: .init(platforms)
-    )
-  }
-
-  func createComponent() -> Component {
+  internal func createComponent() -> Component {
     .init(
       name: self.typeName,
       inheritedTypes: ["PlatformSet"],
       properties: [
         "body": .init(
-          name: "body", type: "any SupportedPlatforms", code: self.platforms.map(\.code))
+          name: "body", type: "any SupportedPlatforms", code: self.platforms.map(\.code)
+        )
       ]
     )
   }
-
-  public let typeName: String
-  public let platforms: Set<SupportedPlatform>
 }

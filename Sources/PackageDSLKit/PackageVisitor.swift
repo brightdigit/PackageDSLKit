@@ -28,14 +28,23 @@
 //
 
 import SwiftSyntax
-import os
 
-class PackageVisitor: SyntaxVisitor {
+#if canImport(os)
+  import os
+#elseif canImport(Logging)
+  import Logging
+#endif
+
+internal class PackageVisitor: SyntaxVisitor {
   private var currentStrategy: ParsingStrategy?
   private let availableStrategies: [ParsingStrategy]
-  private let logger = Logger(subsystem: "packagedsl", category: "unified-visitor")
+  #if canImport(os)
+    private let logger = Logger(subsystem: "packagedsl", category: "structure")
+  #elseif canImport(Logging)
+    private let logger = Logger(label: "structure")
+  #endif
 
-  init(
+  internal init(
     viewMode: SyntaxTreeViewMode = .fixedUp,
     strategies: [ParsingStrategy] = [PackageIndexStrategy(), StructureStrategy()]
   ) {
@@ -46,7 +55,7 @@ class PackageVisitor: SyntaxVisitor {
 
   private var results: [ParsingResult] = []
 
-  func parse(_ node: some SyntaxProtocol) -> [ParsingResult] {
+  internal func parse(_ node: some SyntaxProtocol) -> [ParsingResult] {
     super.walk(node)
     self.finishCurrentStrategy()
     return results
@@ -71,38 +80,38 @@ class PackageVisitor: SyntaxVisitor {
     }
   }
 
-  override func visit(_ node: CodeBlockItemSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: CodeBlockItemSyntax) -> SyntaxVisitorContinueKind {
     checkForStrategyActivation(node)
     return currentStrategy?.visit(node) ?? .visitChildren
   }
 
-  override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
     checkForStrategyActivation(node)
     return currentStrategy?.visit(node) ?? .visitChildren
   }
 
-  override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
     currentStrategy?.visit(node) ?? .visitChildren
   }
 
-  override func visit(_ node: DeclReferenceExprSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: DeclReferenceExprSyntax) -> SyntaxVisitorContinueKind {
     currentStrategy?.visit(node) ?? .visitChildren
   }
 
-  override func visit(_ node: LabeledExprSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: LabeledExprSyntax) -> SyntaxVisitorContinueKind {
     currentStrategy?.visit(node) ?? .visitChildren
   }
 
-  override func visitPost(_ node: LabeledExprSyntax) {
+  override internal func visitPost(_ node: LabeledExprSyntax) {
     currentStrategy?.visitPost(node)
   }
 
-  override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
     checkForStrategyActivation(node)
     return currentStrategy?.visit(node) ?? .visitChildren
   }
 
-  override func visit(_ node: InheritedTypeSyntax) -> SyntaxVisitorContinueKind {
+  override internal func visit(_ node: InheritedTypeSyntax) -> SyntaxVisitorContinueKind {
     currentStrategy?.visit(node) ?? .visitChildren
   }
 }

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-protocol TypeReference {
+public protocol TypeReference {
   var name: String { get }
 }
 
@@ -51,7 +51,7 @@ public typealias TestTargetRef = BasicTypeReference
 public typealias SwiftSettingRef = BasicTypeReference
 
 extension BasicTypeReference {
-  init(source: TypeSource) {
+  public init(source: TypeSource) {
     self.init(name: source.typeName)
   }
 }

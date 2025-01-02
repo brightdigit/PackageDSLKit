@@ -30,6 +30,5 @@
 public enum PackageDSLError: Error {
   case custom(String, (any Sendable)?)
   case other(any Error)
-
   case validationFailure([MissingSource])
 }

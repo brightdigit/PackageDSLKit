@@ -28,6 +28,6 @@
 //
 
 public struct Modifier {
-  let type: ModifierType
-  let code: [String]
+  public let type: ModifierType
+  public let code: [String]
 }

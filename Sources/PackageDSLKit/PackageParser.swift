@@ -30,11 +30,6 @@
 import Foundation
 import SwiftParser
 
-//
-// public struct SwiftSetting : Hashable {
-//  let typeName : String
-// }
-
 public struct PackageParser {
   public init() {
   }

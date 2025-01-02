@@ -28,8 +28,8 @@
 //
 
 public struct SupportedPlatform: Hashable {
-  let osName: String
-  let version: Int
+  public let osName: String
+  public let version: Int
 
   public func hash(into hasher: inout Hasher) {
     hasher.combine(osName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
@@ -37,10 +37,10 @@ public struct SupportedPlatform: Hashable {
   }
 }
 extension SupportedPlatform {
-  var code: String {
+  public var code: String {
     "SupportedPlatform.\(osName)(.v\(version)"
   }
-  init?(string: String) {
+  public init?(string: String) {
     // Remove any whitespace and optional "SupportedPlatform." prefix
     let cleanString = string.trimmingCharacters(in: .whitespaces)
       .replacingOccurrences(of: "SupportedPlatform.", with: "")

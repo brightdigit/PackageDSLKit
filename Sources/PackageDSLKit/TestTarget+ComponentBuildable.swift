@@ -28,14 +28,14 @@
 //
 
 extension TestTarget: ComponentBuildable {
-  static let directoryName: String = "Tests"
-  static func requirements(from component: Component) -> ()? {
+  internal static let directoryName: String = "Tests"
+  internal static func requirements(from component: Component) -> ()? {
     guard component.inheritedTypes.contains("TestTarget") else {
       return nil
     }
     return ()
   }
-  init(component: Component, requirements: Void) {
+  internal init(component: Component, requirements: Void) {
     let dependencies =
       component.properties["dependencies"]?.code.map { line in
         DependencyRef(
@@ -46,7 +46,7 @@ extension TestTarget: ComponentBuildable {
     self.init(typeName: component.name, dependencies: dependencies)
   }
 
-  func createComponent() -> Component {
+  internal func createComponent() -> Component {
     .init(
       name: self.typeName,
       inheritedTypes: ["TestTarget"],
@@ -58,41 +58,3 @@ extension TestTarget: ComponentBuildable {
     )
   }
 }
-//
-
-//
-// @available(*, deprecated)
-// extension Set: ComponentBuildable where Element == SupportedPlatform {
-//  init?(component: Component) {
-//    guard component.inheritedTypes.contains("PlatformSet") else {
-//      return nil
-//    }
-//    guard let body = component.properties["body"] else {
-//      return nil
-//    }
-//    guard
-//      body.type.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
-//        == "any SupportedPlatforms"
-//    else {
-//      return nil
-//    }
-//    guard !body.code.isEmpty else {
-//      return nil
-//    }
-//    let platformValues = body.code.map(SupportedPlatform.init)
-//    let platforms = platformValues.compactMap { $0 }
-//    assert(platforms.count == platformValues.count)
-//    self.init(platforms)
-//    //            ?.code, !body.isEmpty else {
-//    //      return nil
-//    //    }
-//  }
-//
-//  func createComponent() -> Component {
-//    fatalError()
-//  }
-// }
-//
-// extension Set : ComponentBuildable where Element == SwiftSetting {
-//
-// }

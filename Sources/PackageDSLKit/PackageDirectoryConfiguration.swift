@@ -28,9 +28,19 @@
 //
 
 public struct PackageDirectoryConfiguration {
-  internal init(
-    index: Index, products: [Product] = [], dependencies: [Dependency] = [], targets: [Target] = [],
-    testTargets: [TestTarget] = [], supportedPlatformSets: [SupportedPlatformSet] = []
+  public let index: Index
+  public let products: [Product]
+  public let dependencies: [Dependency]
+  public let targets: [Target]
+  public let testTargets: [TestTarget]
+  public let supportedPlatformSets: [SupportedPlatformSet]
+  public init(
+    index: Index,
+    products: [Product] = [],
+    dependencies: [Dependency] = [],
+    targets: [Target] = [],
+    testTargets: [TestTarget] = [],
+    supportedPlatformSets: [SupportedPlatformSet] = []
   ) {
     self.index = index
     self.products = products
@@ -39,13 +49,6 @@ public struct PackageDirectoryConfiguration {
     self.testTargets = testTargets
     self.supportedPlatformSets = supportedPlatformSets
   }
-
-  public let index: Index
-  public let products: [Product]
-  public let dependencies: [Dependency]
-  public let targets: [Target]
-  public let testTargets: [TestTarget]
-  public let supportedPlatformSets: [SupportedPlatformSet]
 }
 
 extension PackageDirectoryConfiguration {
@@ -84,11 +87,16 @@ extension PackageDirectoryConfiguration {
       throw .custom("Missing Index", nil)
     }
     self.init(
-      index: index, products: products, dependencies: dependencies, targets: targets,
-      testTargets: testTargets, supportedPlatformSets: supportedPlatformSets)
+      index: index,
+      products: products,
+      dependencies: dependencies,
+      targets: targets,
+      testTargets: testTargets,
+      supportedPlatformSets: supportedPlatformSets
+    )
   }
 
-  func createComponents() -> [Component] {
+  internal func createComponents() -> [Component] {
     var components: [Component] = []
     components.append(contentsOf: products.map { $0.createComponent() })
     components.append(contentsOf: dependencies.map { $0.createComponent() })
@@ -97,40 +105,6 @@ extension PackageDirectoryConfiguration {
     components.append(contentsOf: supportedPlatformSets.map { $0.createComponent() })
     return components
   }
-}
-
-enum SourceType: CaseIterable {
-  case product
-  case dependency
-  case testTarget
-
-  func sources(from configuration: PackageDirectoryConfiguration) -> [any TypeSource] {
-    switch self {
-    case .product: return configuration.products
-    case .dependency: return configuration.dependencies
-    case .testTarget: return configuration.testTargets
-    }
-  }
-  func indexReferences(from index: Index) -> [any TypeReference] {
-    switch self {
-    case .product: return index.entries
-
-    case .dependency: return index.dependencies
-    case .testTarget: return index.testTargets
-    }
-  }
-}
-
-enum Source {
-  case index
-  case product(String)
-  case target(String)
-}
-
-public struct MissingSource: Sendable {
-  let source: Source
-  let sourceType: SourceType
-  let name: String
 }
 
 extension PackageDirectoryConfiguration {
@@ -212,43 +186,5 @@ extension PackageDirectoryConfiguration {
     return Set(references).subtracting(sources).map {
       MissingSource(source: .index, sourceType: sourceType, name: $0)
     }
-  }
-}
-
-public struct PackageSpecifications {
-  public init(
-    products: [Product] = [], dependencies: [Dependency] = [], targets: [Target] = [],
-    testTargets: [TestTarget] = [], supportedPlatformSets: [SupportedPlatformSet] = [],
-    swiftSettings: [SwiftSettingRef] = [],
-    modifiers: [Modifier] = []
-  ) {
-    self.products = products
-    self.dependencies = dependencies
-    self.targets = targets
-    self.testTargets = testTargets
-    self.supportedPlatformSets = supportedPlatformSets
-    self.swiftSettings = swiftSettings
-    self.modifiers = modifiers
-  }
-
-  public let products: [Product]
-  public let dependencies: [Dependency]
-  public let targets: [Target]
-  public let testTargets: [TestTarget]
-  public let supportedPlatformSets: [SupportedPlatformSet]
-  public let swiftSettings: [SwiftSettingRef]
-  public let modifiers: [Modifier]
-}
-
-extension PackageSpecifications {
-  public init(from directoryConfiguration: PackageDirectoryConfiguration) throws(PackageDSLError) {
-    try directoryConfiguration.validate()
-    self.products = directoryConfiguration.products
-    self.dependencies = directoryConfiguration.dependencies
-    self.targets = directoryConfiguration.targets
-    self.testTargets = directoryConfiguration.testTargets
-    self.swiftSettings = directoryConfiguration.index.swiftSettings
-    self.supportedPlatformSets = directoryConfiguration.supportedPlatformSets
-    self.modifiers = directoryConfiguration.index.modifiers
   }
 }

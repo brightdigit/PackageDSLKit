@@ -30,7 +30,7 @@
 import SwiftSyntax
 
 extension ImportDeclSyntax {
-  static func module(_ moduleName: String) -> ImportDeclSyntax {
+  internal static func module(_ moduleName: String) -> ImportDeclSyntax {
     ImportDeclSyntax(
       path: ImportPathComponentListSyntax([
         ImportPathComponentSyntax(
