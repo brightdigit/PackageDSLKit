@@ -28,6 +28,17 @@
 //
 
 public struct TestTarget: TypeSource {
+  public init(typeName: String, dependencies: [DependencyRef] = []) {
+    self.typeName = typeName
+    self.dependencies = dependencies
+  }
+  
   public let typeName: String
   public let dependencies: [DependencyRef]
+}
+
+extension TestTarget {
+  public init (for product: Product) {
+    self.init(typeName: product.typeName + "Tests")
+  }
 }

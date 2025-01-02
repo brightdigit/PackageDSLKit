@@ -80,17 +80,15 @@ extension Package {
       try writer.write(spec, to: self.settings.dslSourcesURL)
       print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
 
+      let swiftVersionFile = settings.pathURL.appending(component: ".swift-version")
+      settings.fileManager.createFile(atPath: swiftVersionFile.path(), contents: Data("\(self.swiftVersion)".utf8))
+      
       // swiftlint:disable:next force_try
       let contents = try! settings.fileManager.readDirectoryContents(
-        at: self.settings.pathURL.path(),
+        at: self.settings.dslSourcesURL.path(),
         fileExtension: "swift"
       )
 
-      try? settings.fileManager.createDirectory(
-        at: settings.pathURL,
-        withIntermediateDirectories: true,
-        attributes: nil
-      )
       let packageFileURL = settings.pathURL.appendingPathComponent("Package.swift")
       let strings =
         [
@@ -100,9 +98,7 @@ extension Package {
       let data = strings.joined(separator: "\n").data(using: .utf8)!
       settings.fileManager.createFile(atPath: packageFileURL.path(), contents: data)
       print(settings.pathURL)
-      // TODO: Added Other Nessecary Files (Sources, Tests, etc...)
-      //      Creating Package.swift
-      //      Creating .gitignore
+      
       guard self.packageType != .empty else {
         return
       }

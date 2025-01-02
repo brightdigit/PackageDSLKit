@@ -47,27 +47,9 @@ struct Package: ParsableCommand {
   )
 }
 
-protocol FileManaging {
-  var fileManagerType: FileManagerType { get }
-}
 
-extension FileManaging {
-  var fileManager: FileManager {
-    FileManager.default
-  }
-}
 
-extension Package {
-  struct Dump: ParsableCommand {
-    @OptionGroup var settings: Settings
-    func run() throws {
-      print(settings.dslSourcesURL)
-      let parser = PackageParser()
-      let package = try parser.parse(at: settings.dslSourcesURL, with: .default)
-      dump(package)
-    }
-  }
-}
+
 
 extension Package {
   struct Target: ParsableCommand {
@@ -107,8 +89,10 @@ extension Package.Product {
     @Option var type: ProductType = .library
 
     func run() throws {
+      
       // add to products directory
       // add to index
+      // create directory in sources
 
     }
   }

@@ -54,6 +54,7 @@ extension PackageSpecifications {
   init(name: String, type: Package.Initialize.PackageType) {
     let product = Product(name: name, type: type)
     let products = [product].compactMap { $0 }
-    self.init(products: products)
+    let testTargets = [product.map(TestTarget.init)].compactMap(\.self)
+    self.init(products: products, testTargets: testTargets)
   }
 }

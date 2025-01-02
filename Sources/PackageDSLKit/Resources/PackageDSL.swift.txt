@@ -101,7 +101,7 @@ case .executable:
 extension Package {
 convenience init(
 name: String? = nil,
-@ProductsBuilder entries: @escaping () -> [any Product],
+@ProductsBuilder entries: @escaping () -> [any Product] = { [any Product]() },
 @PackageDependencyBuilder dependencies packageDependencies: @escaping () -> [any PackageDependency] = { [any PackageDependency] () },
 @TestTargetBuilder testTargets: @escaping () -> any TestTargets = { [any TestTarget]() },
 @SwiftSettingsBuilder swiftSettings: @escaping () -> [SwiftSetting] = { [SwiftSetting]() }
