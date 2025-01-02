@@ -25,7 +25,9 @@ let package = Package(
       name: "PackageDSLKit",
       dependencies: [
         .product(name: "SwiftSyntax", package: "swift-syntax"),
-        .product(name: "SwiftParser", package: "swift-syntax")
+        .product(name: "SwiftParser", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxBuilder", package: "swift-syntax")
+        
       ]
     ),
     .executableTarget(

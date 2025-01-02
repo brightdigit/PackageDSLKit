@@ -32,3 +32,6 @@ struct Component : Sendable {
   let inheritedTypes: [String]
   let properties: [String: Property]
 }
+
+
+

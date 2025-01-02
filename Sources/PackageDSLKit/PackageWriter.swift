@@ -29,6 +29,43 @@
 
 import Foundation
 import SwiftSyntax
+import SwiftSyntaxBuilder
+
+public struct PropertyWriter {
+  func node(from property:Property) -> VariableDeclSyntax {
+    let codeBlocks = property.code.map(CodeBlockItemSyntax.init)
+    let codeBlockList = CodeBlockItemListSyntax(codeBlocks)
+    let pattern = PatternSyntax(codeBlockList)!
+    
+    let patternBinding = PatternBindingSyntax(pattern)!
+    let patternBindingList = PatternBindingListSyntax(patternBinding)!
+    return try! VariableDeclSyntax(
+     """
+      var \(raw: property.name): \(raw: property.type) {
+        
+      }
+    """
+    ).with(\.bindings, patternBindingList)
+  }
+}
+
+public struct ComponentWriter {
+  let propertyWriter = PropertyWriter()
+  func node(from component: Component) -> StructDeclSyntax {
+    let memberBlockList = MemberBlockItemListSyntax(
+      component.properties.values.map(propertyWriter.node(from:)).map(MemberBlockItemSyntax.init).map{$0!}
+    )
+    let inheritedTypes = component.inheritedTypes.map{TokenSyntax.identifier($0)}.map(InheritedTypeSyntax.init).map{$0!}
+    let inheritedTypeList = InheritedTypeListSyntax(inheritedTypes)
+    let clause = InheritanceClauseSyntax(inheritedTypes: inheritedTypeList)
+    let memberBlock = MemberBlockSyntax(members: memberBlockList)
+    return StructDeclSyntax(
+      name: .identifier(component.name),
+      inheritanceClause: clause,
+      memberBlock: memberBlock
+    )
+  }
+}
 
 public struct PackageIndexWriter {
   public func labeledExpression(for name: String, items: [String]) -> LabeledExprSyntax {
@@ -63,6 +100,12 @@ public struct PackageIndexWriter {
   public func writeIndex(_ index: Index) throws -> String {
     let declSyntax: DeclSyntax = .init(ImportDeclSyntax.module("PackageDescription"))
 
+    let labeledExpressions = [
+      self.labeledExpression(for: "entries", items: index.entries.map(\.name)),
+      self.labeledExpression(for: "dependencies", items: index.dependencies.map(\.name)),
+      self.labeledExpression(for: "testTargets", items: index.testTargets.map(\.name)),
+      self.labeledExpression(for: "swiftSettings", items: index.swiftSettings.map(\.name))
+    ]
     let packageDecl = VariableDeclSyntax(
       leadingTrivia: .newline,
       bindingSpecifier: .keyword(.let),
@@ -79,9 +122,7 @@ public struct PackageIndexWriter {
                 leadingTrivia: .space,
                 calledExpression: DeclReferenceExprSyntax(baseName: .identifier("Package")),
                 leftParen: .leftParenToken(),
-                arguments: LabeledExprListSyntax([
-                  self.labeledExpression(for: "entries", items: ["FODWorkout"])
-                ]),
+                arguments: LabeledExprListSyntax(labeledExpressions),
                 rightParen: .rightParenToken()
               )
           )
@@ -97,9 +138,13 @@ public struct PackageIndexWriter {
 }
 
 public struct PackageWriter {
+  public init() {
+  }
+  
   let fileManager : FileManager = .default
   let indexWriter: PackageIndexWriter = .init()
-  func write(_ specification: PackageSpecifications, to url: URL) throws(PackageDSLError) {
+  let componentWriter: ComponentWriter = .init()
+  public func write(_ specification: PackageSpecifications, to url: URL) throws(PackageDSLError) {
     let configuration = PackageDirectoryConfiguration(specifications: specification)
 
     let indexFileURL = url.appending(component: "Index.swift")
@@ -124,6 +169,20 @@ public struct PackageWriter {
         } catch {
           throw .other(error)
         }
+        directoryCreated[directoryURL] = ()
+      }
+      
+      let filePath = directoryURL
+        .appending(path: component.name)
+        .appendingPathExtension("swift")
+        .standardizedFileURL
+      
+      let node = componentWriter.node(from: component)
+      do {
+        try node.description.write(to: filePath, atomically: true, encoding: .utf8)
+        
+      } catch {
+        throw .other(error)
       }
     }
   }

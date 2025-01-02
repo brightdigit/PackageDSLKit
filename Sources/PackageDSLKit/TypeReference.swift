@@ -45,3 +45,9 @@ public typealias EntryRef = BasicTypeReference
 public typealias DependencyRef = BasicTypeReference
 public typealias TestTargetRef = BasicTypeReference
 public typealias SwiftSettingRef = BasicTypeReference
+
+extension BasicTypeReference {
+  init(source : TypeSource) {
+    self.init(name: source.typeName)
+  }
+}

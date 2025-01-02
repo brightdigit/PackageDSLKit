@@ -135,7 +135,27 @@ public struct MissingSource: Sendable {
 
 extension PackageDirectoryConfiguration {
   public init(specifications: PackageSpecifications) {
-    fatalError()
+    let entries = specifications.products.map(EntryRef.init)
+    let dependencies = specifications.dependencies.map(DependencyRef.init)
+    let testTargets = specifications.testTargets.map(TestTargetRef.init)
+    let swiftSettings = specifications.swiftSettings
+    let index = Index(
+      entries: entries,
+      dependencies: dependencies,
+      testTargets:  testTargets,
+      swiftSettings: swiftSettings,
+      modifiers: specifications.modifiers
+    )
+
+    
+    self.init(
+      index: index,
+      products: specifications.products,
+      dependencies: specifications.dependencies,
+      targets: specifications.targets,
+      testTargets: specifications.testTargets,
+      supportedPlatformSets: specifications.supportedPlatformSets
+    )
   }
   func validateDependencies() -> [MissingSource] {
     let dependencyNames = Set(
@@ -199,13 +219,17 @@ extension PackageDirectoryConfiguration {
 public struct PackageSpecifications {
   public init(
     products: [Product] = [], dependencies: [Dependency] = [], targets: [Target] = [],
-    testTargets: [TestTarget] = [], supportedPlatformSets: [SupportedPlatformSet] = []
+    testTargets: [TestTarget] = [], supportedPlatformSets: [SupportedPlatformSet] = [],
+    swiftSettings : [SwiftSettingRef] = [],
+    modifiers: [Modifier] = []
   ) {
     self.products = products
     self.dependencies = dependencies
     self.targets = targets
     self.testTargets = testTargets
     self.supportedPlatformSets = supportedPlatformSets
+    self.swiftSettings = swiftSettings
+    self.modifiers = modifiers
   }
 
   public let products: [Product]
@@ -213,6 +237,8 @@ public struct PackageSpecifications {
   public let targets: [Target]
   public let testTargets: [TestTarget]
   public let supportedPlatformSets: [SupportedPlatformSet]
+  public let swiftSettings: [SwiftSettingRef]
+  public let modifiers : [Modifier]
 }
 
 extension PackageSpecifications {
@@ -222,6 +248,8 @@ extension PackageSpecifications {
     self.dependencies = directoryConfiguration.dependencies
     self.targets = directoryConfiguration.targets
     self.testTargets = directoryConfiguration.testTargets
+    self.swiftSettings = directoryConfiguration.index.swiftSettings
     self.supportedPlatformSets = directoryConfiguration.supportedPlatformSets
+    self.modifiers = directoryConfiguration.index.modifiers
   }
 }

@@ -90,10 +90,12 @@ extension Package {
         try self.settings.fileManager.createDirectory(
           at: self.settings.dslSourcesURL, withIntermediateDirectories: true, attributes: nil)
       }
-      PackageSpecifications()
+      let spec = PackageSpecifications()
+      let writer = PackageWriter()
+      try writer.write(spec, to: self.settings.dslSourcesURL)
       // let currentDirectoryURL = URL(fileURLWithPath: self.settings.fileManager.currentDirectoryPath)
       // let packageName = currentDirectoryURL.lastPathComponent
-      let packageSwiftURL = self.settings.dslSourcesURL.appending(path: "Index.swift")
+     // let packageSwiftURL = self.settings.dslSourcesURL.appending(path: "Index.swift")
       //      try PackageDSLKit.run()
       //        .write(to: packageSwiftURL, atomically: true, encoding: .utf8)
       print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
