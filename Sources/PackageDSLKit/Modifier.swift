@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct Modifier {
+public struct Modifier : Sendable {
   public let type: ModifierType
   public let code: [String]
 }

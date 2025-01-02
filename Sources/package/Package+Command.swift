@@ -43,7 +43,7 @@ import PackageDSLKit
 @main
 struct Package: ParsableCommand {
   static let configuration: CommandConfiguration = .init(
-    subcommands: [Initialize.self, Dump.self]
+    subcommands: [Initialize.self, Dump.self, Product.self]
   )
 }
 
@@ -89,7 +89,18 @@ extension Package.Product {
     @Option var type: ProductType = .library
 
     func run() throws {
+      let parser = PackageParser()
+      let package = try parser.parse(at: settings.dslSourcesURL, with: .default)
+      let newPackage = package.updating(descriptor: Product.self) { products in
+        var newProducts = products
+        newProducts.append(.init(typeName: name))
+        return newProducts
+      }
+      let writer = PackageWriter()
+      try writer.write(newPackage, to: self.settings.dslSourcesURL)
       
+      
+      print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
       // add to products directory
       // add to index
       // create directory in sources

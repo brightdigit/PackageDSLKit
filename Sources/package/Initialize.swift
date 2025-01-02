@@ -66,48 +66,21 @@ extension Package {
       name ?? settings.rootName
     }
 
-    internal func run() throws {
-      if shouldCreateDirectory {
-        try self.settings.fileManager.createDirectory(
-          at: self.settings.dslSourcesURL,
-          withIntermediateDirectories: true,
-          attributes: nil
-        )
-      }
-
-      let spec = PackageSpecifications(name: name ?? settings.rootName, type: self.packageType)
-      let writer = PackageWriter()
-      try writer.write(spec, to: self.settings.dslSourcesURL)
-      print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
-
-      let swiftVersionFile = settings.pathURL.appending(component: ".swift-version")
-      settings.fileManager.createFile(atPath: swiftVersionFile.path(), contents: Data("\(self.swiftVersion)".utf8))
-      
-      // swiftlint:disable:next force_try
-      let contents = try! settings.fileManager.readDirectoryContents(
-        at: self.settings.dslSourcesURL.path(),
-        fileExtension: "swift"
-      )
-
-      let packageFileURL = settings.pathURL.appendingPathComponent("Package.swift")
-      let strings =
-        [
-          "// swift-tools-version: \(self.swiftVersion)",
-          SupportCodeBlock.syntaxNode.trimmedDescription,
-        ] + contents
-      let data = strings.joined(separator: "\n").data(using: .utf8)!
-      settings.fileManager.createFile(atPath: packageFileURL.path(), contents: data)
-      print(settings.pathURL)
-      
-      guard self.packageType != .empty else {
+    internal static func createFileStructure(
+      forPackageType packageType: PackageType,
+      withFileManager fileManager: FileManager,
+      forProductName productName: String,
+      at pathURL: URL
+    ) throws {
+      guard packageType != .empty else {
         return
       }
 
-      let sourcesDirURL = self.settings.pathURL.appendingPathComponent("Sources/\(productName)")
-      try settings.fileManager.createDirectory(at: sourcesDirURL, withIntermediateDirectories: true)
+      let sourcesDirURL = pathURL.appendingPathComponent("Sources/\(productName)")
+      try fileManager.createDirectory(at: sourcesDirURL, withIntermediateDirectories: true)
       let sourceCode: String
       let fileName: String
-      switch self.packageType {
+      switch packageType {
       case .empty:
         assertionFailure()
         return
@@ -127,17 +100,17 @@ extension Package {
           """
       }
 
-      settings.fileManager.createFile(
+      fileManager.createFile(
         atPath: sourcesDirURL.appendingPathComponent(fileName).path(),
         contents: Data(sourceCode.utf8)
       )
 
-      guard self.packageType == .library else {
+      guard packageType == .library else {
         return
       }
 
-      let testingDirURL = self.settings.pathURL.appendingPathComponent("Tests/\(productName)Tests")
-      try settings.fileManager.createDirectory(at: testingDirURL, withIntermediateDirectories: true)
+      let testingDirURL = pathURL.appendingPathComponent("Tests/\(productName)Tests")
+      try fileManager.createDirectory(at: testingDirURL, withIntermediateDirectories: true)
 
       let testFileURL = testingDirURL.appendingPathComponent("\(productName)Tests.swift")
       let testCode = """
@@ -148,7 +121,49 @@ extension Package {
             // Write your test here and use APIs like `#expect(...)` to check expected conditions.
         }
         """
-      settings.fileManager.createFile(atPath: testFileURL.path(), contents: Data(testCode.utf8))
+      fileManager.createFile(atPath: testFileURL.path(), contents: Data(testCode.utf8))
+    }
+    internal static func writePackageSwiftFile(
+      withFileManager fileManager: FileManager,
+      swiftVersion: SwiftVersion,
+      from dslSourcesURL: URL,
+      to pathURL: URL
+    ) throws {
+      let contents = try fileManager.readDirectoryContents(
+        at: dslSourcesURL.path(),
+        fileExtension: "swift"
+      )
+      
+      let packageFileURL = pathURL.appendingPathComponent("Package.swift")
+      let strings =
+      [
+        "// swift-tools-version: \(swiftVersion)",
+        SupportCodeBlock.syntaxNode.trimmedDescription,
+      ] + contents
+      let data = strings.joined(separator: "\n").data(using: .utf8)!
+      fileManager.createFile(atPath: packageFileURL.path(), contents: data)
+    }
+    
+    internal func run() throws {
+      if shouldCreateDirectory {
+        try self.settings.fileManager.createDirectory(
+          at: self.settings.dslSourcesURL,
+          withIntermediateDirectories: true,
+          attributes: nil
+        )
+      }
+
+      let spec = PackageSpecifications(name: name ?? settings.rootName, type: self.packageType)
+      let writer = PackageWriter()
+      try writer.write(spec, to: self.settings.dslSourcesURL)
+      print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
+
+      let swiftVersionFile = settings.pathURL.appending(component: ".swift-version")
+      settings.fileManager.createFile(atPath: swiftVersionFile.path(), contents: Data("\(self.swiftVersion)".utf8))
+      try! Self.writePackageSwiftFile(withFileManager: settings.fileManager, swiftVersion: swiftVersion, from: settings.dslSourcesURL, to: settings.pathURL)
+      print(settings.pathURL)
+      
+      try! Self.createFileStructure(forPackageType: packageType, withFileManager: settings.fileManager, forProductName: productName, at: settings.pathURL)
     }
   }
 }
