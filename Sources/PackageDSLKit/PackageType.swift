@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum PackageType: String {
+public enum PackageType: String, Sendable, Hashable, Codable {
   case empty
   case library
   case executable

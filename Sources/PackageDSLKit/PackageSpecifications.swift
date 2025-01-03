@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct PackageSpecifications: Sendable {
+public struct PackageSpecifications: Sendable, Hashable, Codable {
   public let products: [Product]
   public let dependencies: [Dependency]
   public let targets: [Target]

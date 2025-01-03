@@ -27,6 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum FileManagerType: String, CaseIterable {
+public enum FileManagerType: String, CaseIterable, Sendable, Hashable, Codable {
   case fileManager
 }

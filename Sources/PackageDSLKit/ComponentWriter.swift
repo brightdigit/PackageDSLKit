@@ -29,7 +29,7 @@
 
 import SwiftSyntax
 
-internal struct ComponentWriter: Sendable {
+internal struct ComponentWriter: Sendable, Hashable, Codable {
   private let propertyWriter = PropertyWriter()
   internal func node(from component: Component) -> StructDeclSyntax {
     let memberBlockList = MemberBlockItemListSyntax(

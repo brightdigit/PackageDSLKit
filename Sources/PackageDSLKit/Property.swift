@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct Property: Sendable {
+public struct Property: Sendable, Hashable, Codable {
   public let name: String
   public let type: String
   public let code: [String]

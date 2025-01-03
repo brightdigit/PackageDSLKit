@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum ProductType: String, Sendable {
+public enum ProductType: String, Sendable, Hashable, Codable {
   case library
   case executable
 }

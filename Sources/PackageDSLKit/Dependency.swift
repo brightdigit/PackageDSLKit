@@ -28,7 +28,7 @@
 //
 
 public struct Dependency: TypeSource {
-  public struct DependencyType: OptionSet, Sendable {
+  public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
     public typealias RawValue = Int
 
     public static let package = DependencyType(rawValue: 1)

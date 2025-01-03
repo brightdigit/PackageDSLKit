@@ -29,7 +29,7 @@
 
 import SwiftSyntax
 
-public struct Index {
+public struct Index: Sendable, Hashable, Codable {
   public let entries: [EntryRef]
   public let dependencies: [DependencyRef]
   public let testTargets: [TestTargetRef]
@@ -52,7 +52,7 @@ public struct Index {
 
 extension Index {
   internal init(
-    items: [(PackageIndexStrategy.ExpressionKind, String)],
+    items: [PackageIndexStrategy.Child],
     modifiers: [ModifierType: [String]]
   ) {
     var entries: [EntryRef] = []
@@ -60,15 +60,15 @@ extension Index {
     var testTargets: [TestTargetRef] = []
     var swiftSettings: [SwiftSettingRef] = []
     for item in items {
-      switch item.0 {
+      switch item.kind {
       case .entries:
-        entries.append(.init(name: item.1))
+        entries.append(.init(name: item.name))
       case .dependencies:
-        dependencies.append(.init(name: item.1))
+        dependencies.append(.init(name: item.name))
       case .testTargets:
-        testTargets.append(.init(name: item.1))
+        testTargets.append(.init(name: item.name))
       case .swiftSettings:
-        swiftSettings.append(.init(name: item.1))
+        swiftSettings.append(.init(name: item.name))
       }
     }
 

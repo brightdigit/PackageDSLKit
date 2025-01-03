@@ -29,7 +29,7 @@
 
 import SwiftSyntax
 
-public struct PackageIndexWriter: Sendable {
+public struct PackageIndexWriter: Sendable, Hashable, Codable {
   private func labeledExpression(for name: String, items: [String]) -> LabeledExprSyntax? {
     if items.isEmpty {
       return nil

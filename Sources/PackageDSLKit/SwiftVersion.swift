@@ -29,7 +29,7 @@
 
 import Foundation
 
-public struct SwiftVersion: Sendable, Equatable, ExpressibleByStringLiteral, CustomStringConvertible
+public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, CustomStringConvertible
 {
   public let major: Int
   public let minor: Int

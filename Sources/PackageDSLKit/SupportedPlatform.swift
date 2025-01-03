@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct SupportedPlatform: Sendable, Hashable {
+public struct SupportedPlatform: Sendable, Hashable, Codable {
   public let osName: String
   public let version: Int
 
