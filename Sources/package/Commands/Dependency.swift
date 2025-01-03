@@ -1,5 +1,5 @@
 //
-//  TestTarget.swift
+//  Dependency.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,17 +27,16 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct TestTarget: TypeSource {
-  public let typeName: String
-  public let dependencies: [DependencyRef]
-  public init(typeName: String, dependencies: [DependencyRef] = []) {
-    self.typeName = typeName
-    self.dependencies = dependencies
+import ArgumentParser
+
+extension Package {
+  internal struct Dependency: ParsableCommand {
   }
 }
+extension Package.Dependency {
+  internal struct Add: ParsableCommand {
+  }
 
-extension TestTarget {
-  public init(for product: Product) {
-    self.init(typeName: product.typeName + "Tests")
+  internal struct Remove: ParsableCommand {
   }
 }

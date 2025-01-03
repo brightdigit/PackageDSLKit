@@ -27,6 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public protocol TypeSource {
+public protocol TypeSource: Sendable, Hashable, Codable {
   var typeName: String { get }
 }

@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct PackageDirectoryConfiguration {
+public struct PackageDirectoryConfiguration: Sendable, Hashable, Codable {
   public let index: Index
   public let products: [Product]
   public let dependencies: [Dependency]

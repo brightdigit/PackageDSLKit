@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum PackageDSLError: Error {
+public enum PackageDSLError: Error, Sendable {
   case custom(String, (any Sendable)?)
   case other(any Error)
   case validationFailure([MissingSource])

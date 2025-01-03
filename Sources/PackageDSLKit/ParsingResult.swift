@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal enum ParsingResult {
-  case packageIndex([(PackageIndexStrategy.ExpressionKind, String)], [ModifierType: [String]])
+internal enum ParsingResult: Sendable, Hashable, Codable {
+  case packageIndex([PackageIndexStrategy.Child], [ModifierType: [String]])
   case structure(Component)  // Add appropriate structure data
 }

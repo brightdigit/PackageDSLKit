@@ -55,9 +55,10 @@ extension Target: ComponentBuildable {
         "dependencies": .init(
           name: "dependencies",
           type: "any Dependencies",
-          code: dependencies.map { $0.asFunctionCall() }
+          code: dependencies.map { $0.asFunctionCall() },
+          disallowEmpty: true
         )
-      ]
+      ].compactMapValues(\.self)
     )
   }
 }

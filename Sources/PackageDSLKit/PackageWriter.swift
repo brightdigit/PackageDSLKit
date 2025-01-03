@@ -31,20 +31,23 @@ import Foundation
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-public struct PackageWriter {
+public struct PackageWriter: Sendable {
   private static let compoenentTypes: [any ComponentBuildable.Type] = [
     Product.self,
     Dependency.self,
     TestTarget.self,
     SupportedPlatformSet.self,
   ]
-  private let fileManager: FileManager = .default
+  private let fileManager: @Sendable () -> FileManager = { .default }
   private let indexWriter: PackageIndexWriter = .init()
   private let componentWriter: ComponentWriter = .init()
 
   public init() {
   }
-  public func write(_ specification: PackageSpecifications, to url: URL) throws(PackageDSLError) {
+  public func write(
+    _ specification: PackageSpecifications,
+    to url: URL
+  ) throws(PackageDSLError) {
     let configuration = PackageDirectoryConfiguration(specifications: specification)
 
     let indexFileURL = url.appending(component: "Index.swift")
@@ -71,7 +74,7 @@ public struct PackageWriter {
 
       if directoryCreated[directoryURL] == nil {
         do {
-          try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+          try fileManager().createDirectory(at: directoryURL, withIntermediateDirectories: true)
         } catch {
           throw .other(error)
         }

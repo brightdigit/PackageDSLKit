@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct PackageSpecifications {
+public struct PackageSpecifications: Sendable, Hashable, Codable {
   public let products: [Product]
   public let dependencies: [Dependency]
   public let targets: [Target]
@@ -65,5 +65,13 @@ extension PackageSpecifications {
     self.swiftSettings = directoryConfiguration.index.swiftSettings
     self.supportedPlatformSets = directoryConfiguration.supportedPlatformSets
     self.modifiers = directoryConfiguration.index.modifiers
+  }
+}
+
+extension PackageSpecifications {
+  public func updating<P: PackagePropertyDescriptor>(descriptor: P.Type, transform: ([P]) -> [P])
+    -> PackageSpecifications
+  {
+    descriptor.update(original: self, transform: transform)
   }
 }

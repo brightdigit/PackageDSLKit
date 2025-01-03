@@ -1,5 +1,5 @@
 //
-//  TestTarget.swift
+//  SwiftVersion.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,17 +27,14 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct TestTarget: TypeSource {
-  public let typeName: String
-  public let dependencies: [DependencyRef]
-  public init(typeName: String, dependencies: [DependencyRef] = []) {
-    self.typeName = typeName
-    self.dependencies = dependencies
-  }
-}
+import ArgumentParser
+import PackageDSLKit
 
-extension TestTarget {
-  public init(for product: Product) {
-    self.init(typeName: product.typeName + "Tests")
+extension SwiftVersion: ExpressibleByArgument {
+  public init(argument value: String) {
+    let components = value.components(separatedBy: ".")
+    let major: Int = .init(components[0])!
+    let minor: Int = .init(components[1])!
+    self.init(major: major, minor: minor)
   }
 }

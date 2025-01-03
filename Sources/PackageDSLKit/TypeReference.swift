@@ -39,7 +39,7 @@ public typealias DependencyRef = BasicTypeReference
 public typealias TestTargetRef = BasicTypeReference
 public typealias SwiftSettingRef = BasicTypeReference
 
-public protocol TypeReference {
+public protocol TypeReference: Sendable, Hashable, Codable {
   var name: String { get }
 }
 
@@ -50,7 +50,7 @@ extension TypeReference {
 }
 
 extension BasicTypeReference {
-  public init(source: TypeSource) {
+  public init(source: any TypeSource) {
     self.init(name: source.typeName)
   }
 }

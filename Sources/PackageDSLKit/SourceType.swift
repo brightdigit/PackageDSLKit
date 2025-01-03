@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum SourceType: CaseIterable, Sendable {
+public enum SourceType: CaseIterable, Sendable, Hashable, Codable {
   case product
   case dependency
   case testTarget

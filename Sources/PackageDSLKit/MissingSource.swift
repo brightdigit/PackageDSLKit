@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct MissingSource: Sendable {
+public struct MissingSource: Sendable, Hashable, Codable {
   public let source: Source
   public let sourceType: SourceType
   public let name: String

@@ -30,7 +30,7 @@
 import Foundation
 import SwiftParser
 
-public struct PackageParser {
+public struct PackageParser: Sendable, Hashable, Codable {
   public init() {
   }
   private func parseResults(at directoryURL: URL, with fileManager: FileManager)

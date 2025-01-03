@@ -31,15 +31,12 @@ import ArgumentParser
 import Foundation
 import PackageDSLKit
 
-internal struct Settings: ParsableArguments, FileManaging {
+internal struct Settings: ParsableArguments, FileManagerContainer {
   @Option(help: .hidden)
   internal var fileManagerType: FileManagerType = .fileManager
 
   @Option
   internal var path: String?
-
-  @Option
-  internal var exportPath: String?
 
   internal var pathURL: URL {
     if let path = self.path {
@@ -49,11 +46,8 @@ internal struct Settings: ParsableArguments, FileManaging {
     }
   }
 
-  internal var exportPathURL: URL? {
-    guard let exportPath = self.exportPath else {
-      return nil
-    }
-    return URL(fileURLWithPath: exportPath)
+  internal var rootName: String {
+    self.pathURL.lastPathComponent
   }
 
   internal var dslSourcesURL: URL {

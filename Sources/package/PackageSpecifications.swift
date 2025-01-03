@@ -1,5 +1,5 @@
 //
-//  TestTarget.swift
+//  PackageSpecifications.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,17 +27,13 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct TestTarget: TypeSource {
-  public let typeName: String
-  public let dependencies: [DependencyRef]
-  public init(typeName: String, dependencies: [DependencyRef] = []) {
-    self.typeName = typeName
-    self.dependencies = dependencies
-  }
-}
+import PackageDSLKit
 
-extension TestTarget {
-  public init(for product: Product) {
-    self.init(typeName: product.typeName + "Tests")
+extension PackageSpecifications {
+  internal init(name: String, type: PackageType) {
+    let product = Product(name: name, type: type)
+    let products = [product].compactMap { $0 }
+    let testTargets = [product.map(TestTarget.init)].compactMap(\.self)
+    self.init(products: products, testTargets: testTargets)
   }
 }

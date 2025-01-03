@@ -36,14 +36,18 @@ import SwiftSyntax
 #endif
 
 internal class PackageIndexStrategy: ParsingStrategy {
-  internal enum ExpressionKind: String {
+  internal struct Child: Sendable, Hashable, Codable {
+    let kind: ExpressionKind
+    let name: String
+  }
+  internal enum ExpressionKind: String, Sendable, Hashable, Codable {
     case entries
     case dependencies
     case testTargets
     case swiftSettings
   }
 
-  private enum VisitorState: Equatable {
+  private enum VisitorState: Sendable, Hashable, Codable {
     case root
     case variable
     case functionCall
@@ -52,7 +56,7 @@ internal class PackageIndexStrategy: ParsingStrategy {
     case modifier(ModifierType)
   }
 
-  private var items = [(ExpressionKind, String)]()
+  private var items = [Child]()
   private var modifiers = [ModifierType: [String]]()
   private var currentState: VisitorState = .root
   #if canImport(os)
@@ -62,9 +66,6 @@ internal class PackageIndexStrategy: ParsingStrategy {
   #endif
 
   internal func finalize() -> ParsingResult? {
-    guard !items.isEmpty else {
-      return nil
-    }
     let result = ParsingResult.packageIndex(items, modifiers)
     return result
   }
@@ -134,7 +135,7 @@ internal class PackageIndexStrategy: ParsingStrategy {
     case (.functionCall, "Package"):
       return .visitChildren
     case (.codeBlockFor(let expressionKind), .some(let name)):
-      items.append((expressionKind, name))
+      items.append(.init(kind: expressionKind, name: name))
       currentState = .labeledExpr(expressionKind)
       return .visitChildren
     case (_, .some(let name)):
@@ -166,11 +167,11 @@ internal class PackageIndexStrategy: ParsingStrategy {
   }
 
   internal func visitPost(_ node: LabeledExprSyntax) {
-    if case let .modifier(modifier) = currentState, !node.trimmedDescription.isEmpty {
+    if case .modifier(let modifier) = currentState, !node.trimmedDescription.isEmpty {
       assert(self.modifiers[modifier] != nil)
       self.modifiers[modifier]?.append(node.trimmedDescription)
     }
-    guard case let .labeledExpr(stateExpressionType) = currentState else {
+    guard case .labeledExpr(let stateExpressionType) = currentState else {
       return
     }
     guard let name = node.label?.identifier?.name else {

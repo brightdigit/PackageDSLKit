@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum ModifierType: String {
+public enum ModifierType: String, Sendable, Hashable, Codable {
   case supportedPlatforms
   case defaultLocalization
 }

@@ -32,7 +32,7 @@ import SwiftSyntax
 // Protocol for different parsing strategies
 internal protocol ParsingStrategy {
   // Return true if this strategy should handle the current context
-  func shouldActivate(_ node: some SyntaxProtocol, currentStrategy: ParsingStrategy?) -> Bool
+  func shouldActivate(_ node: some SyntaxProtocol, currentStrategy: (any ParsingStrategy)?) -> Bool
 
   // Called when switching from this strategy to another
   func finalize() -> ParsingResult?

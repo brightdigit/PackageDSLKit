@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct Property: Sendable {
+public struct Property: Sendable, Hashable, Codable {
   public let name: String
   public let type: String
   public let code: [String]
@@ -43,9 +43,9 @@ public struct Property: Sendable {
 }
 
 extension Property {
-  internal init?(name: String, type: String, code: [String?]) {
+  internal init?(name: String, type: String, code: [String?], disallowEmpty: Bool) {
     let code = code.compactMap(\.self)
-    guard !code.isEmpty else {
+    guard !code.isEmpty || !disallowEmpty else {
       return nil
     }
     self.init(name: name, type: type, code: code)

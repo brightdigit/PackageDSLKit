@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum Source : Sendable {
+public enum Source: Sendable, Hashable, Codable {
   case index
   case product(String)
   case target(String)

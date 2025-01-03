@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-internal struct Component: Sendable {
+internal struct Component: Sendable, Hashable, Codable {
   internal let name: String
   internal let inheritedTypes: [String]
   internal let properties: [String: Property]

@@ -1,5 +1,5 @@
 //
-//  TestTarget.swift
+//  Dump.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,17 +27,17 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct TestTarget: TypeSource {
-  public let typeName: String
-  public let dependencies: [DependencyRef]
-  public init(typeName: String, dependencies: [DependencyRef] = []) {
-    self.typeName = typeName
-    self.dependencies = dependencies
-  }
-}
+import ArgumentParser
+import PackageDSLKit
 
-extension TestTarget {
-  public init(for product: Product) {
-    self.init(typeName: product.typeName + "Tests")
+extension Package {
+  internal struct Dump: ParsableCommand {
+    @OptionGroup internal var settings: Settings
+    internal func run() throws {
+      print(settings.dslSourcesURL)
+      let parser = PackageParser()
+      let package = try parser.parse(at: settings.dslSourcesURL, with: .default)
+      dump(package)
+    }
   }
 }
