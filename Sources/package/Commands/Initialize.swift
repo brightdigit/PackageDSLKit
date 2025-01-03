@@ -31,11 +31,6 @@ import ArgumentParser
 import Foundation
 import PackageDSLKit
 
-internal enum PackageType: String, ExpressibleByArgument {
-  case empty
-  case library
-  case executable
-}
 extension Package {
   internal struct Initialize: ParsableCommand {
     @OptionGroup internal var settings: Settings
@@ -84,13 +79,21 @@ extension Package {
 
       let swiftVersionFile = settings.pathURL.appending(component: ".swift-version")
       settings.fileManager.createFile(
-        atPath: swiftVersionFile.path(), contents: Data("\(self.swiftVersion)".utf8))
+        atPath: swiftVersionFile.path(),
+        contents: Data("\(self.swiftVersion)".utf8)
+      )
       try! settings.fileManager.writePackageSwiftFile(
-        swiftVersion: swiftVersion, from: settings.dslSourcesURL, to: settings.pathURL)
+        swiftVersion: swiftVersion,
+        from: settings.dslSourcesURL,
+        to: settings.pathURL
+      )
       print(settings.pathURL)
 
       try! settings.fileManager.createFileStructure(
-        forPackageType: packageType, forProductName: productName, at: settings.pathURL)
+        forPackageType: packageType,
+        forProductName: productName,
+        at: settings.pathURL
+      )
     }
   }
 }

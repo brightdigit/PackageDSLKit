@@ -44,3 +44,12 @@ public struct Product: TypeSource {
     self.productType = productType
   }
 }
+
+extension Product {
+  public init?(name: String, type: PackageType) {
+    guard let productType = ProductType(type: type) else {
+      return nil
+    }
+    self.init(typeName: name, productType: productType)
+  }
+}

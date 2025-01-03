@@ -30,6 +30,7 @@
 import Foundation
 import PackageDSLKit
 
+@available(*, deprecated, message: "Migrate to separate protocol.")
 extension FileManager {
   internal func swiftVersion(from directoryURL: URL) -> SwiftVersion? {
     let swiftVersionURL = directoryURL.appending(component: ".swift-version")

@@ -31,7 +31,7 @@ import ArgumentParser
 import Foundation
 import PackageDSLKit
 
-internal struct Settings: ParsableArguments, FileManaging {
+internal struct Settings: ParsableArguments, FileManagerContainer {
   @Option(help: .hidden)
   internal var fileManagerType: FileManagerType = .fileManager
 

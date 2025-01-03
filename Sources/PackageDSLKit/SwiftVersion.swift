@@ -27,14 +27,53 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
-import PackageDSLKit
+import Foundation
 
-extension SwiftVersion: ExpressibleByArgument {
-  public init(argument value: String) {
+public struct SwiftVersion: Sendable, Equatable, ExpressibleByStringLiteral, CustomStringConvertible
+{
+  public init(major: Int, minor: Int) {
+    self.major = major
+    self.minor = minor
+  }
+
+  public init(stringLiteral value: String) {
     let components = value.components(separatedBy: ".")
     let major: Int = .init(components[0])!
     let minor: Int = .init(components[1])!
     self.init(major: major, minor: minor)
+  }
+
+  public let major: Int
+  public let minor: Int
+
+  public var description: String {
+    [major, minor].map(\.description).joined(separator: ".")
+  }
+}
+
+extension SwiftVersion {
+  public static func readFrom(packageSwiftFileURL: URL) -> SwiftVersion? {
+    let versionText: String
+    let fileHandle: FileHandle
+    do {
+      fileHandle = try FileHandle(forReadingFrom: packageSwiftFileURL)
+    } catch {
+      // TODO: log error if file exists
+      // TODO: Assertion failure too
+      return nil
+    }
+    guard
+      let firstLine = String(data: fileHandle.readData(ofLength: 64), encoding: .utf8)?.components(
+        separatedBy: .newlines
+      ).first,
+      firstLine.hasPrefix("// swift-tools-version:")
+    else {
+      return nil
+    }
+
+    versionText = firstLine.replacingOccurrences(of: "// swift-tools-version:", with: "")
+      .trimmingCharacters(in: .whitespaces)
+    fileHandle.closeFile()
+    return SwiftVersion(stringLiteral: versionText)
   }
 }

@@ -29,27 +29,6 @@
 
 import PackageDSLKit
 
-extension ProductType {
-  init?(type: PackageType) {
-    switch type {
-    case .empty:
-      return nil
-    case .library:
-      self = .library
-    case .executable:
-      self = .executable
-    }
-  }
-}
-extension Product {
-  init?(name: String, type: PackageType) {
-    guard let productType = ProductType(type: type) else {
-      return nil
-    }
-    self.init(typeName: name, productType: productType)
-  }
-}
-
 extension PackageSpecifications {
   init(name: String, type: PackageType) {
     let product = Product(name: name, type: type)

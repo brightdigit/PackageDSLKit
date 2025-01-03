@@ -27,20 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum ProductType: String, Sendable {
-  case library
-  case executable
-}
+import ArgumentParser
+import PackageDSLKit
 
-extension ProductType {
-  init?(type: PackageType) {
-    switch type {
-    case .empty:
-      return nil
-    case .library:
-      self = .library
-    case .executable:
-      self = .executable
-    }
-  }
+extension ProductType: ExpressibleByArgument {
 }

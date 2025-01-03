@@ -1,5 +1,5 @@
 //
-//  ProductType.swift
+//  Target.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,20 +27,20 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum ProductType: String, Sendable {
-  case library
-  case executable
+import ArgumentParser
+
+extension Package {
+  struct Target: ParsableCommand {
+  }
 }
 
-extension ProductType {
-  init?(type: PackageType) {
-    switch type {
-    case .empty:
-      return nil
-    case .library:
-      self = .library
-    case .executable:
-      self = .executable
-    }
+extension Package.Target {
+  struct Add: ParsableCommand {
+    @Argument var name: String
+
+    @OptionGroup var settings: Settings
+  }
+
+  struct Remove: ParsableCommand {
   }
 }

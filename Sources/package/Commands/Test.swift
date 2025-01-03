@@ -1,5 +1,5 @@
 //
-//  FileManaging.swift
+//  Test.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,15 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-import PackageDSLKit
+import ArgumentParser
 
-internal protocol FileManaging {
-  var fileManagerType: FileManagerType { get }
+extension Package {
+  internal struct Test: ParsableCommand {
+  }
 }
 
-extension FileManaging {
-  internal var fileManager: FileManager {
-    FileManager.default
+extension Package.Test {
+  internal struct Add: ParsableCommand {
+  }
+}
+
+extension Package.Test {
+  internal struct Remove: ParsableCommand {
   }
 }
