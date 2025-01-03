@@ -31,6 +31,32 @@ import Foundation
 
 public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, CustomStringConvertible
 {
+  internal struct ParsingError: OptionSet, Error {
+    internal let rawValue: Int
+
+    internal init(rawValue: Int) {
+      self.rawValue = rawValue
+    }
+    fileprivate init?(major: Int?, minor: Int?) {
+      var error = ParsingError()
+
+      if major == nil {
+        error.insert(.major)
+      }
+
+      if minor == nil {
+        error.insert(.minor)
+      }
+
+      guard error.rawValue > 0 else {
+        return nil
+      }
+      self = error
+    }
+
+    internal static let major: ParsingError = .init(rawValue: 1 << 0)
+    internal static let minor: ParsingError = .init(rawValue: 1 << 1)
+  }
   public let major: Int
   public let minor: Int
 
@@ -42,11 +68,28 @@ public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, Cust
     self.minor = minor
   }
 
-  public init(stringLiteral value: String) {
+  internal init(throwing value: String) throws(ParsingError) {
     let components = value.components(separatedBy: ".")
-    let major: Int = .init(components[0])!
-    let minor: Int = .init(components[1])!
-    self.init(major: major, minor: minor)
+    let major: Int? = .init(components[0])
+    let minor: Int? = .init(components[1])
+    try self.init(major: major, minor: minor)
+  }
+  internal init(major: Int?, minor: Int?) throws(ParsingError) {
+    if let major = major, let minor = minor {
+      self.init(major: major, minor: minor)
+    } else if let error = ParsingError(major: major, minor: minor) {
+      throw error
+    } else {
+      assertionFailure("Should never reach here")
+      throw .init(rawValue: 0)
+    }
+  }
+  public init(stringLiteral value: String) {
+    do {
+      try self.init(throwing: value)
+    } catch {
+      fatalError("Invalid String Literal: \(value)")
+    }
   }
 }
 

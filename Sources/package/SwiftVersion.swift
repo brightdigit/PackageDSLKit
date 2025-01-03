@@ -32,9 +32,6 @@ import PackageDSLKit
 
 extension SwiftVersion: ExpressibleByArgument {
   public init(argument value: String) {
-    let components = value.components(separatedBy: ".")
-    let major: Int = .init(components[0])!
-    let minor: Int = .init(components[1])!
-    self.init(major: major, minor: minor)
+    self.init(stringLiteral: value)
   }
 }
