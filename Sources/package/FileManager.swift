@@ -28,8 +28,129 @@
 //
 
 import Foundation
+import PackageDSLKit
 
 extension FileManager {
+  internal func swiftVersion(from directoryURL: URL) -> SwiftVersion? {
+    let swiftVersionURL = directoryURL.appending(component: ".swift-version")
+    let packageSwiftURL = directoryURL.appending(component: "Package.swift")
+
+    let swiftVersionText: String?
+    do {
+      swiftVersionText = try String(contentsOf: swiftVersionURL)
+    } catch {
+      // TODO: log error if file exists
+      // TODO: Assertion failure too
+      swiftVersionText = nil
+    }
+
+    let swiftVersion = swiftVersionText.flatMap(SwiftVersion.init(stringLiteral:))
+
+    if let swiftVersion {
+      return swiftVersion
+    }
+
+    return .readFrom(packageSwiftFileURL: packageSwiftURL)
+  }
+  internal func createTargetSourceAt(
+    _ pathURL: URL, productName: String, _ productType: ProductType
+  ) throws {
+    let sourcesDirURL = pathURL.appendingPathComponent("Sources/\(productName)")
+    try self.createDirectory(at: sourcesDirURL, withIntermediateDirectories: true)
+    let sourceCode: String
+    let fileName: String
+    switch productType {
+    case .library:
+      sourceCode = """
+        // The Swift Programming Language
+        // https://docs.swift.org/swift-book
+        """
+      fileName = "\(productName).swift"
+    case .executable:
+      fileName = "main.swift"
+      sourceCode = """
+        // The Swift Programming Language
+        // https://docs.swift.org/swift-book
+
+        print("Hello, world!")
+        """
+    }
+
+    self.createFile(
+      atPath: sourcesDirURL.appendingPathComponent(fileName).path(),
+      contents: Data(sourceCode.utf8)
+    )
+  }
+  internal func createTargetSourceAt(
+    _ pathURL: URL, productName: String, _ packageType: PackageType
+  ) throws {
+    let productType: ProductType?
+
+    switch packageType {
+    case .empty:
+      productType = nil
+    case .library:
+      productType = .library
+    case .executable:
+      productType = .executable
+    }
+    assert(productType != nil, "Unknown package type \(packageType)")
+    guard let productType else { return }
+    try self.createTargetSourceAt(pathURL, productName: productName, productType)
+  }
+
+  fileprivate func createTestTargetAt(_ pathURL: URL, _ productName: String) throws {
+    let testingDirURL = pathURL.appendingPathComponent("Tests/\(productName)Tests")
+    try self.createDirectory(at: testingDirURL, withIntermediateDirectories: true)
+
+    let testFileURL = testingDirURL.appendingPathComponent("\(productName)Tests.swift")
+    let testCode = """
+      import Testing
+      @testable import \(productName)
+
+      @Test func example() async throws {
+          // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+      }
+      """
+    self.createFile(atPath: testFileURL.path(), contents: Data(testCode.utf8))
+  }
+
+  internal func createFileStructure(
+    forPackageType packageType: PackageType,
+    forProductName productName: String,
+    at pathURL: URL
+  ) throws {
+    guard packageType != .empty else {
+      return
+    }
+
+    try self.createTargetSourceAt(pathURL, productName: productName, packageType)
+
+    guard packageType == .library else {
+      return
+    }
+
+    try createTestTargetAt(pathURL, productName)
+  }
+  internal func writePackageSwiftFile(
+    swiftVersion: SwiftVersion,
+    from dslSourcesURL: URL,
+    to pathURL: URL
+  ) throws {
+    let contents = try self.readDirectoryContents(
+      at: dslSourcesURL.path(),
+      fileExtension: "swift"
+    )
+
+    let packageFileURL = pathURL.appendingPathComponent("Package.swift")
+    let strings =
+      [
+        "// swift-tools-version: \(swiftVersion)",
+        SupportCodeBlock.syntaxNode.trimmedDescription,
+      ] + contents
+    let data = strings.joined(separator: "\n").data(using: .utf8)!
+    self.createFile(atPath: packageFileURL.path(), contents: data)
+  }
   internal func readDirectoryContents(at path: String, fileExtension: String = "swift") throws
     -> [String]
   {

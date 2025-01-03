@@ -39,7 +39,7 @@ public typealias DependencyRef = BasicTypeReference
 public typealias TestTargetRef = BasicTypeReference
 public typealias SwiftSettingRef = BasicTypeReference
 
-public protocol TypeReference : Sendable {
+public protocol TypeReference: Sendable {
   var name: String { get }
 }
 

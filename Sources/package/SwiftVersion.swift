@@ -28,6 +28,7 @@
 //
 
 import ArgumentParser
+import Foundation
 
 struct SwiftVersion: Sendable, Equatable, ExpressibleByStringLiteral, CustomStringConvertible,
   ExpressibleByArgument
@@ -55,5 +56,32 @@ struct SwiftVersion: Sendable, Equatable, ExpressibleByStringLiteral, CustomStri
 
   var description: String {
     [major, minor].map(\.description).joined(separator: ".")
+  }
+}
+
+extension SwiftVersion {
+  static func readFrom(packageSwiftFileURL: URL) -> SwiftVersion? {
+    let versionText: String
+    let fileHandle: FileHandle
+    do {
+      fileHandle = try FileHandle(forReadingFrom: packageSwiftFileURL)
+    } catch {
+      // TODO: log error if file exists
+      // TODO: Assertion failure too
+      return nil
+    }
+    guard
+      let firstLine = String(data: fileHandle.readData(ofLength: 64), encoding: .utf8)?.components(
+        separatedBy: .newlines
+      ).first,
+      firstLine.hasPrefix("// swift-tools-version:")
+    else {
+      return nil
+    }
+
+    versionText = firstLine.replacingOccurrences(of: "// swift-tools-version:", with: "")
+      .trimmingCharacters(in: .whitespaces)
+    fileHandle.closeFile()
+    return SwiftVersion(stringLiteral: versionText)
   }
 }

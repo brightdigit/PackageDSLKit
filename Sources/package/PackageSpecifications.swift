@@ -30,7 +30,7 @@
 import PackageDSLKit
 
 extension ProductType {
-  init?(type: Package.Initialize.PackageType) {
+  init?(type: PackageType) {
     switch type {
     case .empty:
       return nil
@@ -42,7 +42,7 @@ extension ProductType {
   }
 }
 extension Product {
-  init?(name: String, type: Package.Initialize.PackageType) {
+  init?(name: String, type: PackageType) {
     guard let productType = ProductType(type: type) else {
       return nil
     }
@@ -51,7 +51,7 @@ extension Product {
 }
 
 extension PackageSpecifications {
-  init(name: String, type: Package.Initialize.PackageType) {
+  init(name: String, type: PackageType) {
     let product = Product(name: name, type: type)
     let products = [product].compactMap { $0 }
     let testTargets = [product.map(TestTarget.init)].compactMap(\.self)

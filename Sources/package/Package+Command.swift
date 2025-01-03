@@ -47,10 +47,6 @@ struct Package: ParsableCommand {
   )
 }
 
-
-
-
-
 extension Package {
   struct Target: ParsableCommand {
   }
@@ -98,13 +94,18 @@ extension Package.Product {
       }
       let writer = PackageWriter()
       try writer.write(newPackage, to: self.settings.dslSourcesURL)
-      
-      
+
       print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
+
+      if let swiftVersion = self.settings.fileManager.swiftVersion(from: self.settings.pathURL) {
+        try self.settings.fileManager.writePackageSwiftFile(
+          swiftVersion: swiftVersion, from: self.settings.dslSourcesURL, to: self.settings.pathURL)
+      }
       // add to products directory
       // add to index
       // create directory in sources
 
+      try! settings.fileManager.createTargetSourceAt(self.settings.pathURL, productName: name, type)
     }
   }
 }
