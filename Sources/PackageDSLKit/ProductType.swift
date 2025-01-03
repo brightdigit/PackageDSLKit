@@ -33,7 +33,7 @@ public enum ProductType: String, Sendable {
 }
 
 extension ProductType {
-  init?(type: PackageType) {
+  public init?(type: PackageType) {
     switch type {
     case .empty:
       return nil

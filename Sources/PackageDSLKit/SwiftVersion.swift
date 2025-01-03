@@ -31,6 +31,12 @@ import Foundation
 
 public struct SwiftVersion: Sendable, Equatable, ExpressibleByStringLiteral, CustomStringConvertible
 {
+  public let major: Int
+  public let minor: Int
+
+  public var description: String {
+    [major, minor].map(\.description).joined(separator: ".")
+  }
   public init(major: Int, minor: Int) {
     self.major = major
     self.minor = minor
@@ -41,13 +47,6 @@ public struct SwiftVersion: Sendable, Equatable, ExpressibleByStringLiteral, Cus
     let major: Int = .init(components[0])!
     let minor: Int = .init(components[1])!
     self.init(major: major, minor: minor)
-  }
-
-  public let major: Int
-  public let minor: Int
-
-  public var description: String {
-    [major, minor].map(\.description).joined(separator: ".")
   }
 }
 

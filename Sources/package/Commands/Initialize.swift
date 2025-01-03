@@ -82,14 +82,14 @@ extension Package {
         atPath: swiftVersionFile.path(),
         contents: Data("\(self.swiftVersion)".utf8)
       )
-      try! settings.fileManager.writePackageSwiftFile(
+      try settings.fileManager.writePackageSwiftFile(
         swiftVersion: swiftVersion,
         from: settings.dslSourcesURL,
         to: settings.pathURL
       )
       print(settings.pathURL)
 
-      try! settings.fileManager.createFileStructure(
+      try settings.fileManager.createFileStructure(
         forPackageType: packageType,
         forProductName: productName,
         at: settings.pathURL

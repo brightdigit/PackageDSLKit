@@ -1,5 +1,5 @@
 //
-//  TestTarget.swift
+//  PackagePropertyDescriptor.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,17 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct TestTarget: TypeSource {
-  public let typeName: String
-  public let dependencies: [DependencyRef]
-  public init(typeName: String, dependencies: [DependencyRef] = []) {
-    self.typeName = typeName
-    self.dependencies = dependencies
-  }
-}
-
-extension TestTarget {
-  public init(for product: Product) {
-    self.init(typeName: product.typeName + "Tests")
-  }
+public protocol PackagePropertyDescriptor {
+  static func get(from specifications: PackageSpecifications) -> [Self]
+  static func update(original: PackageSpecifications, transform: ([Self]) -> [Self])
+    -> PackageSpecifications
 }

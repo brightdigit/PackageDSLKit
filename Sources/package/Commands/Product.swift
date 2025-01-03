@@ -31,21 +31,21 @@ import ArgumentParser
 import PackageDSLKit
 
 extension Package {
-  struct Product: ParsableCommand {
-    static let configuration: CommandConfiguration = .init(
+  internal struct Product: ParsableCommand {
+    internal static let configuration: CommandConfiguration = .init(
       subcommands: [Add.self]
     )
   }
 }
 extension Package.Product {
-  struct Add: ParsableCommand {
-    @Argument var name: String
+  internal struct Add: ParsableCommand {
+    @Argument internal var name: String
 
-    @OptionGroup var settings: Settings
+    @OptionGroup internal var settings: Settings
 
-    @Option var type: ProductType = .library
+    @Option internal var type: ProductType = .library
 
-    func run() throws {
+    internal func run() throws {
       let parser = PackageParser()
       let package = try parser.parse(at: settings.dslSourcesURL, with: .default)
       let newPackage = package.updating(descriptor: Product.self) { products in
@@ -60,13 +60,16 @@ extension Package.Product {
 
       if let swiftVersion = self.settings.fileManager.swiftVersion(from: self.settings.pathURL) {
         try self.settings.fileManager.writePackageSwiftFile(
-          swiftVersion: swiftVersion, from: self.settings.dslSourcesURL, to: self.settings.pathURL)
+          swiftVersion: swiftVersion,
+          from: self.settings.dslSourcesURL,
+          to: self.settings.pathURL
+        )
       }
 
-      try! settings.fileManager.createTargetSourceAt(self.settings.pathURL, productName: name, type)
+      try settings.fileManager.createTargetSourceAt(self.settings.pathURL, productName: name, type)
     }
   }
 
-  struct Remove: ParsableCommand {
+  internal struct Remove: ParsableCommand {
   }
 }

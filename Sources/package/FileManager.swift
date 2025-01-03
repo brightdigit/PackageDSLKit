@@ -96,7 +96,9 @@ extension FileManager {
       productType = .executable
     }
     assert(productType != nil, "Unknown package type \(packageType)")
-    guard let productType else { return }
+    guard let productType else {
+      return
+    }
     try self.createTargetSourceAt(pathURL, productName: productName, productType)
   }
 
@@ -110,7 +112,7 @@ extension FileManager {
       @testable import \(productName)
 
       @Test func example() async throws {
-          // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
       }
       """
     self.createFile(atPath: testFileURL.path(), contents: Data(testCode.utf8))
@@ -149,7 +151,7 @@ extension FileManager {
         "// swift-tools-version: \(swiftVersion)",
         SupportCodeBlock.syntaxNode.trimmedDescription,
       ] + contents
-    let data = strings.joined(separator: "\n").data(using: .utf8)!
+    let data = Data(strings.joined(separator: "\n").utf8)
     self.createFile(atPath: packageFileURL.path(), contents: data)
   }
   internal func readDirectoryContents(at path: String, fileExtension: String = "swift") throws

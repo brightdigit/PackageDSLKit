@@ -41,8 +41,8 @@ import PackageDSLKit
 // package test add "name"
 
 @main
-struct Package: ParsableCommand {
-  static let configuration: CommandConfiguration = .init(
+internal struct Package: ParsableCommand {
+  internal static let configuration: CommandConfiguration = .init(
     subcommands: [Initialize.self, Dump.self, Product.self]
   )
 }

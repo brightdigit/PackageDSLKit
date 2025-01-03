@@ -30,7 +30,7 @@
 import PackageDSLKit
 
 extension PackageSpecifications {
-  init(name: String, type: PackageType) {
+  internal init(name: String, type: PackageType) {
     let product = Product(name: name, type: type)
     let products = [product].compactMap { $0 }
     let testTargets = [product.map(TestTarget.init)].compactMap(\.self)

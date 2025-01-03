@@ -53,3 +53,23 @@ extension Product {
     self.init(typeName: name, productType: productType)
   }
 }
+
+extension Product: PackagePropertyDescriptor {
+  public static func get(from specifications: PackageSpecifications) -> [Product] {
+    specifications.products
+  }
+
+  public static func update(original: PackageSpecifications, transform: ([Product]) -> [Product])
+    -> PackageSpecifications
+  {
+    .init(
+      products: transform(original.products),
+      dependencies: original.dependencies,
+      targets: original.targets,
+      testTargets: original.testTargets,
+      supportedPlatformSets: original.supportedPlatformSets,
+      swiftSettings: original.swiftSettings,
+      modifiers: original.modifiers
+    )
+  }
+}

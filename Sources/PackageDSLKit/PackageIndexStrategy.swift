@@ -163,11 +163,11 @@ internal class PackageIndexStrategy: ParsingStrategy {
   }
 
   internal func visitPost(_ node: LabeledExprSyntax) {
-    if case let .modifier(modifier) = currentState, !node.trimmedDescription.isEmpty {
+    if case .modifier(let modifier) = currentState, !node.trimmedDescription.isEmpty {
       assert(self.modifiers[modifier] != nil)
       self.modifiers[modifier]?.append(node.trimmedDescription)
     }
-    guard case let .labeledExpr(stateExpressionType) = currentState else {
+    guard case .labeledExpr(let stateExpressionType) = currentState else {
       return
     }
     guard let name = node.label?.identifier?.name else {

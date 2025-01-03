@@ -30,17 +30,17 @@
 import ArgumentParser
 
 extension Package {
-  struct Target: ParsableCommand {
+  internal struct Target: ParsableCommand {
   }
 }
 
 extension Package.Target {
-  struct Add: ParsableCommand {
-    @Argument var name: String
+  internal struct Add: ParsableCommand {
+    @Argument internal var name: String
 
-    @OptionGroup var settings: Settings
+    @OptionGroup internal var settings: Settings
   }
 
-  struct Remove: ParsableCommand {
+  internal struct Remove: ParsableCommand {
   }
 }
