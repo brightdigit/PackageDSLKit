@@ -29,9 +29,6 @@
 
 import SwiftSyntax
 
-public protocol IndexCodeWriter: Sendable {
-  func writeIndex(_ index: Index) throws(PackageDSLError) -> String
-}
 public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
   public init() {
   }

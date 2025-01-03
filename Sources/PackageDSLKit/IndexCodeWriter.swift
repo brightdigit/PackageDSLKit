@@ -1,5 +1,5 @@
 //
-//  FileManagerContainer.swift
+//  IndexCodeWriter.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,24 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
-import Foundation
-import PackageDSLKit
+import SwiftSyntax
 
-internal protocol FileManagerContainer {
-  var packageFiles: PackageFilesFactory { get }
-  var fileManagerType: PackageFilesInterfaceType { get }
-}
-
-extension FileManagerContainer {
-  internal var packageFiles: PackageFilesFactory {
-    PackageFiles.default
-  }
-
-  internal var fileManager: PackageFilesInterface {
-    self.packageFiles.interface(for: self.fileManagerType)
-  }
-}
-
-extension PackageFilesInterfaceType: ExpressibleByArgument {
+public protocol IndexCodeWriter: Sendable {
+  func writeIndex(_ index: Index) throws(PackageDSLError) -> String
 }
