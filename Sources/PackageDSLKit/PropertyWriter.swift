@@ -29,7 +29,6 @@
 
 import SwiftSyntax
 
-
 public enum PropertyWriter {
   public static func node(from property: Property) -> VariableDeclSyntax {
     let codeBlocks = property.code.map(CodeBlockItemSyntax.init)

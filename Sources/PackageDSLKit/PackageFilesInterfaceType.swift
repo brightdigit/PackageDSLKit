@@ -1,5 +1,5 @@
 //
-//  Settings.swift
+//  PackageFilesInterfaceType.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,30 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
-import Foundation
-import PackageDSLKit
-
-internal struct Settings: ParsableArguments, FileManagerContainer {
-  @Option(help: .hidden)
-  internal var fileManagerType: PackageFilesInterfaceType = .fileManager
-
-  @Option
-  internal var path: String?
-
-  internal var pathURL: URL {
-    if let path = self.path {
-      return URL(fileURLWithPath: path)
-    } else {
-      return self.fileManager.currentDirectoryURL
-    }
-  }
-
-  internal var rootName: String {
-    self.pathURL.lastPathComponent
-  }
-
-  internal var dslSourcesURL: URL {
-    self.pathURL.appendingPathComponent("Package")
-  }
+public enum PackageFilesInterfaceType: String, CaseIterable, Sendable, Hashable, Codable {
+  case fileManager
 }

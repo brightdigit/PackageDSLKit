@@ -32,14 +32,14 @@ import Foundation
 import PackageDSLKit
 
 internal protocol FileManagerContainer {
-  var fileManagerType: FileManagerType { get }
+  var fileManagerType: PackageFilesInterfaceType { get }
 }
 
 extension FileManagerContainer {
-  internal var fileManager: FileManager {
+  internal var fileManager: PackageFilesInterface {
     FileManager.default
   }
 }
 
-extension FileManagerType: ExpressibleByArgument {
+extension PackageFilesInterfaceType: ExpressibleByArgument {
 }

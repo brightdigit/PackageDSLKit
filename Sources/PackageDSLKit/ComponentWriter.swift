@@ -29,20 +29,15 @@
 
 import SwiftSyntax
 
-public protocol StructureWriter : Sendable {
-  func node(from component: Component) -> StructDeclSyntax
-}
-
 public struct ComponentWriter: Sendable, StructureWriter {
-  
-  private let propertyWriter : @Sendable (Property) -> VariableDeclSyntax
-  
+  private let propertyWriter: @Sendable (Property) -> VariableDeclSyntax
+
   public init(
     propertyWriter: @escaping @Sendable (Property) -> VariableDeclSyntax = PropertyWriter.node
   ) {
     self.propertyWriter = propertyWriter
   }
-  
+
   public func node(from component: Component) -> StructDeclSyntax {
     let memberBlockList = MemberBlockItemListSyntax(
       component.properties.values.map(propertyWriter).map {

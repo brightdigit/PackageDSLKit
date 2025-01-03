@@ -31,64 +31,36 @@ import Foundation
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-public protocol PackageFilesFactory : Sendable {
-  func filesInterface() -> any PackageFilesInterface
-}
-
-public struct PackageFilesAccessor : PackageFilesFactory {
-  public func filesInterface() -> any PackageFilesInterface {
-    return FileManager.default
-  }
-  
-  public init () {}
-}
-
-extension FileManager : PackageFilesInterface {
-  public func createDirectory(at url: URL, withIntermediateDirectories createIntermediates: Bool) throws {
-    try self.createDirectory(at: url, withIntermediateDirectories: createIntermediates, attributes: nil)
-  }
-  
-   
-}
-
-public protocol PackageFilesInterface {
-  func createDirectory(
-      at url: URL,
-      withIntermediateDirectories createIntermediates: Bool
-  ) throws
-}
 public struct PackageWriter: Sendable {
-  public init(
-    fileAccessor: any PackageFilesFactory = PackageFilesAccessor(),
-    indexWriter: any IndexCodeWriter = PackageIndexWriter(),
-    componentWriter: any StructureWriter = ComponentWriter()
-  ) {
-    self.fileAccessor = fileAccessor
-    self.indexWriter = indexWriter
-    self.componentWriter = componentWriter
-  }
-  
-
   private static let compoenentTypes: [any ComponentBuildable.Type] = [
     Product.self,
     Dependency.self,
     TestTarget.self,
     SupportedPlatformSet.self,
   ]
-  
-  @available(*, deprecated, message: "Use fileAccessor.filesInterface")
-  private func fileManager () -> PackageFilesInterface {
-    return self.fileAccessor.filesInterface()
-  }
+
+  private let fileInterfaceType: PackageFilesInterfaceType
   private let fileAccessor: PackageFilesFactory
-  //private let fileManager: @Sendable () -> FileManager = { .default }
   private let indexWriter: IndexCodeWriter
   private let componentWriter: StructureWriter
+
+  public init(
+    fileAccessor: any PackageFilesFactory = PackageFiles.default,
+    fileInterfaceType: PackageFilesInterfaceType = .fileManager,
+    indexWriter: any IndexCodeWriter = PackageIndexWriter(),
+    componentWriter: any StructureWriter = ComponentWriter()
+  ) {
+    self.fileAccessor = fileAccessor
+    self.fileInterfaceType = fileInterfaceType
+    self.indexWriter = indexWriter
+    self.componentWriter = componentWriter
+  }
 
   public func write(
     _ specification: PackageSpecifications,
     to url: URL
   ) throws(PackageDSLError) {
+    let filesInterface = self.fileAccessor.interface(for: self.fileInterfaceType)
     let configuration = PackageDirectoryConfiguration(specifications: specification)
 
     let indexFileURL = url.appending(component: "Index.swift")
@@ -115,7 +87,7 @@ public struct PackageWriter: Sendable {
 
       if directoryCreated[directoryURL] == nil {
         do {
-          try fileManager().createDirectory(at: directoryURL, withIntermediateDirectories: true)
+          try filesInterface.createDirectory(at: directoryURL, withIntermediateDirectories: true)
         } catch {
           throw .other(error)
         }

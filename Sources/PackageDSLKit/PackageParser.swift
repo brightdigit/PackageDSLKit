@@ -48,7 +48,7 @@ public struct PackageParser: Sendable, Hashable, Codable {
       }
       let sourceCode: String
       do {
-        sourceCode = try String(contentsOf: directoryURL.appending(path: filePath))
+        sourceCode = try String(contentsOf: directoryURL.appending(path: filePath), encoding: .utf8)
       } catch {
         throw .other(error)
       }

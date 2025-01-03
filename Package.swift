@@ -47,7 +47,8 @@ let package = Package(
       ]
     ),
     .testTarget(
-      name: "PackageDSLKitTests"
+      name: "PackageDSLKitTests",
+      dependencies: ["PackageDSLKit"]
     )
   ]
 )

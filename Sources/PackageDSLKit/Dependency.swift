@@ -40,7 +40,22 @@ public struct Dependency: TypeSource {
     public init(rawValue: Int) {
       self.rawValue = rawValue
     }
-    public init?(strings: [String]) {
+    internal struct InvalidValueError: Error {
+      internal init?(invalidCount: Int) {
+        guard invalidCount != 0 else {
+          return nil
+        }
+        assert(invalidCount > 0)
+        self.invalidCount = invalidCount
+      }
+
+      internal init?(valuesCount: Int, indiciesCount: Int) {
+        self.init(invalidCount: indiciesCount - valuesCount)
+      }
+
+      internal let invalidCount: Int
+    }
+    internal init?(stringsThrows strings: [String]) throws(InvalidValueError) {
       let indicies = strings.map {
         Self.strings.firstIndex(of: $0)
       }
@@ -48,9 +63,21 @@ public struct Dependency: TypeSource {
       if rawValues.isEmpty {
         return nil
       }
-      assert(rawValues.count == indicies.count)
+      if let error = InvalidValueError(valuesCount: rawValues.count, indiciesCount: indicies.count)
+      {
+        assert(error.invalidCount > 0)
+        throw error
+      }
       let rawValue = rawValues.reduce(0) { $0 + $1 }
       self.init(rawValue: rawValue)
+    }
+    public init?(strings: [String]) {
+      do {
+        try self.init(stringsThrows: strings)
+      } catch {
+        assertionFailure("Invalid Values Passed: \(error.invalidCount)")
+        return nil
+      }
     }
 
     internal func asInheritedTypes() -> [String] {
