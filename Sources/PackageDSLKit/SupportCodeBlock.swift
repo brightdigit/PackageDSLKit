@@ -39,7 +39,7 @@ public enum SupportCodeBlock {
   private static func readSyntaxNode() -> any SyntaxProtocol {
     // swiftlint:disable force_try force_unwrapping
     let url = Bundle.module.url(forResource: "PackageDSL.swift", withExtension: "txt")!
-    let text = try! String(contentsOf: url)
+    let text = try! String(contentsOf: url, encoding: .utf8)
     // swiftlint:enable force_try force_unwrapping
     return SourceFileSyntax(stringLiteral: text)
   }

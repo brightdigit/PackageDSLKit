@@ -64,8 +64,7 @@ extension Package {
       if shouldCreateDirectory {
         try self.settings.fileManager.createDirectory(
           at: self.settings.dslSourcesURL,
-          withIntermediateDirectories: true,
-          attributes: nil
+          withIntermediateDirectories: true
         )
       }
 
@@ -79,8 +78,8 @@ extension Package {
 
       let swiftVersionFile = settings.pathURL.appending(component: ".swift-version")
       settings.fileManager.createFile(
-        atPath: swiftVersionFile.path(),
-        contents: Data("\(self.swiftVersion)".utf8)
+        at: swiftVersionFile,
+        text: self.swiftVersion.description
       )
       try settings.fileManager.writePackageSwiftFile(
         swiftVersion: swiftVersion,

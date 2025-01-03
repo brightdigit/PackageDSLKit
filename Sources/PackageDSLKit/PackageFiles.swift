@@ -1,5 +1,5 @@
 //
-//  FileManagerType.swift
+//  PackageFiles.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,6 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum FileManagerType: String, CaseIterable, Sendable, Hashable, Codable {
-  case fileManager
+import Foundation
+
+public struct PackageFiles: PackageFilesFactory {
+  public static let `default`: PackageFilesFactory = PackageFiles()
+
+  private static let defaultTypes:
+    [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface] = [
+      .fileManager: { FileManager.default }
+    ]
+
+  private let types: [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface]
+
+  internal init(
+    types: [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface]? = nil
+  ) {
+    self.types = types ?? Self.defaultTypes
+  }
+
+  public func interface(for type: PackageFilesInterfaceType) -> any PackageFilesInterface {
+    self.types[type]!()
+  }
 }

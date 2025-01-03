@@ -38,16 +38,29 @@ public struct PackageWriter: Sendable {
     TestTarget.self,
     SupportedPlatformSet.self,
   ]
-  private let fileManager: @Sendable () -> FileManager = { .default }
-  private let indexWriter: PackageIndexWriter = .init()
-  private let componentWriter: ComponentWriter = .init()
 
-  public init() {
+  private let fileInterfaceType: PackageFilesInterfaceType
+  private let fileAccessor: PackageFilesFactory
+  private let indexWriter: IndexCodeWriter
+  private let componentWriter: StructureWriter
+
+  public init(
+    fileAccessor: any PackageFilesFactory = PackageFiles.default,
+    fileInterfaceType: PackageFilesInterfaceType = .fileManager,
+    indexWriter: any IndexCodeWriter = PackageIndexWriter(),
+    componentWriter: any StructureWriter = ComponentWriter()
+  ) {
+    self.fileAccessor = fileAccessor
+    self.fileInterfaceType = fileInterfaceType
+    self.indexWriter = indexWriter
+    self.componentWriter = componentWriter
   }
+
   public func write(
     _ specification: PackageSpecifications,
     to url: URL
   ) throws(PackageDSLError) {
+    let filesInterface = self.fileAccessor.interface(for: self.fileInterfaceType)
     let configuration = PackageDirectoryConfiguration(specifications: specification)
 
     let indexFileURL = url.appending(component: "Index.swift")
@@ -74,7 +87,7 @@ public struct PackageWriter: Sendable {
 
       if directoryCreated[directoryURL] == nil {
         do {
-          try fileManager().createDirectory(at: directoryURL, withIntermediateDirectories: true)
+          try filesInterface.createDirectory(at: directoryURL, withIntermediateDirectories: true)
         } catch {
           throw .other(error)
         }

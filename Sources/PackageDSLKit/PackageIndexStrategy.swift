@@ -37,8 +37,8 @@ import SwiftSyntax
 
 internal class PackageIndexStrategy: ParsingStrategy {
   internal struct Child: Sendable, Hashable, Codable {
-    let kind: ExpressionKind
-    let name: String
+    internal let kind: ExpressionKind
+    internal let name: String
   }
   internal enum ExpressionKind: String, Sendable, Hashable, Codable {
     case entries

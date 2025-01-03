@@ -1,5 +1,5 @@
 //
-//  Settings.swift
+//  PackageFilesInterface.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,30 +27,33 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
 import Foundation
-import PackageDSLKit
 
-internal struct Settings: ParsableArguments, FileManagerContainer {
-  @Option(help: .hidden)
-  internal var fileManagerType: PackageFilesInterfaceType = .fileManager
+public protocol PackageFilesInterface {
+  var currentDirectoryURL: URL { get }
 
-  @Option
-  internal var path: String?
+  func createDirectory(
+    at url: URL,
+    withIntermediateDirectories createIntermediates: Bool
+  ) throws
 
-  internal var pathURL: URL {
-    if let path = self.path {
-      return URL(fileURLWithPath: path)
-    } else {
-      return self.fileManager.currentDirectoryURL
-    }
-  }
+  func createFile(at url: URL, text: String)
 
-  internal var rootName: String {
-    self.pathURL.lastPathComponent
-  }
+  func swiftVersion(from directoryURL: URL) -> SwiftVersion?
 
-  internal var dslSourcesURL: URL {
-    self.pathURL.appendingPathComponent("Package")
-  }
+  func writePackageSwiftFile(
+    swiftVersion: SwiftVersion,
+    from dslSourcesURL: URL,
+    to pathURL: URL
+  ) throws
+
+  func createFileStructure(
+    forPackageType packageType: PackageType,
+    forProductName productName: String,
+    at pathURL: URL
+  ) throws
+
+  func createTargetSourceAt(
+    _ pathURL: URL, productName: String, _ productType: ProductType
+  ) throws
 }
