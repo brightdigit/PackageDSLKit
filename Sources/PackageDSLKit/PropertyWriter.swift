@@ -29,8 +29,9 @@
 
 import SwiftSyntax
 
-internal struct PropertyWriter: Sendable, Hashable, Codable {
-  internal func node(from property: Property) -> VariableDeclSyntax {
+
+public enum PropertyWriter {
+  public static func node(from property: Property) -> VariableDeclSyntax {
     let codeBlocks = property.code.map(CodeBlockItemSyntax.init)
     let codeBlockList = CodeBlockItemListSyntax(codeBlocks)
     // swiftlint:disable:next force_try

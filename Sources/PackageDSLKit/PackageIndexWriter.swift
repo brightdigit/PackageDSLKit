@@ -29,7 +29,13 @@
 
 import SwiftSyntax
 
-public struct PackageIndexWriter: Sendable, Hashable, Codable {
+public protocol IndexCodeWriter : Sendable {
+  func writeIndex(_ index: Index) throws (PackageDSLError) -> String
+}
+public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
+  public init () {
+    
+  }
   private func labeledExpression(for name: String, items: [String]) -> LabeledExprSyntax? {
     if items.isEmpty {
       return nil
@@ -62,7 +68,7 @@ public struct PackageIndexWriter: Sendable, Hashable, Codable {
     )
   }
 
-  public func writeIndex(_ index: Index) throws -> String {
+  public func writeIndex(_ index: Index) throws (PackageDSLError) -> String {
     let declSyntax: DeclSyntax = .init(ImportDeclSyntax.module("PackageDescription"))
 
     let labeledExpressions = [
