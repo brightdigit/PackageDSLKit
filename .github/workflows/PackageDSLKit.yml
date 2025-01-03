@@ -3,7 +3,7 @@ on:
   push:
     branches-ignore:
       - '*WIP'
-  pull-request:
+  pull_request:
 env:
   PACKAGE_NAME: PackageDSLKit      
 jobs:
