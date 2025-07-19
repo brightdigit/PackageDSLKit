@@ -1,9 +1,9 @@
 //
-//  PackageDSLKit.swift
+//  Settings.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
-//  Copyright © 2024 BrightDigit.
+//  Copyright © 2025 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
@@ -27,5 +27,30 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum PackageDSLKit {
+import ArgumentParser
+import Foundation
+import PackageDSLKit
+
+internal struct Settings: ParsableArguments, FileManagerContainer {
+  @Option(help: .hidden)
+  internal var fileManagerType: PackageFilesInterfaceType = .fileManager
+
+  @Option
+  internal var path: String?
+
+  internal var pathURL: URL {
+    if let path = self.path {
+      return URL(fileURLWithPath: path)
+    } else {
+      return self.fileManager.currentDirectoryURL
+    }
+  }
+
+  internal var rootName: String {
+    self.pathURL.lastPathComponent
+  }
+
+  internal var dslSourcesURL: URL {
+    self.pathURL.appendingPathComponent("Package")
+  }
 }

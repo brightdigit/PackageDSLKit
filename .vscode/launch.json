@@ -3,7 +3,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "args": [],
+            "args": ["init", "--path", "Samples/Appz"],
+            "cwd": "${workspaceFolder:PackageDSLKit}",
+            "name": "Debug package",
+            "program": "${workspaceFolder:PackageDSLKit}/.build/debug/package",
+            "preLaunchTask": "swift: Build Debug package"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": ["init", "--path", "Samples/Appz"],
             "cwd": "${workspaceFolder:PackageDSLKit}",
             "name": "Debug package",
             "program": "${workspaceFolder:PackageDSLKit}/.build/debug/package",
