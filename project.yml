@@ -4,6 +4,8 @@ settings:
 packages:
   PackageDSLKit:
     path: .
+  SyntaxKit:
+    path: Packages/SyntaxKit
 aggregateTargets:
   Lint:
     buildScripts:
