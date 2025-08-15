@@ -30,6 +30,7 @@
 import SwiftSyntax
 
 extension ImportDeclSyntax {
+  @available(*, deprecated, message: "Use SyntaxKit Import instead")
   internal static func module(_ moduleName: String) -> ImportDeclSyntax {
     ImportDeclSyntax(
       path: ImportPathComponentListSyntax([

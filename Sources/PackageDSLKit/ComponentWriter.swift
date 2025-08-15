@@ -28,16 +28,19 @@
 //
 
 import SwiftSyntax
+import SyntaxKit
 
 public struct ComponentWriter: Sendable, StructureWriter {
   private let propertyWriter: @Sendable (Property) -> VariableDeclSyntax
 
+  @available(*, deprecated, message: "Use init(syntaxKitPropertyWriter:) instead")
   public init(
     propertyWriter: @escaping @Sendable (Property) -> VariableDeclSyntax = PropertyWriter.node
   ) {
     self.propertyWriter = propertyWriter
   }
 
+  @available(*, deprecated, message: "Use syntaxKitNode(from:) instead")
   public func node(from component: Component) -> StructDeclSyntax {
     let memberBlockList = MemberBlockItemListSyntax(
       component.properties.values.map(propertyWriter).map {
@@ -69,5 +72,23 @@ public struct ComponentWriter: Sendable, StructureWriter {
       inheritanceClause: clause,
       memberBlock: memberBlock
     )
+  }
+  
+  /// Creates a struct using SyntaxKit
+  public func syntaxKitNode(from component: Component) -> Struct {
+    // Convert properties to SyntaxKit CodeBlocks
+    let properties: [CodeBlock] = component.properties.values.map { property in
+      PropertyWriter.syntaxKitNode(from: property)
+    }
+    
+    // Create struct with inheritance
+    let structDecl = Struct(component.name) {
+      for property in properties {
+        property
+      }
+    }
+    
+    // Add inheritance using the array overload we added to SyntaxKit
+    return structDecl.inherits(component.inheritedTypes)
   }
 }

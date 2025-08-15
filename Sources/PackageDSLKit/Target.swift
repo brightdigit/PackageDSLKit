@@ -30,4 +30,9 @@
 public struct Target: TypeSource {
   public let typeName: String
   public let dependencies: [DependencyRef]
+  
+  public init(typeName: String, dependencies: [DependencyRef] = []) {
+    self.typeName = typeName
+    self.dependencies = dependencies
+  }
 }

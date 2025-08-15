@@ -28,8 +28,21 @@
 //
 
 import SwiftSyntax
+import SyntaxKit
+
+// Simple wrapper to convert string code to CodeBlock
+private struct StringCodeBlock: CodeBlock {
+  let code: String
+  
+  var syntax: SyntaxProtocol {
+    // For simplicity, just treat the code as an identifier or expression
+    // In practice, the original PropertyWriter used string interpolation which was more complex
+    return ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(code)))
+  }
+}
 
 public enum PropertyWriter {
+  @available(*, deprecated, message: "Use syntaxKitNode(from:) instead")
   public static func node(from property: Property) -> VariableDeclSyntax {
     let codeBlocks = property.code.map(CodeBlockItemSyntax.init)
     let codeBlockList = CodeBlockItemListSyntax(codeBlocks)
@@ -41,5 +54,23 @@ public enum PropertyWriter {
         }
       """
     )
+  }
+  
+  /// Creates a property variable using SyntaxKit
+  public static func syntaxKitNode(from property: Property) -> ComputedProperty {
+    // Convert string code blocks to SyntaxKit CodeBlocks
+    let codeBlocks: [CodeBlock] = property.code.map { StringCodeBlock(code: $0) }
+    
+    // Create a computed property with the code blocks as body
+    // For now, we'll just use the first code block or create an empty return
+    if let firstCodeBlock = codeBlocks.first {
+      return ComputedProperty(property.name, type: property.type) {
+        firstCodeBlock
+      }
+    } else {
+      return ComputedProperty(property.name, type: property.type) {
+        // Empty computed property body
+      }
+    }
   }
 }

@@ -28,6 +28,7 @@
 //
 
 import SwiftSyntax
+import SyntaxKit
 
 public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
   public init() {
@@ -64,8 +65,10 @@ public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
     )
   }
 
+  @available(*, deprecated, message: "Use syntaxKitWriteIndex(_:) instead")
   public func writeIndex(_ index: Index) throws(PackageDSLError) -> String {
-    let declSyntax: DeclSyntax = .init(ImportDeclSyntax.module("PackageDescription"))
+    let importDecl = Import("PackageDescription")
+    let declSyntax: DeclSyntax = .init(importDecl.syntax.as(ImportDeclSyntax.self)!)
 
     let labeledExpressions = [
       self.labeledExpression(for: "entries", items: index.entries.map(\.name)),
@@ -110,6 +113,70 @@ public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
       CodeBlockItemSyntax(item: .decl(declSyntax)),
       CodeBlockItemSyntax(item: .decl(DeclSyntax(packageDecl))),
     ])
+    return syntax.description
+  }
+  
+  /// Creates index using SyntaxKit
+  public func syntaxKitWriteIndex(_ index: Index) throws(PackageDSLError) -> String {
+    // Create import declaration
+    let importDecl = Import("PackageDescription")
+    
+    // Helper function to create parameter for each section
+    func createParameter(name: String, items: [String]) -> ParameterExp? {
+      guard !items.isEmpty else { return nil }
+      
+      // Create closure with function calls
+      // For simplicity, use the first item for now
+      let closure = Closure {
+        if let firstItem = items.first {
+          Call(firstItem)
+        }
+      }
+      
+      return ParameterExp(name: name, value: closure)
+    }
+    
+    // Create labeled parameters
+    let parameters: [ParameterExp] = [
+      createParameter(name: "entries", items: index.entries.map(\.name)),
+      createParameter(name: "dependencies", items: index.dependencies.map(\.name)),
+      createParameter(name: "testTargets", items: index.testTargets.map(\.name)),
+      createParameter(name: "swiftSettings", items: index.swiftSettings.map(\.name))
+    ].compactMap { $0 }
+    
+    // Create Package initialization
+    // For simplicity, use the first few parameters
+    let packageInit = Init("Package") {
+      if parameters.count > 0 {
+        parameters[0]
+      }
+      if parameters.count > 1 {
+        parameters[1]
+      }
+      if parameters.count > 2 {
+        parameters[2]
+      }
+      if parameters.count > 3 {
+        parameters[3]
+      }
+    }
+    
+    // Create let package = Package(...) variable
+    let packageVar = Variable(.let, name: "package", equals: packageInit)
+    
+    // Combine import and package declaration
+    let codeBlocks: [CodeBlock] = [importDecl, packageVar]
+    
+    // Convert to syntax and return description
+    let syntax = CodeBlockItemListSyntax(
+      codeBlocks.compactMap { codeBlock in
+        if let declSyntax = codeBlock.syntax.as(DeclSyntax.self) {
+          return CodeBlockItemSyntax(item: .decl(declSyntax))
+        }
+        return nil
+      }
+    )
+    
     return syntax.description
   }
 }

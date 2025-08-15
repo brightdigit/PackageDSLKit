@@ -31,13 +31,16 @@ import ArgumentParser
 import PackageDSLKit
 
 extension Package {
+  @available(iOS 16.0, *)
   internal struct Product: ParsableCommand {
     internal static let configuration: CommandConfiguration = .init(
       subcommands: [Add.self]
     )
   }
 }
+@available(iOS 16.0, *)
 extension Package.Product {
+  @available(iOS 16.0, *)
   internal struct Add: ParsableCommand {
     @Argument internal var name: String
 
