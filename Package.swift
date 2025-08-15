@@ -11,12 +11,13 @@ let package = Package(
     .macOS(.v13)
   ],
   products: [
-    .library(name: "PackageDSLKit", targets: ["PackageDSLKit"])
+    .library(name: "PackageDSLKit", targets: ["PackageDSLKit"]),
+    .library(name: "SwiftPackageManagerKit", targets: ["SwiftPackageManagerKit"])
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.4.0"),
     .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "601.0.0-prerelease-2024-11-18"),
-    .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.4.0"),
+    .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.4.0"),
     .package(url: "https://github.com/apple/swift-log.git", from: "1.6.0"),
     .package(path: "Packages/SyntaxKit")
   ],
@@ -40,6 +41,9 @@ let package = Package(
       resources: [
         .copy("Resources/PackageDSL.swift.txt")
       ]
+    ),
+    .target(
+      name: "SwiftPackageManagerKit"
     ),
     .executableTarget(
       name: "package",
