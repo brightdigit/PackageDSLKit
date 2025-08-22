@@ -649,6 +649,43 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
   }
 }
 
+// MARK: - Code Generation
+
+extension PackageDSLManager {
+  
+  /// Generate DSL component files in the package directory
+  /// - Throws: PackageError on generation failures
+  /// - Returns: Self for method chaining
+  @discardableResult
+  public func generatePackageSwift() throws -> PackageDSLManager {
+    do {
+      // Use PackageWriter to generate DSL component files
+      let packageWriter = PackageWriter()
+      try packageWriter.write(specifications, to: packageURL)
+      return self
+      
+    } catch let error as PackageDSLError {
+      throw PackageError.packageGenerationFailed("DSL generation failed: \(error.localizedDescription)")
+    } catch {
+      throw PackageError.packageGenerationFailed("Package generation failed: \(error.localizedDescription)")
+    }
+  }
+  
+  /// Check if the package directory has existing DSL component files
+  /// - Returns: True if DSL components exist, false otherwise
+  public func hasDSLComponents() -> Bool {
+    let indexFile = packageURL.appendingPathComponent("Index.swift")
+    return FileManager.default.fileExists(atPath: indexFile.path)
+  }
+  
+  /// Check if the package directory has a traditional Package.swift file
+  /// - Returns: True if Package.swift exists, false otherwise
+  public func hasTraditionalPackageSwift() -> Bool {
+    let packageSwiftFile = packageURL.appendingPathComponent("Package.swift")
+    return FileManager.default.fileExists(atPath: packageSwiftFile.path)
+  }
+}
+
 // MARK: - Fluent API Extensions
 
 extension PackageDSLManager {
