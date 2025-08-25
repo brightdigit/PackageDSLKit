@@ -41,7 +41,7 @@ internal struct ComponentWriterTests {
     )
     await confirmation(expectedCount: propertyValues.count) { confirmation in
       let indicies = Indicies()
-      let writer = ComponentWriter { actualProperty in
+      let writer = ComponentWriter(syntaxKitPropertyWriter: { actualProperty in
         // swiftlint:disable:next force_try
         let actualIndex = try! #require(propertyValues.firstIndex(of: actualProperty))
         #expect(!indicies.contains(actualIndex))
@@ -49,14 +49,14 @@ internal struct ComponentWriterTests {
         defer {
           confirmation()
         }
-        return PropertyWriter.node(from: actualProperty)
-      }
+        return PropertyWriter.syntaxKitNode(from: actualProperty)
+      })
       let component = Component(
         name: .randomIdentifier(),
         inheritedTypes: [.randomIdentifier(), .randomIdentifier()],
         properties: propertyDictionary
       )
-      _ = writer.node(from: component)
+      _ = writer.syntaxKitNode(from: component)
     }
   }
 }

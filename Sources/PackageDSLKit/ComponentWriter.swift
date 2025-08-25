@@ -82,11 +82,7 @@ public struct ComponentWriter: Sendable, StructureWriter {
     }
     
     // Create struct with inheritance
-    let structDecl = Struct(component.name) {
-      for property in properties {
-        property
-      }
-    }
+    let structDecl = Struct(component.name, members: properties)
     
     // Add inheritance using the array overload we added to SyntaxKit
     return structDecl.inherits(component.inheritedTypes)

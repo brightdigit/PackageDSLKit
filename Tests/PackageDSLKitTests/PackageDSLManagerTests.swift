@@ -7,11 +7,11 @@ final class PackageDSLManagerTests: XCTestCase {
     var tempDirectory: URL!
     var packageManager: PackageDSLManager!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         tempDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("PackageDSLManagerTests-\(UUID().uuidString)")
-        packageManager = PackageDSLManager(packageURL: tempDirectory, packageName: "TestPackage")
+        packageManager = await PackageDSLManager(packageURL: tempDirectory, packageName: "TestPackage")
     }
     
     override func tearDown() {
@@ -21,32 +21,32 @@ final class PackageDSLManagerTests: XCTestCase {
         super.tearDown()
     }
     
-    func testGeneratePackageSwiftCreatesFiles() throws {
+    func testGeneratePackageSwiftCreatesFiles() async throws {
         // Create package directory
         try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
         
         // Configure a simple package
-        try packageManager
+        try await packageManager
             .createPackage(type: .library)
             .addDependency(url: "https://github.com/apple/swift-log.git", requirement: .from("1.0.0"))
         
         // Generate DSL files
-        try packageManager.generatePackageSwift()
+        try await packageManager.generatePackageSwift()
         
         // Verify Index.swift was created
         let indexFile = tempDirectory.appendingPathComponent("Index.swift")
         XCTAssertTrue(FileManager.default.fileExists(atPath: indexFile.path))
         
         // Verify the manager correctly detects DSL components
-        XCTAssertTrue(packageManager.hasDSLComponents())
+        XCTAssertTrue(await packageManager.hasDSLComponents())
     }
     
-    func testHasDSLComponentsReturnsFalseWhenNoFiles() {
+    func testHasDSLComponentsReturnsFalseWhenNoFiles() async {
         // For a directory without DSL files
-        XCTAssertFalse(packageManager.hasDSLComponents())
+        XCTAssertFalse(await packageManager.hasDSLComponents())
     }
     
-    func testHasTraditionalPackageSwiftDetectsFile() throws {
+    func testHasTraditionalPackageSwiftDetectsFile() async throws {
         // Create package directory
         try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
         
@@ -55,6 +55,6 @@ final class PackageDSLManagerTests: XCTestCase {
         try "// swift-tools-version: 5.9\nimport PackageDescription\n\nlet package = Package(name: \"TestPackage\")".write(to: packageSwiftFile, atomically: true, encoding: .utf8)
         
         // Verify detection
-        XCTAssertTrue(packageManager.hasTraditionalPackageSwift())
+        XCTAssertTrue(await packageManager.hasTraditionalPackageSwift())
     }
 }

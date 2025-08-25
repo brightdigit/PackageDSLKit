@@ -127,11 +127,8 @@ public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
       
       // Create closure with function calls
       // For simplicity, use the first item for now
-      let closure = Closure {
-        if let firstItem = items.first {
-          Call(firstItem)
-        }
-      }
+      
+      let closure = Closure(body: items.first.map { [Call($0)] } ?? [])
       
       return ParameterExp(name: name, value: closure)
     }
@@ -146,20 +143,7 @@ public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
     
     // Create Package initialization
     // For simplicity, use the first few parameters
-    let packageInit = Init("Package") {
-      if parameters.count > 0 {
-        parameters[0]
-      }
-      if parameters.count > 1 {
-        parameters[1]
-      }
-      if parameters.count > 2 {
-        parameters[2]
-      }
-      if parameters.count > 3 {
-        parameters[3]
-      }
-    }
+    let packageInit = Init("Package", params: Array(parameters.prefix(4)))
     
     // Create let package = Package(...) variable
     let packageVar = Variable(.let, name: "package", equals: packageInit)
