@@ -27,6 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import SwiftPackageManagerKit
+
 public struct PackageDirectoryConfiguration: Sendable, Hashable, Codable {
   public let index: Index
   public let products: [Product]
@@ -52,40 +54,27 @@ public struct PackageDirectoryConfiguration: Sendable, Hashable, Codable {
 }
 
 extension PackageDirectoryConfiguration {
-  internal init(from results: [ParsingResult]) throws(PackageDSLError) {
-    var index: Index?
-    var products: [Product] = []
-    var dependencies: [Dependency] = []
-    var targets: [Target] = []
-    var testTargets: [TestTarget] = []
-    var supportedPlatformSets: [SupportedPlatformSet] = []
-    for result in results {
-      switch result {
-      case .packageIndex(let newItems, let modifiers):
-        if index == nil {
-          index = .init(items: newItems, modifiers: modifiers)
-        } else if !newItems.isEmpty {
-          throw .custom("Multiple PackageIndexes", nil)
-        }
-      case .structure(let component):
-        if let product = Product(component: component) {
-          products.append(product)
-        } else if let dependency = Dependency(component: component) {
-          dependencies.append(dependency)
-        } else if let target = Target(component: component) {
-          targets.append(target)
-        } else if let testTarget = TestTarget(component: component) {
-          testTargets.append(testTarget)
-        } else if let supportedPlatforms = SupportedPlatformSet(component: component) {
-          supportedPlatformSets.append(supportedPlatforms)
-        } else {
-          assertionFailure()
-        }
-      }
-    }
-    guard let index else {
-      throw .custom("Missing Index", nil)
-    }
+  // New SPM-based initializer
+  internal init(from packageInfo: SPMPackageInfo) throws(PackageDSLError) {
+    // Convert SPM data to PackageDSLKit data structures
+    let products = packageInfo.products.compactMap { Product(spmProduct: $0) }
+    let dependencies = packageInfo.dependencies.compactMap { Dependency(spmDependency: $0) }
+    let targets = packageInfo.targets.compactMap { Target(spmTarget: $0) }
+    let testTargets = packageInfo.targets.compactMap { TestTarget(spmTarget: $0) }
+    let supportedPlatformSets = packageInfo.platforms.isEmpty ? [] : [SupportedPlatformSet(spmPlatforms: packageInfo.platforms)].compactMap { $0 }
+    
+    // Create index based on SPM data
+    let entries = products.map(EntryRef.init)
+    let dependencyRefs = dependencies.map(DependencyRef.init)
+    let testTargetRefs = testTargets.map(TestTargetRef.init)
+    let index = Index(
+      entries: entries,
+      dependencies: dependencyRefs,
+      testTargets: testTargetRefs,
+      swiftSettings: [], // TODO: Extract from SPM if available
+      modifiers: [] // TODO: Extract from SPM if available
+    )
+    
     self.init(
       index: index,
       products: products,
@@ -95,6 +84,8 @@ extension PackageDirectoryConfiguration {
       supportedPlatformSets: supportedPlatformSets
     )
   }
+  
+  // Legacy SwiftSyntax-based initializer removed - use SPM-based parsing instead
 
   internal func createComponents() -> [Component] {
     var components: [Component] = []

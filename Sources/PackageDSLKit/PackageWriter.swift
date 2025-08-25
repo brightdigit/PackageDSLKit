@@ -33,6 +33,7 @@ public struct PackageWriter: Sendable {
   private static let compoenentTypes: [any ComponentBuildable.Type] = [
     Product.self,
     Dependency.self,
+    Target.self,
     TestTarget.self,
     SupportedPlatformSet.self,
   ]

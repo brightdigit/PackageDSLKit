@@ -27,93 +27,14 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftSyntax
 import SyntaxKit
 
 public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
   public init() {
   }
-  private func labeledExpression(for name: String, items: [String]) -> LabeledExprSyntax? {
-    if items.isEmpty {
-      return nil
-    }
-    return LabeledExprSyntax(
-      leadingTrivia: .newline,
-      label: .identifier(name),
-      colon: .colonToken(trailingTrivia: .space),
-      expression: ClosureExprSyntax(
-        statements: CodeBlockItemListSyntax(
-          items.map { name in
-            CodeBlockItemSyntax(
-              item: .expr(
-                ExprSyntax(
-                  FunctionCallExprSyntax(
-                    leadingTrivia: .newline,
-                    calledExpression: DeclReferenceExprSyntax(baseName: .identifier(name)),
-                    leftParen: .leftParenToken(),
-                    arguments: LabeledExprListSyntax([]),
-                    rightParen: .rightParenToken(),
-                    trailingTrivia: .init(.newline)
-                  )
-                )
-              )
-            )
-          }
-        )
-      ),
-      trailingTrivia: .newline
-    )
-  }
-
-  @available(*, deprecated, message: "Use syntaxKitWriteIndex(_:) instead")
+  // IndexCodeWriter protocol implementation - delegates to SyntaxKit version
   public func writeIndex(_ index: Index) throws(PackageDSLError) -> String {
-    let importDecl = Import("PackageDescription")
-    let declSyntax: DeclSyntax = .init(importDecl.syntax.as(ImportDeclSyntax.self)!)
-
-    let labeledExpressions = [
-      self.labeledExpression(for: "entries", items: index.entries.map(\.name)),
-      self.labeledExpression(for: "dependencies", items: index.dependencies.map(\.name)),
-      self.labeledExpression(for: "testTargets", items: index.testTargets.map(\.name)),
-      self.labeledExpression(for: "swiftSettings", items: index.swiftSettings.map(\.name)),
-    ]
-    .compactMap { $0 }
-    .reversed()
-    .enumerated()
-    .map { index, expression in
-      if index == 0 {
-        return expression
-      }
-      return expression.with(\.trailingComma, .commaToken())
-    }
-    .reversed()
-    let packageDecl = VariableDeclSyntax(
-      leadingTrivia: .newline,
-      bindingSpecifier: .keyword(.let),
-      bindings: PatternBindingListSyntax([
-        PatternBindingSyntax(
-          pattern: IdentifierPatternSyntax(
-            leadingTrivia: .space,
-            identifier: .identifier("package"),
-            trailingTrivia: .space
-          ),
-          initializer: InitializerClauseSyntax(
-            value:
-              FunctionCallExprSyntax(
-                leadingTrivia: .space,
-                calledExpression: DeclReferenceExprSyntax(baseName: .identifier("Package")),
-                leftParen: .leftParenToken(),
-                arguments: LabeledExprListSyntax(labeledExpressions),
-                rightParen: .rightParenToken()
-              )
-          )
-        )
-      ])
-    )
-    let syntax = CodeBlockItemListSyntax([
-      CodeBlockItemSyntax(item: .decl(declSyntax)),
-      CodeBlockItemSyntax(item: .decl(DeclSyntax(packageDecl))),
-    ])
-    return syntax.description
+    return try syntaxKitWriteIndex(index)
   }
   
   /// Creates index using SyntaxKit
@@ -151,16 +72,11 @@ public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
     // Combine import and package declaration
     let codeBlocks: [CodeBlock] = [importDecl, packageVar]
     
-    // Convert to syntax and return description
-    let syntax = CodeBlockItemListSyntax(
-      codeBlocks.compactMap { codeBlock in
-        if let declSyntax = codeBlock.syntax.as(DeclSyntax.self) {
-          return CodeBlockItemSyntax(item: .decl(declSyntax))
-        }
-        return nil
-      }
-    )
+    // Convert to syntax using SyntaxKit's code generation
+    let lines = codeBlocks.map { codeBlock in
+      codeBlock.syntax.trimmedDescription
+    }
     
-    return syntax.description
+    return lines.joined(separator: "\n")
   }
 }

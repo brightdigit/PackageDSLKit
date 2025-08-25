@@ -41,3 +41,30 @@ extension TestTarget {
     self.init(typeName: product.typeName + "Tests")
   }
 }
+
+import SwiftPackageManagerKit
+
+extension TestTarget {
+  /// Initialize TestTarget from SPM data (for test targets only)
+  public init?(spmTarget: SPMTarget) {
+    // Only convert test targets
+    guard spmTarget.type == .test else {
+      return nil
+    }
+    
+    // Convert dependencies
+    let dependencies: [DependencyRef] = spmTarget.dependencies.compactMap { dependency in
+      switch dependency {
+      case .byName(let name, _):
+        return DependencyRef(name: name)
+      case .product(let productName, _, _):
+        return DependencyRef(name: productName)
+      }
+    }
+    
+    self.init(
+      typeName: spmTarget.name,
+      dependencies: dependencies
+    )
+  }
+}

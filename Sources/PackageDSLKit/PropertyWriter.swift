@@ -29,22 +29,14 @@
 
 import SyntaxKit
 
-// Simple wrapper to convert string code to CodeBlock
-private struct StringCodeBlock: CodeBlock {
-  let code: String
-  
-  var syntax: SyntaxProtocol {
-    // For simplicity, just treat the code as an identifier or expression
-    // In practice, this could be enhanced to parse more complex expressions
-    return StringLiteral(code).syntax
-  }
-}
+// Use SyntaxKit's Literal for string code blocks
+private typealias StringCodeBlock = Literal
 
 public enum PropertyWriter {
   /// Creates a property variable using SyntaxKit
   public static func syntaxKitNode(from property: Property) -> ComputedProperty {
     // Convert string code blocks to SyntaxKit CodeBlocks
-    let codeBlocks: [CodeBlock] = property.code.map { StringCodeBlock(code: $0) }
+    let codeBlocks: [CodeBlock] = property.code.map { Literal.ref($0) }
     
     // Create a computed property with the code blocks as body
     // For now, we'll just use the first code block or create an empty return

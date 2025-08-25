@@ -28,19 +28,33 @@
 //
 
 import Foundation
-import SwiftSyntax
 
 public enum SupportCodeBlock {
-  nonisolated(unsafe) public static var syntaxNode: any SyntaxProtocol = {
-    readSyntaxNode()
+  // Replaced SwiftSyntax parsing with direct string reading
+  nonisolated(unsafe) public static var content: String = {
+    readSupportCode()
+  }()
+  
+  // For backward compatibility - returns the same content as .content  
+  nonisolated(unsafe) public static var syntaxNode: SupportCodeBlockContent = {
+    SupportCodeBlockContent(content: content)
   }()
 
   // swift-format-ignore NeverForceUnwrap NeverUseForceTry
-  private static func readSyntaxNode() -> any SyntaxProtocol {
+  private static func readSupportCode() -> String {
     // swiftlint:disable force_try force_unwrapping
     let url = Bundle.module.url(forResource: "PackageDSL.swift", withExtension: "txt")!
     let text = try! String(contentsOf: url, encoding: .utf8)
     // swiftlint:enable force_try force_unwrapping
-    return SourceFileSyntax(stringLiteral: text)
+    return text
+  }
+}
+
+// Backward compatibility wrapper to replace SyntaxProtocol usage
+public struct SupportCodeBlockContent {
+  public let content: String
+  
+  public var trimmedDescription: String {
+    content.trimmingCharacters(in: .whitespacesAndNewlines)
   }
 }

@@ -54,6 +54,38 @@ extension Product {
   }
 }
 
+import SwiftPackageManagerKit
+
+extension Product {
+  /// Initialize Product from SPM data
+  public init?(spmProduct: SPMProduct) {
+    // Convert SPMProductType to ProductType
+    let productType: ProductType
+    switch spmProduct.type {
+    case .library(.static):
+      productType = .library
+    case .library(.dynamic):
+      productType = .library  
+    case .library(.automatic):
+      productType = .library
+    case .executable:
+      productType = .executable
+    case .plugin:
+      return nil  // Skip plugin products for now
+    }
+    
+    // Convert targets to dependencies (simplified mapping)
+    let dependencies = spmProduct.targets.map { DependencyRef(name: $0) }
+    
+    self.init(
+      typeName: spmProduct.name,
+      name: spmProduct.name,
+      dependencies: dependencies,
+      productType: productType
+    )
+  }
+}
+
 extension Product: PackagePropertyDescriptor {
   public static func get(from specifications: PackageSpecifications) -> [Product] {
     specifications.products

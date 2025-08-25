@@ -28,42 +28,31 @@
 //
 
 import Foundation
-import SwiftParser
+import SwiftPackageManagerKit
 
 public struct PackageParser: Sendable, Hashable, Codable {
   public init() {
   }
-  private func parseResults(at directoryURL: URL, with fileManager: FileManager)
-    throws(PackageDSLError)
-    -> [ParsingResult]
-  {
-    guard let enumerator = fileManager.enumerator(atPath: directoryURL.standardizedFileURL.path())
-    else {
-      throw .custom("Missing Enumerator at \(directoryURL)", nil)
-    }
-    var results = [ParsingResult]()
-    while let filePath = enumerator.nextObject() as? String {
-      guard filePath.hasSuffix(".swift") else {
-        continue
-      }
-      let sourceCode: String
-      do {
-        sourceCode = try String(contentsOf: directoryURL.appending(path: filePath), encoding: .utf8)
-      } catch {
-        throw .other(error)
-      }
-      let sourceSyntax = Parser.parse(source: sourceCode)
-      let packageVisitor = PackageVisitor()
-      results.append(contentsOf: packageVisitor.parse(sourceSyntax))
-    }
-    return results
-  }
-  public func parse(at directoryURL: URL, with fileManager: FileManager) throws(PackageDSLError)
+  
+  public func parse(at directoryURL: URL, with fileManager: FileManager) async throws(PackageDSLError)
     -> PackageSpecifications
   {
-    let results = try parseResults(at: directoryURL, with: fileManager)
+    // Use SPM JSON parsing instead of SwiftSyntax parsing
+    let executor: SPMExecutor
+    do {
+      executor = try SPMExecutor(packageDirectory: directoryURL)
+    } catch {
+      throw .other(error)
+    }
+    
+    let packageInfo: SPMPackageInfo
+    do {
+      packageInfo = try await executor.dumpPackage()
+    } catch {
+      throw .other(error)
+    }
 
-    let directoryConfiguration = try PackageDirectoryConfiguration(from: results)
+    let directoryConfiguration = try PackageDirectoryConfiguration(from: packageInfo)
 
     return try .init(from: directoryConfiguration)
   }

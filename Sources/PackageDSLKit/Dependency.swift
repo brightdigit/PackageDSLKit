@@ -121,3 +121,19 @@ extension Int {
     return exponents
   }
 }
+
+import SwiftPackageManagerKit
+
+extension Dependency {
+  /// Initialize Dependency from SPM data
+  public init?(spmDependency: SPMDependency) {
+    let identity = spmDependency.identity
+    
+    self.init(
+      typeName: identity,
+      type: .package,  // SPM dependencies are package dependencies
+      dependency: nil,
+      package: DependencyRef(name: identity)
+    )
+  }
+}

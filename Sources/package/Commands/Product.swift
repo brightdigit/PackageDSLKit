@@ -41,16 +41,16 @@ extension Package {
 @available(iOS 16.0, *)
 extension Package.Product {
   @available(iOS 16.0, *)
-  internal struct Add: ParsableCommand {
+  internal struct Add: AsyncParsableCommand {
     @Argument internal var name: String
 
     @OptionGroup internal var settings: Settings
 
     @Option internal var type: ProductType = .library
 
-    internal func run() throws {
+    internal func run() async throws {
       let parser = PackageParser()
-      let package = try parser.parse(at: settings.dslSourcesURL, with: .default)
+      let package = try await parser.parse(at: settings.dslSourcesURL, with: .default)
       let newPackage = package.updating(descriptor: Product.self) { products in
         var newProducts = products
         newProducts.append(.init(typeName: name))

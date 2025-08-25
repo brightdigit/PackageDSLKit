@@ -27,7 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftSyntax
 
 public struct Index: Sendable, Hashable, Codable {
   public let entries: [EntryRef]
@@ -50,34 +49,4 @@ public struct Index: Sendable, Hashable, Codable {
   }
 }
 
-extension Index {
-  internal init(
-    items: [PackageIndexStrategy.Child],
-    modifiers: [ModifierType: [String]]
-  ) {
-    var entries: [EntryRef] = []
-    var dependencies: [DependencyRef] = []
-    var testTargets: [TestTargetRef] = []
-    var swiftSettings: [SwiftSettingRef] = []
-    for item in items {
-      switch item.kind {
-      case .entries:
-        entries.append(.init(name: item.name))
-      case .dependencies:
-        dependencies.append(.init(name: item.name))
-      case .testTargets:
-        testTargets.append(.init(name: item.name))
-      case .swiftSettings:
-        swiftSettings.append(.init(name: item.name))
-      }
-    }
-
-    self.init(
-      entries: entries,
-      dependencies: dependencies,
-      testTargets: testTargets,
-      swiftSettings: swiftSettings,
-      modifiers: modifiers.map(Modifier.init)
-    )
-  }
-}
+// Legacy SwiftSyntax-based initializer removed - use SPM-based parsing instead

@@ -36,3 +36,30 @@ public struct Target: TypeSource {
     self.dependencies = dependencies
   }
 }
+
+import SwiftPackageManagerKit
+
+extension Target {
+  /// Initialize Target from SPM data (for regular and executable targets)
+  public init?(spmTarget: SPMTarget) {
+    // Only convert regular and executable targets, skip test targets
+    guard spmTarget.type == .regular || spmTarget.type == .executable else {
+      return nil
+    }
+    
+    // Convert dependencies
+    let dependencies: [DependencyRef] = spmTarget.dependencies.compactMap { dependency in
+      switch dependency {
+      case .byName(let name, _):
+        return DependencyRef(name: name)
+      case .product(let productName, _, _):
+        return DependencyRef(name: productName)
+      }
+    }
+    
+    self.init(
+      typeName: spmTarget.name,
+      dependencies: dependencies
+    )
+  }
+}
