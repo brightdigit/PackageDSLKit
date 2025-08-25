@@ -1,7 +1,7 @@
 import Foundation
 
 /// Severity levels for validation issues
-public enum ValidationSeverity: String, CaseIterable, Comparable, Codable {
+public enum ValidationSeverity: String, CaseIterable, Comparable, Codable, Sendable {
     case error = "error"
     case warning = "warning"
     case info = "info"
@@ -17,7 +17,7 @@ public enum ValidationSeverity: String, CaseIterable, Comparable, Codable {
 }
 
 /// Categories of validation issues
-public enum ValidationCategory: String, CaseIterable, Codable {
+public enum ValidationCategory: String, CaseIterable, Codable, Sendable {
     case structure = "structure"
     case dependencies = "dependencies"
     case versions = "versions"
@@ -28,7 +28,7 @@ public enum ValidationCategory: String, CaseIterable, Codable {
 }
 
 /// Represents a validation issue found in a Swift package
-public struct ValidationIssue: Codable, Hashable {
+public struct ValidationIssue: Codable, Hashable, Sendable {
     /// Unique identifier for this issue type
     public let id: String
     

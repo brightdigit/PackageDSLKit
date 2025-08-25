@@ -28,8 +28,6 @@
 //
 
 import Foundation
-import SwiftSyntax
-import SwiftSyntaxBuilder
 
 public struct PackageWriter: Sendable {
   private static let compoenentTypes: [any ComponentBuildable.Type] = [
@@ -100,9 +98,9 @@ public struct PackageWriter: Sendable {
         .appendingPathExtension("swift")
         .standardizedFileURL
 
-      let node = componentWriter.node(from: component)
+      let node = componentWriter.syntaxKitNode(from: component)
       do {
-        try node.description.write(to: filePath, atomically: true, encoding: .utf8)
+        try node.syntax.description.write(to: filePath, atomically: true, encoding: .utf8)
       } catch {
         throw .other(error)
       }

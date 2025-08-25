@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -27,7 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftSyntax
 import SyntaxKit
 
 // Simple wrapper to convert string code to CodeBlock
@@ -36,26 +35,12 @@ private struct StringCodeBlock: CodeBlock {
   
   var syntax: SyntaxProtocol {
     // For simplicity, just treat the code as an identifier or expression
-    // In practice, the original PropertyWriter used string interpolation which was more complex
-    return ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(code)))
+    // In practice, this could be enhanced to parse more complex expressions
+    return StringLiteral(code).syntax
   }
 }
 
 public enum PropertyWriter {
-  @available(*, deprecated, message: "Use syntaxKitNode(from:) instead")
-  public static func node(from property: Property) -> VariableDeclSyntax {
-    let codeBlocks = property.code.map(CodeBlockItemSyntax.init)
-    let codeBlockList = CodeBlockItemListSyntax(codeBlocks)
-    // swiftlint:disable:next force_try
-    return try! VariableDeclSyntax(
-      """
-        var \(raw: property.name): \(raw: property.type) {
-          \(codeBlockList)
-        }
-      """
-    )
-  }
-  
   /// Creates a property variable using SyntaxKit
   public static func syntaxKitNode(from property: Property) -> ComputedProperty {
     // Convert string code blocks to SyntaxKit CodeBlocks

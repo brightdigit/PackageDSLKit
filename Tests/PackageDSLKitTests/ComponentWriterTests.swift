@@ -23,7 +23,7 @@ internal struct ComponentWriterTests {
   }
 
   @Test(arguments: 1...100)
-  internal func testPropertyCalls(index: Int) async {
+  internal func testSyntaxKitNodeGeneration(index: Int) async {
     let propertyValues: [Property] = (1...5).map { _ in
       .init(
         name: .randomIdentifier(),
@@ -39,24 +39,28 @@ internal struct ComponentWriterTests {
         ($0.name, $0)
       }
     )
-    await confirmation(expectedCount: propertyValues.count) { confirmation in
-      let indicies = Indicies()
-      let writer = ComponentWriter(syntaxKitPropertyWriter: { actualProperty in
-        // swiftlint:disable:next force_try
-        let actualIndex = try! #require(propertyValues.firstIndex(of: actualProperty))
-        #expect(!indicies.contains(actualIndex))
-        indicies.insert(actualIndex)
-        defer {
-          confirmation()
-        }
-        return PropertyWriter.syntaxKitNode(from: actualProperty)
-      })
-      let component = Component(
-        name: .randomIdentifier(),
-        inheritedTypes: [.randomIdentifier(), .randomIdentifier()],
-        properties: propertyDictionary
-      )
-      _ = writer.syntaxKitNode(from: component)
+    
+    // Test that ComponentWriter can generate SyntaxKit nodes without using deprecated APIs
+    let writer = ComponentWriter()
+    let component = Component(
+      name: .randomIdentifier(),
+      inheritedTypes: [.randomIdentifier(), .randomIdentifier()],
+      properties: propertyDictionary
+    )
+    let syntaxKitStruct = writer.syntaxKitNode(from: component)
+    
+    // Verify the struct was created with the expected name and properties
+    #expect(syntaxKitStruct.syntax.description.contains(component.name))
+    
+    // Verify properties are included in the generated syntax
+    for property in propertyValues {
+      #expect(syntaxKitStruct.syntax.description.contains(property.name))
+      #expect(syntaxKitStruct.syntax.description.contains(property.type))
+    }
+    
+    // Verify inheritance is included
+    for inheritedType in component.inheritedTypes {
+      #expect(syntaxKitStruct.syntax.description.contains(inheritedType))
     }
   }
 }

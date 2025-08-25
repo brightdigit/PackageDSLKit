@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -27,53 +27,14 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftSyntax
 import SyntaxKit
 
 public struct ComponentWriter: Sendable, StructureWriter {
-  private let propertyWriter: @Sendable (Property) -> VariableDeclSyntax
-
-  @available(*, deprecated, message: "Use init(syntaxKitPropertyWriter:) instead")
-  public init(
-    propertyWriter: @escaping @Sendable (Property) -> VariableDeclSyntax = PropertyWriter.node
-  ) {
-    self.propertyWriter = propertyWriter
-  }
-
-  @available(*, deprecated, message: "Use syntaxKitNode(from:) instead")
-  public func node(from component: Component) -> StructDeclSyntax {
-    let memberBlockList = MemberBlockItemListSyntax(
-      component.properties.values.map(propertyWriter).map {
-        MemberBlockItemSyntax(decl: $0)
-      }
-    )
-    let inheritedTypes = component.inheritedTypes
-      .map { TokenSyntax.identifier($0) }
-      .map {
-        IdentifierTypeSyntax(name: $0)
-      }
-      .map {
-        InheritedTypeSyntax(type: $0)
-      }
-      .reversed()
-      .enumerated()
-      .map { index, expression in
-        if index == 0 {
-          return expression
-        }
-        return expression.with(\.trailingComma, .commaToken())
-      }
-      .reversed()
-    let inheritedTypeList = InheritedTypeListSyntax(inheritedTypes)
-    let clause = InheritanceClauseSyntax(inheritedTypes: inheritedTypeList)
-    let memberBlock = MemberBlockSyntax(members: memberBlockList)
-    return StructDeclSyntax(
-      name: .identifier(component.name, leadingTrivia: .space),
-      inheritanceClause: clause,
-      memberBlock: memberBlock
-    )
-  }
   
+  /// Creates a ComponentWriter that uses SyntaxKit for code generation
+  public init() {
+  }
+
   /// Creates a struct using SyntaxKit
   public func syntaxKitNode(from component: Component) -> Struct {
     // Convert properties to SyntaxKit CodeBlocks
