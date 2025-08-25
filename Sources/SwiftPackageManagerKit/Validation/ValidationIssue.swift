@@ -187,7 +187,7 @@ extension ValidationIssue {
 // MARK: - Validation Result
 
 /// Result of a validation operation
-public struct ValidationResult: Codable {
+public struct ValidationResult: Codable, Sendable {
     /// All validation issues found
     public let issues: [ValidationIssue]
     

@@ -185,12 +185,10 @@ extension PackageDSLManager {
       // Create temporary directory
       try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
       
-      // Generate Package.swift using PackageWriter
-      let packageWriter = PackageWriter()
-      try packageWriter.write(
-        specifications,
-        to: tempDirectory
-      )
+      // Generate traditional Package.swift for SPM validation
+      let packageSwiftContent = generateTraditionalPackageSwift()
+      let packageSwiftFile = tempDirectory.appendingPathComponent("Package.swift")
+      try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
       
       // Execute swift package dump-package
       let executor = try SPMExecutor(packageDirectory: tempDirectory)
@@ -214,6 +212,80 @@ extension PackageDSLManager {
       try? FileManager.default.removeItem(at: tempDirectory)
       throw PackageError.packageGenerationFailed("Validation failed: \(error.localizedDescription)")
     }
+  }
+  
+  /// Generate traditional Package.swift content from current configuration
+  /// - Returns: String containing Package.swift content
+  public func generateTraditionalPackageSwift() -> String {
+    var content = """
+    // swift-tools-version: 5.9
+    import PackageDescription
+    
+    let package = Package(
+        name: "\(packageName)"
+    """
+    
+    // Add products if any
+    if !products.isEmpty {
+      content += ",\n        products: [\n"
+      for (index, product) in products.enumerated() {
+        let productTargets = product.dependencies.map { "\"" + $0.name + "\"" }.joined(separator: ", ")
+        let productTypeString = product.productType == .library ? "library" : "executable"
+        content += "            .\(productTypeString)(name: \"\(product.typeName)\", targets: [\(productTargets)])"
+        if index < products.count - 1 {
+          content += ","
+        }
+        content += "\n"
+      }
+      content += "        ]"
+    }
+    
+    // Add dependencies if any
+    if !dependencies.isEmpty {
+      content += ",\n        dependencies: [\n"
+      for (index, dependency) in dependencies.enumerated() {
+        let dependencyString = dependency.dependency ?? ""
+        // Remove quotes if they exist around the dependency string
+        let cleanDependency = dependencyString.hasPrefix("\"") && dependencyString.hasSuffix("\"") 
+          ? String(dependencyString.dropFirst().dropLast())
+          : dependencyString
+        content += "            " + cleanDependency
+        if index < dependencies.count - 1 {
+          content += ","
+        }
+        content += "\n"
+      }
+      content += "        ]"
+    }
+    
+    // Add targets
+    let allTargets = targets + testTargets.map { testTarget in
+      Target(typeName: testTarget.typeName, dependencies: testTarget.dependencies)
+    }
+    
+    if !allTargets.isEmpty {
+      content += ",\n        targets: [\n"
+      for (index, target) in allTargets.enumerated() {
+        let isTestTarget = testTargets.contains { $0.typeName == target.typeName }
+        let targetType = isTestTarget ? "testTarget" : "target"
+        
+        if target.dependencies.isEmpty {
+          content += "            .\(targetType)(name: \"\(target.typeName)\")"
+        } else {
+          let targetDeps = target.dependencies.map { "\"" + $0.name + "\"" }.joined(separator: ", ")
+          content += "            .\(targetType)(name: \"\(target.typeName)\", dependencies: [\(targetDeps)])"
+        }
+        
+        if index < allTargets.count - 1 {
+          content += ","
+        }
+        content += "\n"
+      }
+      content += "        ]"
+    }
+    
+    content += "\n    )\n"
+    return content
   }
   
   /// Validate the package and throw if there are any error-level issues
