@@ -1,0 +1,491 @@
+# PackageDSLKit - Product Requirements Document (PRD)
+
+## Project Overview
+PackageDSLKit is a Swift library and CLI tool for creating and manipulating Swift packages that use the PackageDSL library. It provides both a programmatic SDK and a command-line interface to make working with PackageDSL-based packages practical and efficient.
+
+## Primary Goals
+1. **Package Creation**: Easy initialization of new PackageDSL-based packages with templates
+2. **Package Manipulation**: Add, remove, and modify targets, products, and dependencies in PackageDSL packages
+3. **Developer Experience**: Provide both SDK and CLI interfaces for different use cases
+4. **Swift Package Manager Integration**: Leverage `swift package` commands for metadata instead of parsing Swift files directly
+
+## Complete List of Manipulable Components
+
+### 1. Core Package Components
+- **Targets** (library, executable, test)
+- **Products** (library, executable) 
+- **Dependencies** (URL, path, registry)
+
+### 2. Swift Settings & Features
+
+#### Swift Feature Flags (SwiftSettingFeature)
+**Experimental Features (.experimental):**
+- `GlobalActorIsolatedTypesUsability`
+- `RegionBasedIsolation`
+- `TransferringArgsAndResults`
+- `AccessLevelOnImport`
+- `NestedProtocols`
+- `VariadicGenerics`
+- `BitwiseCopyable`
+- `NoncopyableGenerics`
+- `MoveOnlyPartialConsumption`
+- `IsolatedAny`
+- `StrictConcurrency` (configurable experimental/upcoming)
+
+**Upcoming Features (.upcoming):**
+- `GlobalConcurrency`
+- `InferSendableFromCaptures`
+- `DeprecateApplicationMain`
+- `FullTypedThrows`
+- `ImportObjcForwardDeclarations`
+- `DynamicActorIsolation`
+- `IsolatedDefaultValues`
+- `InternalImportsByDefault`
+- `DisableOutwardActorInference`
+
+### 3. Unsafe Flags
+
+#### Compilation & Optimization Flags
+- `O`, `Onone`, `Osize`, `WholeModuleOptimization`, `NoWholeModuleOptimization`
+- `Static`, `StaticExecutable`, `StaticStdlib`
+
+#### Debug & Analysis Flags
+- `G`, `GdwarfTypes`, `Gnone`, `GlineTablesOnly`
+- `DebugInfoStoreInvocation`, `VerifyDebugInfo`
+- `ColorDiagnostics`, `NoColorDiagnostics`
+
+#### Emit & Output Flags
+- `EmitObjcHeader`, `EmitModule`, `EmitModuleInterface`
+- `EmitSil`, `EmitSilgen`, `EmitSib`, `EmitSibgen`
+- `EmitIr`, `EmitIrgen`, `EmitBc`, `EmitAssembly`
+- `EmitExecutable`, `EmitLibrary`, `EmitObject`
+
+#### Warning & Error Flags
+- `WarningsAsErrors`, `NoWarningsAsErrors`
+- `SuppressWarnings`, `SuppressRemarks`
+- `WarnConcurrency`, `WarnImplicitOverrides`
+
+#### Special Parameterized Flags
+- `WarnLongExpressionTypeChecking(milliseconds: Int)`
+- `WarnLongFunctionBodies(milliseconds: Int)`
+
+### 4. Platform Support
+- **SupportedPlatformSet** - Year-based platform groups (2019-2024)
+- **SupportedPlatform** - Individual platform specifications (iOS, macOS, watchOS, tvOS, Linux, etc.)
+- **Platform version specifications**
+
+### 5. Build Configuration
+- **Resources** - Package resources
+- **SwiftSettings** - Per-target and global Swift settings
+- **Modifiers** - Package modifiers
+
+## Core Features
+
+### 1. Swift SDK (PackageDSLKit Library)
+**Programmatic API for other tools and applications**
+
+#### Package Management SDK
+- `PackageDSLManager` - Core package manipulation APIs
+  - Create new packages with specified types
+  - Add/remove targets, products, and dependencies
+  - Generate Package.swift from PackageDSL definitions
+  - Validate package structure and consistency
+
+#### Code Generation SDK  
+- `DSLCodeGenerator` - PackageDSL code generation
+  - Generate Target structs with appropriate protocols
+  - Generate Product structs (library/executable)
+  - Generate PackageDependency structs
+  - Generate main Package() definition with result builders
+
+#### File Management SDK
+- `DSLFileManager` - File operations and organization
+  - Create proper PackageDSL directory structure
+  - Write and organize DSL component files
+  - Manage source file layout and naming conventions
+
+#### SPM Integration SDK
+- `SPMIntegrator` - Swift Package Manager integration
+  - Execute `swift package dump-package` for metadata
+  - Parse SPM JSON output into structured data
+  - Validate PackageDSL against actual SPM behavior
+
+#### Swift Settings Management SDK  
+- `SwiftSettingsManager` - Swift feature and flag management
+  - Add/remove Swift feature flags (experimental/upcoming)
+  - Add/remove unsafe flags (compilation, debug, emit, warning flags)
+  - Handle parameterized flags (WarnLongFunctionBodies, etc.)
+  - Target-specific Swift settings configuration
+
+#### Platform Management SDK
+- `PlatformManager` - Platform support management
+  - Year-based platform sets (2019-2024 mapping to OS versions)
+  - Individual platform specifications (iOS, macOS, watchOS, tvOS, Linux)
+  - Custom platform set creation with include/exclude options
+  - Platform version validation and consistency checking
+
+### 2. CLI Tool (package executable)
+**Command-line interface using ArgumentParser**
+
+#### Package Lifecycle Commands
+```bash
+package init                                    # Initialize new PackageDSL package
+package init --name MyLib --type library       # Create library package
+package init --name MyApp --type executable    # Create executable package
+package validate                                # Validate PackageDSL structure
+package convert <Package.swift>                # Convert from traditional Package.swift
+```
+
+#### Component Management Commands
+```bash
+# Target Management
+package target add <name>                      # Add new target
+package target add <name> --type library       # Add library target
+package target add <name> --type executable    # Add executable target
+package target remove <name>                   # Remove target
+package target list                            # List all targets
+
+# Product Management  
+package product add <name>                     # Add new product
+package product add <name> --type executable  # Add executable product
+package product add <name> --targets t1,t2    # Specify target dependencies
+package product remove <name>                 # Remove product
+package product list                           # List all products
+
+# Dependency Management
+package dependency add <name> <url>           # Add URL dependency
+package dependency add <name> <url> --version "1.0.0"    # Exact version
+package dependency add <name> <url> --from "1.0.0"      # From version
+package dependency add <name> --path "../Local"         # Local dependency
+package dependency remove <name>              # Remove dependency
+package dependency list                       # List all dependencies
+```
+
+#### Swift Settings Management (NEW)
+```bash
+# Feature Flags
+package swift-feature add StrictConcurrency              # Add experimental feature
+package swift-feature add InternalImportsByDefault       # Add upcoming feature
+package swift-feature remove StrictConcurrency           # Remove feature
+package swift-feature list                               # List active features
+
+# Unsafe Flags  
+package unsafe-flag add WholeModuleOptimization         # Add optimization flag
+package unsafe-flag add WarnLongFunctionBodies --ms 100 # Parameterized flag
+package unsafe-flag remove WholeModuleOptimization      # Remove flag
+package unsafe-flag list                                 # List active flags
+
+# Target-specific Swift settings
+package target MyTarget swift-settings add StrictConcurrency
+package target MyTarget swift-settings remove InternalImportsByDefault
+```
+
+#### Platform Management (NEW)
+```bash
+# Year-Based Platform Set Management
+package platform-set set 2023                  # Set to 2023 platforms (iOS 17+, macOS 14+, etc.)
+package platform-set set 2022                  # Set to 2022 platforms (iOS 16+, macOS 13+, etc.)  
+package platform-set set 2021                  # Set to 2021 platforms (iOS 15+, macOS 12+, etc.)
+
+# Platform set management
+package platform-set show                      # Show current platform set
+package platform-set remove                    # Remove platform set (use manual platform specs)
+package platform-set list                      # List all available platform sets
+
+# Custom platform sets
+package platform-set set 2023 --ios --macos   # Only iOS 17+ and macOS 14+ from 2023
+package platform-set set 2023 --exclude tvos  # All 2023 platforms except tvOS
+
+# Individual Platform Support
+package platform add iOS --version "15.0"              # Add iOS 15+ support
+package platform add macOS --version "12.0"            # Add macOS 12+ support  
+package platform add linux                              # Add Linux support
+package platform remove watchOS                         # Remove watchOS support
+package platform list                                   # List supported platforms
+```
+
+#### Development Workflow Commands
+```bash
+package generate                               # Generate Package.swift from PackageDSL
+package info                                   # Show package overview
+package dump                                   # Display detailed package structure
+package doctor                                 # Check for common issues
+```
+
+## Technical Architecture
+
+### Dual-Purpose Design
+1. **Swift SDK** - Library for programmatic use by other tools
+2. **CLI Tool** - ArgumentParser-based command interface
+
+### Key Design Principles
+- **SDK handles logic** - All business logic in the PackageDSLKit library
+- **CLI handles interface** - ArgumentParser commands are thin wrappers around SDK
+- **SPM Integration** - Use `swift package dump-package` instead of parsing Swift syntax
+- **Clear separation** - SDK completely independent of CLI implementation
+
+### Integration Strategy
+- Leverage Swift Package Manager's built-in metadata capabilities
+- Use `swift package dump-package` for authoritative package information  
+- Focus on PackageDSL generation and manipulation rather than parsing
+- Validate PackageDSL by comparing generated Package.swift with SPM metadata
+
+## Implementation Phases
+
+### Phase 1: Core SDK Foundation (HIGH PRIORITY)
+- PackageDSLManager with basic CRUD operations
+- DSLCodeGenerator for basic code generation
+- DSLFileManager for file operations  
+- SPMIntegrator for swift package commands
+- Basic SwiftSettingsManager (common feature flags and unsafe flags)
+- Basic PlatformManager (year-based platform sets)
+
+### Phase 2: CLI Commands Implementation (HIGH PRIORITY)
+- Update CLI main entry point with proper command structure
+- Complete target, product, and dependency management commands
+- Add Swift feature and unsafe flag management commands
+- Add platform and platform-set management commands
+- Add package generation and validation commands
+
+### Phase 3: Advanced Configuration (MEDIUM PRIORITY)
+- Complete SwiftSettingsManager (all unsafe flags, parameterized flags)
+- Target-specific Swift settings management
+- Custom platform set creation with include/exclude options
+- Enhanced error handling and validation
+- Implement conversion from traditional Package.swift
+
+### Phase 4: Ecosystem Integration (LOW PRIORITY)
+- IDE integration helpers
+- CI/CD integration utilities
+- Watch mode for development workflows
+- Community template system
+
+## Success Metrics
+- Streamlined creation of new PackageDSL packages
+- Easy management of existing PackageDSL packages  
+- Generated PackageDSL produces identical Package.swift output
+- Reduced complexity in PackageDSL package maintenance
+- Active adoption by Swift package developers
+- Comprehensive tooling ecosystem around PackageDSL
+
+## Example Usage
+
+### SDK Usage (Programmatic)
+```swift
+import PackageDSLKit
+
+let manager = PackageDSLManager(at: URL(fileURLWithPath: "."))
+try manager.createPackage(name: "MyLibrary", type: .library)
+try manager.addTarget(name: "Core", type: .library) 
+try manager.addProduct(name: "MyLibrary", targets: ["Core"])
+try manager.addDependency(name: "Alamofire", url: "https://github.com/Alamofire/Alamofire.git", from: "5.8.0")
+try manager.generatePackageSwift()
+```
+
+### CLI Usage (Command Line)
+```bash
+# Create and setup new package
+package init MyLibrary --type library
+package target add Core --type library
+package product add MyLibrary --targets Core
+package dependency add Alamofire https://github.com/Alamofire/Alamofire.git --from 5.8.0
+
+# Generate and validate
+package generate
+package validate
+```
+
+## Detailed Package Structure Implementation
+
+### Products (Public Interfaces)
+1. **`PackageDSLKit`** (library) - Core SDK for PackageDSL manipulation
+2. **`SwiftPackageManagerKit`** (library) - Swift Package Manager integration toolkit
+3. **`PackageDSLCLI`** (library) - CLI framework for building tools
+4. **`package`** (executable) - Command-line tool
+
+### Target Dependencies (Corrected Layering)
+
+**CLI → SDK → SwiftPackageManagerKit**
+
+```
+package (executable)
+├── PackageDSLKit (SDK)
+├── PackageDSLCLI (CLI framework)  
+├── ArgumentParser
+└── NO direct SwiftPackageManagerKit
+
+PackageDSLKit (library)
+├── SwiftPackageManagerKit (internal SPM integration)
+├── SwiftSyntax (code generation)
+└── SyntaxKit (advanced syntax)
+
+PackageDSLCLI (library)
+├── PackageDSLKit (SDK for business logic)
+├── ArgumentParser (CLI parsing)
+└── NO direct SwiftPackageManagerKit
+
+SwiftPackageManagerKit (library)
+└── Foundation (JSON parsing only)
+```
+
+### Target Implementation Details
+
+#### 1. SwiftPackageManagerKit (SPM Integration Library)
+```
+Sources/SwiftPackageManagerKit/
+├── Execution/
+│   ├── SPMExecutor.swift           # Execute swift package commands
+│   ├── ProcessRunner.swift         # Process execution utilities
+│   └── SPMError.swift              # SPM-specific error types
+├── Models/
+│   ├── SPMPackageInfo.swift        # Swift package dump-package JSON model
+│   ├── SPMProduct.swift            # SPM product definitions
+│   ├── SPMTarget.swift             # SPM target definitions
+│   ├── SPMDependency.swift         # SPM dependency definitions
+│   └── SPMPlatform.swift           # SPM platform specifications
+├── Analysis/
+│   ├── SPMAnalyzer.swift           # Parse and analyze SPM data
+│   ├── SPMValidator.swift          # Validate SPM package configurations
+│   └── SPMComparator.swift         # Compare SPM package states
+└── Utilities/
+    ├── JSONParser.swift            # JSON parsing utilities
+    └── PathResolver.swift          # Path and URL utilities
+```
+
+#### 2. PackageDSLKit (Enhanced Core SDK)
+```
+Sources/PackageDSLKit/
+├── Core/
+│   ├── PackageDSLManager.swift     # Main SDK entry point (uses SPM internally)
+│   ├── SwiftSettingsManager.swift  # Swift feature flags and unsafe flags
+│   ├── PlatformManager.swift       # Platform and platform-set management
+│   └── PackageValidator.swift      # Validation against SPM data
+├── Integration/
+│   ├── SPMIntegrator.swift         # Internal wrapper for SwiftPackageManagerKit
+│   └── ValidationEngine.swift      # Compare PackageDSL vs SPM data
+├── Generation/
+│   ├── DSLCodeGenerator.swift      # Generate PackageDSL code
+│   ├── SwiftSettingsCodeGen.swift  # Generate Swift settings DSL
+│   └── PlatformCodeGenerator.swift # Generate platform DSL
+├── Conversion/
+│   ├── SPMToPackageDSL.swift      # Convert SPM data to PackageDSL
+│   ├── PackageDSLToSPM.swift      # Generate Package.swift from DSL
+│   └── RoundTripValidator.swift    # Validate conversion accuracy
+└── Models/
+    ├── PackageConfiguration.swift  # Complete package configuration
+    ├── SwiftFeature.swift          # Swift feature definitions
+    ├── UnsafeFlag.swift            # Unsafe flag definitions
+    ├── PlatformSet.swift           # Year-based platform sets
+    └── ValidationResult.swift      # Validation outcomes
+```
+
+#### 3. PackageDSLCLI (CLI Framework - No Direct SPM Access)
+```
+Sources/PackageDSLCLI/
+├── Infrastructure/
+│   ├── CLIContext.swift            # CLI execution context (SDK only)
+│   ├── CommandExecutor.swift       # Execute SDK operations only
+│   └── CLIConfiguration.swift      # CLI-specific settings
+├── Output/
+│   ├── OutputFormatter.swift       # Format SDK results for display
+│   ├── ErrorReporter.swift         # User-friendly error messages
+│   └── ValidationReporter.swift    # Report SDK validation results
+└── Shared/
+    ├── GlobalOptions.swift         # Shared command-line options
+    └── VerbosityLevel.swift        # Output verbosity controls
+```
+
+#### 4. package (CLI Executable - SDK Only)
+```
+Sources/package/
+├── Commands/
+│   ├── Core/
+│   │   ├── InitCommand.swift       # Calls PackageDSLManager.createPackage()
+│   │   ├── GenerateCommand.swift   # Calls PackageDSLManager.generate()
+│   │   ├── ValidateCommand.swift   # Calls PackageDSLManager.validate()
+│   │   └── InfoCommand.swift       # Calls PackageDSLManager.getPackageInfo()
+│   ├── Components/
+│   │   ├── TargetCommand.swift     # Calls PackageDSLManager.addTarget() etc.
+│   │   ├── ProductCommand.swift    # Calls PackageDSLManager.addProduct() etc.
+│   │   └── DependencyCommand.swift # Calls PackageDSLManager.addDependency() etc.
+│   └── Settings/
+│       ├── SwiftFeatureCommand.swift   # Calls SwiftSettingsManager
+│       ├── UnsafeFlagCommand.swift     # Calls SwiftSettingsManager  
+│       ├── PlatformCommand.swift       # Calls PlatformManager
+│       └── PlatformSetCommand.swift    # Calls PlatformManager
+└── main.swift                      # CLI entry point
+```
+
+### Proper Layered Architecture Examples
+
+#### CLI Command (Only Calls SDK)
+```swift
+struct InfoCommand: ParsableCommand {
+    @OptionGroup var settings: Settings
+    
+    func run() async throws {
+        // CLI only talks to SDK, never directly to SwiftPackageManagerKit
+        let manager = PackageDSLManager(at: settings.packagePath)
+        
+        // SDK handles all SPM integration internally
+        let packageInfo = try await manager.getPackageInfo()
+        
+        // CLI formats the results from SDK
+        let formatter = OutputFormatter()
+        print(formatter.formatPackageInfo(packageInfo))
+    }
+}
+```
+
+#### SDK Implementation (Uses SwiftPackageManagerKit Internally)
+```swift
+public class PackageDSLManager {
+    private let smpIntegrator: SPMIntegrator  // Internal use of SwiftPackageManagerKit
+    
+    public func getPackageInfo() async throws -> PackageInfo {
+        // SDK uses SwiftPackageManagerKit internally
+        let smpData = try await smpIntegrator.dumpPackage()
+        let dslConfig = try parseCurrentPackageDSL()
+        
+        // SDK provides unified view to CLI
+        return PackageInfo(
+            smpData: smpData,
+            dslConfiguration: dslConfig,
+            validationResult: try validate(dsl: dslConfig, against: smpData)
+        )
+    }
+}
+```
+
+#### Internal SPM Integration (Hidden from CLI)
+```swift
+internal class SPMIntegrator {
+    private let executor: SPMExecutor  // Uses SwiftPackageManagerKit
+    
+    func dumpPackage() async throws -> SPMPackageInfo {
+        return try await executor.dumpPackage(at: packagePath)
+    }
+}
+```
+
+## Benefits
+
+### For PackageDSL Users
+- Easy package creation and management
+- Reduced boilerplate and configuration complexity
+- Type-safe package definitions with validation
+- Seamless integration with existing Swift Package Manager workflows
+
+### For Tool Developers  
+- Comprehensive SDK for building PackageDSL tooling
+- Well-defined APIs for package manipulation
+- Consistent data models and validation
+- Integration points for custom workflows
+
+### For the Swift Ecosystem
+- Lower barrier to entry for complex package configurations
+- Improved maintainability of package definitions
+- Better tooling support for package development
+- Enhanced developer productivity with PackageDSL
+
+This PRD establishes PackageDSLKit as the essential companion tooling for PackageDSL, providing both programmatic and command-line interfaces to make PackageDSL practical for everyday Swift package development.

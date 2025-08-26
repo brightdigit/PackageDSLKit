@@ -1,0 +1,686 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create SwiftPackageManagerKit Target and SPM Integration",
+        "description": "Implement the SwiftPackageManagerKit library target for Swift Package Manager integration with models and execution layer",
+        "details": "Create SwiftPackageManagerKit target in Package.swift and implement core SPM integration:\n1. Add new library target 'SwiftPackageManagerKit' with Foundation dependency\n2. Implement SPMExecutor class using Process API to execute 'swift package dump-package' command\n3. Create SPM JSON model classes (SPMPackageInfo, SPMProduct, SPMTarget, SPMDependency, SPMPlatform) matching the structure from swift package dump-package output\n4. Implement SPMAnalyzer to parse JSON response using JSONDecoder with proper error handling\n5. Add SPMValidator for validating package configurations\n6. Create ProcessRunner utility for executing shell commands with timeout and proper error handling\n\nKey implementation details:\n- Use async/await for Process execution (available in Swift 5.5+)\n- Model the JSON structure from 'swift package dump-package' output precisely\n- Handle Process errors, timeouts, and non-zero exit codes\n- Parse semantic version strings properly (e.g., \"1.0.0\"..<\"2.0.0\")",
+        "testStrategy": "Unit tests for JSON parsing with fixture files containing sample dump-package outputs, integration tests for SPMExecutor with real swift package commands on test packages, validate error handling for malformed JSON and failed processes",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Add SwiftPackageManagerKit Target to Package.swift",
+            "description": "Configure the SwiftPackageManagerKit library target in Package.swift with required dependencies",
+            "dependencies": [],
+            "details": "Edit Package.swift to add a new library target named 'SwiftPackageManagerKit' with Foundation as a dependency. Configure the target with proper source directory structure at Sources/SwiftPackageManagerKit/. Ensure the target is properly exposed as a library product for consumption by other targets in the package.",
+            "status": "done",
+            "testStrategy": "Verify Package.swift compiles successfully with swift package resolve, ensure target appears in swift package dump-package output"
+          },
+          {
+            "id": 2,
+            "title": "Create SPM JSON Model Classes",
+            "description": "Implement Codable model classes matching the JSON structure from swift package dump-package output",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "Create model classes in Sources/SwiftPackageManagerKit/Models/: SPMPackageInfo (root package structure with name, platforms, products, dependencies, targets), SPMProduct (type, name, targets array), SPMTarget (name, type, dependencies, path, sources, resources), SPMDependency (url/path, requirement with version ranges), SPMPlatform (platform name and version). All models must conform to Codable with proper CodingKeys for JSON mapping. Handle version requirement parsing for semantic version ranges like '1.0.0'..<'2.0.0'.",
+            "status": "done",
+            "testStrategy": "Unit test each model with fixture JSON files containing real dump-package output, test encoding/decoding round trips, verify version range parsing"
+          },
+          {
+            "id": 3,
+            "title": "Implement ProcessRunner Utility",
+            "description": "Create a reusable ProcessRunner class for executing shell commands with async/await support",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "Implement ProcessRunner in Sources/SwiftPackageManagerKit/Utilities/ with async execute method that: creates and configures Process instances, sets up pipes for stdout/stderr capture, handles process termination with configurable timeout (default 30 seconds), returns ProcessResult struct containing exitCode, stdout, stderr strings, throws ProcessError for failures (timeout, non-zero exit, launch failure). Use Task for timeout handling and process cancellation support.",
+            "status": "done",
+            "testStrategy": "Test with various shell commands (echo, ls, false), verify timeout handling with sleep command, test error cases and cancellation"
+          },
+          {
+            "id": 4,
+            "title": "Implement SPMExecutor Class",
+            "description": "Create SPMExecutor to execute swift package commands and capture their output",
+            "dependencies": [
+              "1.3"
+            ],
+            "details": "Implement SPMExecutor in Sources/SwiftPackageManagerKit/Execution/ with methods: dumpPackage(at packagePath: URL) async throws -> Data (executes 'swift package dump-package' and returns JSON data), resolvePackage(at packagePath: URL) async throws (executes 'swift package resolve'), buildPackage(at packagePath: URL) async throws (executes 'swift package build'). Use ProcessRunner for command execution, validate swift binary availability, handle working directory changes, provide detailed error messages for common failures.",
+            "status": "done",
+            "testStrategy": "Integration test with real swift package commands on test fixtures, mock ProcessRunner for unit tests, verify error handling for invalid packages"
+          },
+          {
+            "id": 5,
+            "title": "Implement SPMAnalyzer and SPMValidator",
+            "description": "Create analyzer for parsing SPM JSON and validator for package configuration validation",
+            "dependencies": [
+              "1.2",
+              "1.4"
+            ],
+            "details": "Implement SPMAnalyzer in Sources/SwiftPackageManagerKit/Analysis/ with analyzePackage(data: Data) throws -> SPMPackageInfo method using JSONDecoder with proper error handling for malformed JSON. Create SPMValidator in Sources/SwiftPackageManagerKit/Validation/ with methods: validatePackageStructure(package: SPMPackageInfo) -> [ValidationIssue] (checks for missing products, orphaned targets, circular dependencies), validateVersionRequirements(dependencies: [SPMDependency]) -> [ValidationIssue] (validates semantic version ranges), validatePlatforms(platforms: [SPMPlatform]) -> [ValidationIssue] (ensures platform versions are valid).",
+            "status": "done",
+            "testStrategy": "Test analyzer with various dump-package outputs including edge cases, test validator identifies common issues like circular dependencies and invalid versions"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement Core PackageDSLManager SDK",
+        "description": "Create the main PackageDSLManager class that serves as the primary SDK entry point for package manipulation",
+        "details": "Implement PackageDSLManager as the main SDK interface:\n1. Create PackageDSLManager class with initialization for package URL\n2. Implement createPackage(name:type:) method supporting library/executable/empty types\n3. Add addTarget(name:type:dependencies:) for creating library/executable/test targets\n4. Add addProduct(name:type:targets:) for creating library/executable products\n5. Add addDependency methods supporting URL, path, and registry dependencies with version requirements\n6. Implement removeTarget, removeProduct, removeDependency methods\n7. Create internal SPMIntegrator wrapper to use SwiftPackageManagerKit\n8. Add generatePackageSwift() method to create Package.swift from DSL\n9. Implement validate() method comparing DSL against SPM metadata\n\nImplementation approach:\n- Store package configuration in memory as structured data\n- Use builder pattern for fluent API design\n- Integrate with existing PackageWriter for code generation\n- Leverage SPMIntegrator for validation against actual SPM behavior",
+        "testStrategy": "Test package creation with different types, verify CRUD operations for targets/products/dependencies maintain consistency, integration test generating Package.swift and validating with swift package dump-package, test error cases for invalid configurations",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create PackageDSLManager class structure",
+            "description": "Design and implement the main PackageDSLManager class with its basic structure, properties, and initialization",
+            "dependencies": [],
+            "details": "Create the PackageDSLManager class that serves as the main SDK entry point. Define the internal structure to store package configuration in memory, including properties for package URL, package name, products, targets, dependencies, and platform settings. Implement initialization with package URL parameter. Set up the foundation for builder pattern implementation with proper Swift access control and documentation.",
+            "status": "done",
+            "testStrategy": "Unit test PackageDSLManager initialization with various URLs, verify default property values, test memory management and thread safety"
+          },
+          {
+            "id": 2,
+            "title": "Implement package and target creation methods",
+            "description": "Build methods for creating packages and adding targets with support for different types",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Implement createPackage(name:type:) method supporting library/executable/empty PackageType enum values. Create addTarget(name:type:dependencies:) supporting library/executable/test target types, mapping to existing Target and TestTarget structs. Ensure proper integration with PackageSpecifications structure. Handle target dependencies using DependencyRef. Validate unique names and handle duplicate name errors.",
+            "status": "done",
+            "testStrategy": "Test package creation with all supported types, verify target addition with various dependency configurations, test error handling for duplicate names, validate target type mapping"
+          },
+          {
+            "id": 3,
+            "title": "Build product and dependency management",
+            "description": "Implement methods for adding products and managing package dependencies",
+            "dependencies": [
+              "2.2"
+            ],
+            "details": "Implement addProduct(name:type:targets:) using existing Product struct and ProductType enum. Create comprehensive addDependency methods supporting URL-based (.package(url:from:)), path-based (.package(path:)), and registry dependencies with version requirements. Map to existing Dependency struct with DependencyType. Implement builder pattern for fluent API chaining. Handle version requirement parsing and validation.",
+            "status": "done",
+            "testStrategy": "Test product creation with library/executable types, verify dependency addition with various version requirements, test path and URL dependency validation, ensure fluent API works correctly"
+          },
+          {
+            "id": 4,
+            "title": "Create removal and validation methods",
+            "description": "Implement CRUD removal operations and validation logic",
+            "dependencies": [
+              "2.3"
+            ],
+            "details": "Implement removeTarget, removeProduct, and removeDependency methods with proper cascade handling for dependent items. Create validate() method that generates temporary Package.swift using PackageWriter, executes 'swift package dump-package' command, parses JSON output, and compares against in-memory DSL configuration. Handle validation errors with detailed mismatch reporting. Ensure removal operations maintain package consistency.",
+            "status": "done",
+            "testStrategy": "Test removal of targets with dependent products, verify cascade deletion behavior, test validation against actual SPM behavior, ensure error messages are descriptive"
+          },
+          {
+            "id": 5,
+            "title": "Integrate PackageWriter and implement code generation",
+            "description": "Connect PackageDSLManager with existing PackageWriter for Package.swift generation",
+            "dependencies": [
+              "2.4"
+            ],
+            "details": "Implement generatePackageSwift() method that converts internal configuration to PackageSpecifications, uses existing PackageWriter to generate DSL files, and optionally generates traditional Package.swift. Create internal helper methods to map SDK structures to existing PackageDSLKit types. Ensure proper file system interaction using PackageFiles interface. Handle generation errors and provide rollback capability.",
+            "status": "review",
+            "testStrategy": "Integration test generating Package.swift from various configurations, verify generated code compiles with Swift compiler, test file system error handling, validate generated DSL matches input configuration"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Build Swift Settings Management System",
+        "description": "Implement SwiftSettingsManager for managing Swift feature flags and unsafe compilation flags",
+        "details": "Create comprehensive Swift settings management:\n1. Define SwiftFeature enum with all experimental features (StrictConcurrency, RegionBasedIsolation, etc.)\n2. Define SwiftFeature enum with all upcoming features (GlobalConcurrency, InternalImportsByDefault, etc.)\n3. Create UnsafeFlag enum covering compilation flags (O, Onone, WholeModuleOptimization), debug flags (G, ColorDiagnostics), emit flags (EmitModule, EmitIr), and warning flags\n4. Implement parameterized flags (WarnLongFunctionBodies with milliseconds parameter)\n5. Create SwiftSettingsManager class with methods to add/remove/list features and flags\n6. Support target-specific and global Swift settings\n7. Generate proper SwiftSettings DSL code using SwiftSyntaxBuilder\n\nCurrent Swift 6.0 features to support:\n- Experimental: StrictConcurrency can be both experimental and upcoming\n- Handle .experimental() and .upcoming() modifiers properly\n- Support parameterized unsafe flags with associated values",
+        "testStrategy": "Unit test all flag combinations, verify generated DSL syntax is valid, test target-specific vs global settings precedence, validate parameterized flags with various values, integration test with actual Swift package compilation",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define Swift Feature Enums",
+            "description": "Create SwiftFeature enum with experimental and upcoming feature cases",
+            "dependencies": [],
+            "details": "Define comprehensive SwiftFeature enum in Sources/PackageDSLKit/SwiftFeature.swift with all experimental features (StrictConcurrency, RegionBasedIsolation, etc.) and upcoming features (GlobalConcurrency, InternalImportsByDefault, BareSlashRegexLiterals, ConciseMagicFile, ExistentialAny, ForwardTrailingClosures, ImplicitOpenExistentials, DisableOutwardActorInference). Implement proper case names, raw values, and methods to convert to SwiftSetting DSL calls like .enableExperimentalFeature() and .enableUpcomingFeature(). Include proper categorization between experimental and upcoming features.",
+            "status": "pending",
+            "testStrategy": "Unit test all feature cases can be converted to proper SwiftSetting syntax, verify experimental vs upcoming categorization is correct, test string representations match expected DSL output"
+          },
+          {
+            "id": 2,
+            "title": "Create Unsafe Flags Enum System",
+            "description": "Implement UnsafeFlag enum covering all compilation, debug, emit, and warning flags",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Create UnsafeFlag enum in Sources/PackageDSLKit/UnsafeFlag.swift with compilation flags (O, Onone, WholeModuleOptimization), debug flags (G, ColorDiagnostics, DebugPrefixMap), emit flags (EmitModule, EmitIr, EmitAssembly), and warning flags (WarningsAsErrors, WarnLongFunctionBodies, WarnUnusedResult). Implement parameterized flags support with associated values (e.g., WarnLongFunctionBodies with milliseconds parameter). Create methods to generate proper .unsafeFlags() DSL calls with correct flag format (-O, -Onone, -whole-module-optimization, etc.).",
+            "status": "pending",
+            "testStrategy": "Test all flag types generate correct command-line arguments, verify parameterized flags handle values correctly, test conversion from camelCase to kebab-case flag format"
+          },
+          {
+            "id": 3,
+            "title": "Build SwiftSettingsManager Class",
+            "description": "Implement core SwiftSettingsManager class for managing features and flags",
+            "dependencies": [
+              "3.1",
+              "3.2"
+            ],
+            "details": "Create SwiftSettingsManager class in Sources/PackageDSLKit/SwiftSettingsManager.swift with properties to store active features and unsafe flags. Implement methods: addFeature(feature:target:), removeFeature(feature:target:), addUnsafeFlag(flag:target:), removeUnsafeFlag(flag:target:), listFeatures(target:), listUnsafeFlags(target:). Support both global and target-specific settings storage. Implement logic to handle precedence where target-specific settings override global ones. Create internal data structures to efficiently manage settings per target.",
+            "status": "pending",
+            "testStrategy": "Unit test adding/removing features and flags, verify target-specific vs global precedence, test listing methods return correct settings, validate duplicate prevention"
+          },
+          {
+            "id": 4,
+            "title": "Implement SwiftSettings DSL Generation",
+            "description": "Create SwiftSyntaxBuilder integration for generating SwiftSettings DSL code",
+            "dependencies": [
+              "3.3"
+            ],
+            "details": "Implement SwiftSettingsBuilder in Sources/PackageDSLKit/SwiftSettingsBuilder.swift using SwiftSyntaxBuilder to generate proper Package.swift SwiftSettings arrays. Create methods to convert SwiftSettingsManager state into SwiftSyntax nodes for .enableExperimentalFeature(), .enableUpcomingFeature(), and .unsafeFlags() calls. Handle proper formatting, indentation, and array syntax. Integrate with existing PackageWriter and ComponentBuildable protocols. Ensure generated code follows Swift Package Manager DSL conventions.",
+            "status": "pending",
+            "testStrategy": "Test generated DSL syntax compiles with swift package dump-package, verify all setting types generate valid syntax, test complex combinations of features and flags"
+          },
+          {
+            "id": 5,
+            "title": "Integrate with PackageSpecifications",
+            "description": "Update PackageSpecifications and related types to support SwiftSettings",
+            "dependencies": [
+              "3.4"
+            ],
+            "details": "Modify PackageSpecifications struct to properly handle swiftSettings array beyond just SwiftSettingRef references. Update PackageDirectoryConfiguration, Index, and PackageParser to parse and store SwiftSettings. Create proper TypeSource implementations for SwiftFeature and UnsafeFlag types. Update ComponentBuildable implementations for Target, TestTarget to include SwiftSettings in their build methods. Ensure SwiftSettings are properly serialized/deserialized in PackageFiles operations.",
+            "status": "pending",
+            "testStrategy": "Integration test full round-trip of parsing existing Package.swift with SwiftSettings, modifying settings, and regenerating valid Package.swift"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Develop Platform Management System",
+        "description": "Implement PlatformManager for year-based platform sets and individual platform specifications",
+        "details": "Build comprehensive platform support management:\n1. Create PlatformSet enum with year-based mappings (2019-2024):\n   - 2024: iOS 18+, macOS 15+, watchOS 11+, tvOS 18+, visionOS 2+\n   - 2023: iOS 17+, macOS 14+, watchOS 10+, tvOS 17+, visionOS 1+\n   - 2022: iOS 16+, macOS 13+, watchOS 9+, tvOS 16+\n   - 2021: iOS 15+, macOS 12+, watchOS 8+, tvOS 15+\n   - 2020: iOS 14+, macOS 11+, watchOS 7+, tvOS 14+\n   - 2019: iOS 13+, macOS 10.15+, watchOS 6+, tvOS 13+\n2. Implement PlatformManager class with set/remove/list operations\n3. Support custom platform sets with include/exclude options\n4. Add individual platform management (add/remove specific platforms)\n5. Implement platform version validation\n6. Generate SupportedPlatformSet and SupportedPlatform DSL code\n7. Handle Linux and Windows platform specifications\n\nImplementation details:\n- Use existing SupportedPlatformSet type from codebase\n- Map year to appropriate OS versions\n- Support .when(platforms:) conditions for dependencies",
+        "testStrategy": "Test all year-based platform sets generate correct versions, verify include/exclude filtering works correctly, test individual platform addition/removal, validate version string parsing and comparison, integration test with SPM validation",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create PlatformSet enum with year mappings",
+            "description": "Define PlatformSet enum with year-based cases (2019-2024) and static platform version mappings",
+            "dependencies": [],
+            "details": "Create Sources/PackageDSLKit/PlatformSet.swift containing an enum with cases for years 2019-2024. Each case should map to the appropriate platform versions as specified (e.g., 2024 -> iOS 18+, macOS 15+, etc.). Include helper methods to convert enum cases to Sets of SupportedPlatform instances. Implement CustomStringConvertible and CaseIterable for easy iteration and display.",
+            "status": "pending",
+            "testStrategy": "Unit tests to verify each year case returns correct platform versions, test conversion to SupportedPlatform sets, verify all platforms are included for each year"
+          },
+          {
+            "id": 2,
+            "title": "Implement PlatformManager core functionality",
+            "description": "Create PlatformManager class with set, remove, list, and validation operations",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Create Sources/PackageDSLKit/PlatformManager.swift implementing a class that manages platform configurations. Include methods: setPlatformSet(year:include:exclude:) for year-based sets with filtering, addPlatform(_:version:), removePlatform(_:), listPlatforms() returning current configuration, validatePlatformVersion(_:) for version string validation. Store configuration in memory with ability to generate SupportedPlatformSet instances.",
+            "status": "pending",
+            "testStrategy": "Test set operations with various year/filter combinations, verify add/remove individual platforms works correctly, test validation accepts valid versions and rejects invalid ones"
+          },
+          {
+            "id": 3,
+            "title": "Add platform filtering and custom sets",
+            "description": "Implement include/exclude filtering and custom platform set creation",
+            "dependencies": [
+              "4.2"
+            ],
+            "details": "Extend PlatformManager with advanced filtering capabilities: implement include parameter to select specific platforms from a year set (e.g., only iOS and macOS from 2023), implement exclude parameter to remove platforms from a set, support creating fully custom platform sets without year basis, handle edge cases like excluding all platforms or conflicting include/exclude parameters.",
+            "status": "pending",
+            "testStrategy": "Test include filtering selects only specified platforms, verify exclude removes correct platforms, test custom sets work independently of year sets, validate error handling for invalid filter combinations"
+          },
+          {
+            "id": 4,
+            "title": "Generate DSL code for platforms",
+            "description": "Implement generation of SupportedPlatformSet and SupportedPlatform DSL code from configurations",
+            "dependencies": [
+              "4.2",
+              "4.3"
+            ],
+            "details": "Add DSL code generation methods to PlatformManager: generateSupportedPlatformSetCode() to create DSL structs inheriting from PlatformSet protocol, generateSupportedPlatformCode() for individual platform specifications, ensure generated code follows existing patterns seen in SupportedPlatformSet.swift with proper body property containing platform array, support .when(platforms:) conditions for conditional dependencies.",
+            "status": "pending",
+            "testStrategy": "Verify generated DSL code compiles correctly, test round-trip conversion (config -> DSL -> parsed config), validate generated code matches expected format from existing codebase patterns"
+          },
+          {
+            "id": 5,
+            "title": "Handle Linux and Windows platforms",
+            "description": "Add support for Linux and Windows platform specifications",
+            "dependencies": [
+              "4.2"
+            ],
+            "details": "Extend PlatformManager to handle non-Apple platforms: add Linux platform support with appropriate version specifications, add Windows platform support with version handling, ensure these platforms integrate with existing year sets where applicable, modify SupportedPlatform to handle these platform types correctly in code generation and parsing.",
+            "status": "pending",
+            "testStrategy": "Test Linux platform can be added and configured correctly, verify Windows platform specifications work as expected, test these platforms integrate with existing filtering and DSL generation, validate SPM accepts generated platform specifications"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Enhance CLI with Component Management Commands",
+        "description": "Implement comprehensive CLI commands for target, product, and dependency management",
+        "details": "Expand CLI with full component management commands:\n1. Complete Target command with add/remove/list subcommands:\n   - 'package target add <name> --type library|executable|test'\n   - 'package target remove <name>'\n   - 'package target list' with formatted output\n2. Complete Product command with add/remove/list:\n   - 'package product add <name> --type library|executable --targets t1,t2'\n   - 'package product remove <name>'\n   - 'package product list'\n3. Complete Dependency command with comprehensive options:\n   - 'package dependency add <name> <url> --from|--exact|--range|--branch|--revision'\n   - 'package dependency add <name> --path <path>' for local dependencies\n   - 'package dependency add <name> --registry <id>' for registry dependencies\n   - 'package dependency remove <name>'\n   - 'package dependency list'\n4. Use ArgumentParser for all command parsing\n5. Integrate with PackageDSLManager for all operations\n6. Add proper error handling and user-friendly messages",
+        "testStrategy": "Test all command combinations with ArgumentParser, verify commands call appropriate SDK methods, test error cases with helpful error messages, integration test full workflow from CLI to generated Package.swift",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Target Command Structure",
+            "description": "Create complete Target command with add/remove/list subcommands using ArgumentParser",
+            "dependencies": [],
+            "details": "Enhance the existing Target.swift command structure to include:\n1. CommandConfiguration with all three subcommands (Add, Remove, List)\n2. Target.Add implementation with --type option supporting library|executable|test TargetType enum\n3. Target.Remove implementation with name argument for target removal\n4. Target.List implementation with formatted console output showing all targets\n5. Integration with PackageParser and PackageWriter for target operations",
+            "status": "pending",
+            "testStrategy": "Unit test all Target subcommands with various argument combinations, verify proper ArgumentParser parsing, test integration with PackageParser for reading targets, test PackageWriter for updating target definitions"
+          },
+          {
+            "id": 2,
+            "title": "Complete Product Command Implementation",
+            "description": "Extend Product command with remove and list subcommands, enhance add with target selection",
+            "dependencies": [],
+            "details": "Complete the Product command implementation:\n1. Add CommandConfiguration to include Remove and List subcommands\n2. Enhance Product.Add to accept --targets option with comma-separated target names\n3. Implement Product.Remove with name argument and PackageParser/Writer integration\n4. Implement Product.List with formatted output displaying products and their target dependencies\n5. Ensure proper validation that specified targets exist before adding to product",
+            "status": "pending",
+            "testStrategy": "Test Product.Add with multiple target specifications, verify Remove deletes products correctly, test List output formatting, validate error handling for non-existent targets"
+          },
+          {
+            "id": 3,
+            "title": "Build Comprehensive Dependency Command",
+            "description": "Implement full Dependency command with support for URL, path, and registry dependencies",
+            "dependencies": [],
+            "details": "Create complete Dependency management commands:\n1. Add CommandConfiguration with Add, Remove, List subcommands\n2. Implement Dependency.Add with multiple source types:\n   - URL dependencies with --from, --exact, --range, --branch, --revision options\n   - Path dependencies with --path option for local packages\n   - Registry dependencies with --registry option\n3. Implement Dependency.Remove with dependency name argument\n4. Implement Dependency.List showing all dependencies with their types and version requirements\n5. Use existing Dependency struct and DependencyType from PackageDSLKit",
+            "status": "pending",
+            "testStrategy": "Test all dependency version requirement types, verify URL/path/registry parsing, test removal of dependencies, validate list output shows correct dependency information"
+          },
+          {
+            "id": 4,
+            "title": "Create PackageDSLManager SDK Class",
+            "description": "Develop the main SDK interface class that wraps CLI functionality for programmatic access",
+            "dependencies": [
+              "5.1",
+              "5.2",
+              "5.3"
+            ],
+            "details": "Build PackageDSLManager as the primary SDK interface:\n1. Create PackageDSLManager class with initialization for package directory URL\n2. Implement target management methods: addTarget, removeTarget, listTargets\n3. Implement product management methods: addProduct, removeProduct, listProducts\n4. Implement dependency management methods: addDependency, removeDependency, listDependencies\n5. Use PackageParser for reading current state and PackageWriter for persisting changes\n6. Add validation logic and return appropriate error types from PackageDSLError",
+            "status": "pending",
+            "testStrategy": "Integration test full CRUD operations through SDK, verify SDK methods match CLI functionality, test error propagation and validation, test concurrent operations handling"
+          },
+          {
+            "id": 5,
+            "title": "Add Error Handling and User Experience",
+            "description": "Implement comprehensive error handling with user-friendly messages across all commands",
+            "dependencies": [
+              "5.1",
+              "5.2",
+              "5.3"
+            ],
+            "details": "Enhance all commands with proper error handling:\n1. Add validation for all input arguments (valid names, existing targets, etc.)\n2. Implement helpful error messages using PackageDSLError enum\n3. Add confirmation prompts for destructive operations (remove commands)\n4. Implement --force flag to skip confirmations\n5. Add colored output for success/error messages using ANSI codes\n6. Create consistent formatting for list outputs across all commands\n7. Add --json flag for machine-readable output format",
+            "status": "pending",
+            "testStrategy": "Test error messages for all invalid input scenarios, verify confirmation prompts work correctly, test force flag bypasses confirmations, validate JSON output format is valid"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Add Swift Settings CLI Commands",
+        "description": "Implement CLI commands for managing Swift feature flags and unsafe compilation flags",
+        "details": "Create Swift settings management CLI commands:\n1. Implement SwiftFeatureCommand with add/remove/list subcommands:\n   - 'package swift-feature add StrictConcurrency|InternalImportsByDefault|...'\n   - 'package swift-feature remove <feature>'\n   - 'package swift-feature list' showing active features\n2. Implement UnsafeFlagCommand with add/remove/list:\n   - 'package unsafe-flag add WholeModuleOptimization|WarningsAsErrors|...'\n   - 'package unsafe-flag add WarnLongFunctionBodies --ms 100' for parameterized\n   - 'package unsafe-flag remove <flag>'\n   - 'package unsafe-flag list'\n3. Add target-specific Swift settings commands:\n   - 'package target <name> swift-settings add <feature>'\n   - 'package target <name> swift-settings remove <feature>'\n4. Use ArgumentParser with proper option parsing\n5. Integrate with SwiftSettingsManager\n6. Provide autocomplete suggestions for feature/flag names",
+        "testStrategy": "Test all Swift features and unsafe flags can be added/removed via CLI, verify parameterized flags parse milliseconds correctly, test target-specific settings, validate generated Package.swift includes correct SwiftSettings",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create SwiftFeatureCommand structure with ArgumentParser",
+            "description": "Implement the main SwiftFeatureCommand with add/remove/list subcommands using ArgumentParser",
+            "dependencies": [],
+            "details": "Create Sources/package/Commands/SwiftFeature.swift defining Package.SwiftFeature as a ParsableCommand with subcommands for Add, Remove, and List. Follow the existing command pattern from Target.swift and Product.swift. Add should accept feature names as arguments (StrictConcurrency, InternalImportsByDefault, etc.), Remove should accept feature name to remove, and List should display all active Swift features from the package specification.",
+            "status": "pending",
+            "testStrategy": "Test command parsing with various Swift feature names, verify ArgumentParser correctly handles multiple features in add command, test list command output formatting"
+          },
+          {
+            "id": 2,
+            "title": "Implement UnsafeFlagCommand with parameterized flag support",
+            "description": "Create UnsafeFlagCommand supporting both simple and parameterized unsafe compilation flags",
+            "dependencies": [],
+            "details": "Create Sources/package/Commands/UnsafeFlag.swift defining Package.UnsafeFlag as a ParsableCommand. Implement Add subcommand with support for both simple flags (WholeModuleOptimization, WarningsAsErrors) and parameterized flags (WarnLongFunctionBodies with --ms parameter). Remove subcommand should accept flag name, and List should show all active unsafe flags with their parameters if applicable. Use @Option for milliseconds parameter in parameterized flags.",
+            "status": "pending",
+            "testStrategy": "Test parsing of simple flags, verify parameterized flag parsing with --ms option, test edge cases for invalid millisecond values, verify list command shows parameters correctly"
+          },
+          {
+            "id": 3,
+            "title": "Add target-specific Swift settings subcommands",
+            "description": "Extend Target command with swift-settings subcommands for target-specific configuration",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Modify Sources/package/Commands/Target.swift to add SwiftSettings nested command with Add and Remove subcommands. Implement 'package target <name> swift-settings add <feature>' and 'package target <name> swift-settings remove <feature>' functionality. The commands should accept target name as argument and feature/flag to add or remove. Ensure proper command structure following ArgumentParser patterns.",
+            "status": "pending",
+            "testStrategy": "Test target-specific feature addition and removal, verify commands correctly identify target and apply settings, test interaction with global settings"
+          },
+          {
+            "id": 4,
+            "title": "Integrate commands with SwiftSettingsManager",
+            "description": "Connect CLI commands to SwiftSettingsManager for actual settings manipulation",
+            "dependencies": [
+              "6.1",
+              "6.2",
+              "6.3"
+            ],
+            "details": "Update PackageSpecifications and related structures to support SwiftSettings manipulation through the new commands. Ensure commands read current package specifications, apply changes through SwiftSettingsManager (from task 3), and write updated specifications back. Implement proper error handling for invalid features/flags. Update Package+Command.swift to register new SwiftFeature and UnsafeFlag commands as subcommands.",
+            "status": "pending",
+            "testStrategy": "Integration test verifying commands modify PackageSpecifications correctly, test that changes persist to generated Package.swift, verify SwiftSettings DSL syntax generation"
+          },
+          {
+            "id": 5,
+            "title": "Implement autocomplete for feature and flag names",
+            "description": "Add autocomplete suggestions for Swift features and unsafe flags in CLI",
+            "dependencies": [
+              "6.4"
+            ],
+            "details": "Implement completion handlers for ArgumentParser to provide autocomplete suggestions. Create enums or constants for all valid Swift features (StrictConcurrency, RegionBasedIsolation, GlobalConcurrency, InternalImportsByDefault, etc.) and unsafe flags. Use ArgumentParser's completion functionality to suggest valid options when users tab-complete. Ensure autocomplete works for both swift-feature and unsafe-flag commands.",
+            "status": "pending",
+            "testStrategy": "Test autocomplete generation for all feature names, verify completion works for parameterized flags, test that invalid options are not suggested"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement Platform Management CLI Commands",
+        "description": "Create CLI commands for platform and platform-set management",
+        "details": "Implement platform management CLI commands:\n1. Create PlatformSetCommand with set/show/remove/list subcommands:\n   - 'package platform-set set 2023|2022|2021|2020|2019' for year-based sets\n   - 'package platform-set set 2023 --ios --macos' for filtered sets\n   - 'package platform-set set 2023 --exclude tvos' for exclusions\n   - 'package platform-set show' displaying current configuration\n   - 'package platform-set remove' to clear platform set\n   - 'package platform-set list' showing all available sets\n2. Create PlatformCommand for individual platforms:\n   - 'package platform add iOS --version \"15.0\"'\n   - 'package platform add linux' (no version required)\n   - 'package platform remove watchOS'\n   - 'package platform list'\n3. Integrate with PlatformManager SDK\n4. Format output nicely with platform names and versions\n5. Validate version strings match platform requirements",
+        "testStrategy": "Test year-based platform sets via CLI, verify include/exclude filters work, test individual platform management, validate version string parsing, integration test platform configuration in generated Package.swift",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create PlatformSetCommand with year-based set functionality",
+            "description": "Implement the main PlatformSetCommand class with 'set' subcommand supporting year-based platform sets (2019-2024) and integration with existing SupportedPlatformSet",
+            "dependencies": [],
+            "details": "Create PlatformSetCommand.swift in Sources/package/Commands/ following the existing command pattern. Implement 'set' subcommand that accepts year arguments (2019-2024) and maps them to appropriate platform versions. Use existing SupportedPlatformSet and SupportedPlatform structs from PackageDSLKit. Parse year arguments and create corresponding platform sets with correct versions for each year.",
+            "status": "pending",
+            "testStrategy": "Test command parsing for different year inputs, verify correct platform versions are mapped for each year, test invalid year handling"
+          },
+          {
+            "id": 2,
+            "title": "Add platform filtering and exclusion options to PlatformSetCommand",
+            "description": "Extend PlatformSetCommand with --ios, --macos, --watchos, --tvos, --visionos flags for filtering and --exclude flag for platform exclusions",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Add @Flag options for each platform type (ios, macos, watchos, tvos, visionos) to enable filtering. Implement --exclude option to remove specific platforms from the set. Modify the set command logic to apply filters and exclusions after determining the base year set. Ensure proper interaction between year selection, include filters, and exclude filters.",
+            "status": "pending",
+            "testStrategy": "Test filtering with single and multiple platform flags, verify exclusion removes correct platforms, test combination of filters and exclusions"
+          },
+          {
+            "id": 3,
+            "title": "Implement show, remove, and list subcommands for PlatformSetCommand",
+            "description": "Add remaining PlatformSetCommand subcommands for displaying current configuration, removing platform sets, and listing available sets",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Create Show subcommand to display current platform configuration from Package.swift. Implement Remove subcommand to clear platform set configuration. Add List subcommand showing all available year-based sets with their platform versions. Format output nicely using print statements with aligned columns for readability.",
+            "status": "pending",
+            "testStrategy": "Test show command displays correct current configuration, verify remove clears platform settings, test list command shows all available sets properly formatted"
+          },
+          {
+            "id": 4,
+            "title": "Create PlatformCommand for individual platform management",
+            "description": "Implement PlatformCommand with add, remove, and list subcommands for managing individual platforms with optional version specifications",
+            "dependencies": [],
+            "details": "Create PlatformCommand.swift with Add subcommand accepting platform name and optional --version flag. Implement Remove subcommand for removing specific platforms. Add List subcommand to show currently configured platforms. Handle platform names case-insensitively and validate version strings match platform requirements. Support platforms without version requirements like Linux.",
+            "status": "pending",
+            "testStrategy": "Test adding platforms with and without versions, verify version validation for each platform type, test removing individual platforms, verify list shows correct platforms"
+          },
+          {
+            "id": 5,
+            "title": "Integrate commands with PackageParser and PackageWriter",
+            "description": "Connect both PlatformSetCommand and PlatformCommand to the existing SDK for reading and writing Package.swift files",
+            "dependencies": [
+              "7.3",
+              "7.4"
+            ],
+            "details": "Use PackageParser to read current package configuration. Integrate with PackageWriter to persist platform changes. Update Package+Command.swift to register new commands in subcommands array. Ensure commands properly update PackageSpecifications with new platform configurations. Handle file I/O errors gracefully with appropriate error messages.",
+            "status": "pending",
+            "testStrategy": "Integration test full workflow from command to generated Package.swift, verify Package.swift syntax is valid after modifications, test error handling for missing or invalid Package.swift files"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Create Package Validation and Generation Commands",
+        "description": "Implement validate, generate, info, and doctor commands for package management",
+        "details": "Build package lifecycle and validation commands:\n1. Implement ValidateCommand:\n   - Execute 'swift package dump-package' via SPMIntegrator\n   - Compare DSL structure with SPM metadata\n   - Report mismatches, missing components, or inconsistencies\n   - Return non-zero exit code on validation failure\n2. Implement GenerateCommand:\n   - Read PackageDSL from Package/ directory\n   - Generate Package.swift using PackageWriter\n   - Write to package root with proper swift-tools-version\n   - Optionally run validation after generation\n3. Implement InfoCommand:\n   - Display package name, products, targets, dependencies\n   - Show platform support and Swift settings\n   - Format as readable summary or JSON output\n4. Implement DoctorCommand:\n   - Check for common issues (missing sources, circular dependencies)\n   - Verify PackageDSL syntax is valid\n   - Suggest fixes for common problems\n   - Check swift-tools-version compatibility",
+        "testStrategy": "Test validation catches DSL/SPM mismatches, verify generation creates valid Package.swift, test info command with various package configurations, verify doctor identifies common issues correctly",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create ValidateCommand for Package Validation",
+            "description": "Implement the validate command that executes swift package dump-package and compares DSL with SPM metadata",
+            "dependencies": [],
+            "details": "Create ValidateCommand.swift in Sources/package/Commands/ extending ParsableCommand. Implement validation logic that reads PackageDSL from Package/ directory using PackageParser, executes 'swift package dump-package' using Process API to get SPM metadata JSON, parses the JSON output into SPM model structures, compares DSL components with SPM data (products, targets, dependencies, platforms), reports any mismatches or inconsistencies to stdout with detailed error messages, and returns appropriate exit codes (0 for success, non-zero for validation failures). Include options for verbose output and JSON format reporting.",
+            "status": "pending",
+            "testStrategy": "Test with valid and invalid PackageDSL configurations, verify mismatch detection for missing targets, incorrect dependencies, and platform inconsistencies, test exit codes and error message formatting"
+          },
+          {
+            "id": 2,
+            "title": "Implement GenerateCommand for Package.swift Generation",
+            "description": "Create command to generate Package.swift from PackageDSL files in Package/ directory",
+            "dependencies": [],
+            "details": "Implement GenerateCommand.swift in Sources/package/Commands/ extending ParsableCommand. Parse PackageDSL from Package/ directory using PackageParser, use PackageWriter to generate Package.swift content with proper formatting, read swift-tools-version from .swift-version file or use default, write generated Package.swift to package root with appropriate header comment, add --validate flag to optionally run validation after generation using ValidateCommand logic, support --dry-run option to preview generated content without writing, handle file write errors gracefully with descriptive messages.",
+            "status": "pending",
+            "testStrategy": "Test generation with various PackageDSL configurations, verify generated Package.swift compiles with swift build, test dry-run mode outputs correct content without file writes, ensure validation flag works correctly"
+          },
+          {
+            "id": 3,
+            "title": "Create InfoCommand for Package Information Display",
+            "description": "Implement info command to display package metadata in human-readable or JSON format",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Create InfoCommand.swift in Sources/package/Commands/ extending ParsableCommand. Execute 'swift package dump-package' to get current package metadata, parse JSON response into structured SPM models, display package information including name, platforms, products (with types and targets), targets (with dependencies and types), external dependencies (with version requirements), Swift language settings and flags. Support --format option for 'text' (default) or 'json' output, implement readable text formatting with proper indentation and sections, provide --verbose flag for additional details like target paths and resource specifications.",
+            "status": "pending",
+            "testStrategy": "Test with packages of varying complexity, verify JSON and text output formats are correct, test verbose mode shows additional details, ensure command handles missing Package.swift gracefully"
+          },
+          {
+            "id": 4,
+            "title": "Implement DoctorCommand for Package Health Checks",
+            "description": "Create doctor command to diagnose common package issues and suggest fixes",
+            "dependencies": [
+              "8.1",
+              "8.2"
+            ],
+            "details": "Implement DoctorCommand.swift in Sources/package/Commands/ extending ParsableCommand. Check for common issues: validate PackageDSL syntax by attempting to parse Package/ directory, verify Package.swift exists and is readable, check swift-tools-version compatibility with current Swift version, detect missing source files for declared targets, identify circular dependencies between targets, find orphaned targets not included in any product, validate dependency version requirements are satisfiable. Provide actionable fix suggestions for each issue found, support --fix flag for auto-fixing simple issues (like creating missing directories), output issues with severity levels (error, warning, info), return non-zero exit code if critical issues found.",
+            "status": "pending",
+            "testStrategy": "Test detection of various package issues like missing sources and circular dependencies, verify fix suggestions are accurate and actionable, test auto-fix functionality for simple issues, ensure proper exit codes based on issue severity"
+          },
+          {
+            "id": 5,
+            "title": "Integrate Commands into Main CLI and Add Tests",
+            "description": "Wire up all validation commands to the main Package CLI and create comprehensive tests",
+            "dependencies": [
+              "8.1",
+              "8.2",
+              "8.3",
+              "8.4"
+            ],
+            "details": "Update Package+Command.swift to register ValidateCommand, GenerateCommand, InfoCommand, and DoctorCommand as subcommands with proper help text and aliases. Create integration tests that validate a sample package with known issues, generate Package.swift and verify it matches expected output, run info command and parse its JSON output, execute doctor command and verify it identifies planted issues. Add unit tests for each command's option parsing and validation logic. Update command help documentation with usage examples and option descriptions. Ensure all commands follow consistent error handling and output formatting patterns.",
+            "status": "pending",
+            "testStrategy": "End-to-end testing of full command workflow from DSL to validation, test command composition (generate then validate), verify help text is comprehensive and accurate, test error handling across all commands"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Implement Package Conversion from Traditional Package.swift",
+        "description": "Create converter to transform traditional Package.swift files into PackageDSL format",
+        "details": "Build Package.swift to PackageDSL converter:\n1. Implement ConvertCommand in CLI:\n   - 'package convert <Package.swift>' or 'package convert' for current directory\n   - Parse existing Package.swift using swift package dump-package\n2. Create SPMToPackageDSL converter:\n   - Map SPM JSON data to PackageDSL components\n   - Convert products to Product structs\n   - Convert targets to Target/TestTarget structs\n   - Convert dependencies to Dependency structs\n   - Map platforms to SupportedPlatformSet or individual platforms\n   - Extract Swift settings and unsafe flags\n3. Generate PackageDSL file structure:\n   - Create Package/ directory with proper structure\n   - Write component files using ComponentWriter\n   - Generate index file with Package() definition\n4. Implement RoundTripValidator:\n   - Generate Package.swift from DSL\n   - Compare with original using SPM dump\n   - Report any data loss or differences\n5. Handle edge cases:\n   - Custom build settings\n   - Complex dependency requirements\n   - System libraries and binary targets",
+        "testStrategy": "Test conversion with various Package.swift examples, verify round-trip conversion preserves all data, test edge cases like binary targets and system libraries, validate converted DSL generates identical Package.swift",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create ConvertCommand CLI structure",
+            "description": "Implement the ConvertCommand class in the CLI with ArgumentParser integration for 'package convert' command",
+            "dependencies": [],
+            "details": "Create ConvertCommand.swift in Sources/package/Commands/ following the pattern of existing commands (Initialize, Dump, Product). Implement ParsableCommand protocol with options for input Package.swift path (optional, defaults to current directory) and output directory. Add command to Package+Command.swift subcommands list. Include Settings option group for path configuration and FileManager access.",
+            "status": "pending",
+            "testStrategy": "Test command parsing with various argument combinations, verify default path handling when no arguments provided, test error cases for invalid paths"
+          },
+          {
+            "id": 2,
+            "title": "Implement SPMPackageLoader for Package.swift parsing",
+            "description": "Create loader that executes 'swift package dump-package' and parses resulting JSON into structured data",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Create SPMPackageLoader.swift in Sources/PackageDSLKit/ that executes 'swift package dump-package' command using Process API, captures JSON output, and decodes it into Codable structs matching SPM's package description format. Define SPMPackage, SPMProduct, SPMTarget, SPMDependency structs matching the JSON schema. Handle process execution errors and JSON parsing failures gracefully.",
+            "status": "pending",
+            "testStrategy": "Test with sample Package.swift files of varying complexity, verify JSON parsing handles all SPM fields correctly, test error handling for malformed Package.swift files"
+          },
+          {
+            "id": 3,
+            "title": "Build SPMToPackageDSL converter core",
+            "description": "Create converter that maps SPM package data structures to PackageDSL components",
+            "dependencies": [
+              "9.2"
+            ],
+            "details": "Implement SPMToPackageDSLConverter.swift with methods to convert SPMPackage to PackageSpecifications. Map SPMProduct to Product with correct ProductType, SPMTarget to Target/TestTarget based on type, SPMDependency to Dependency handling URL/path/registry types with version requirements. Convert platforms array to SupportedPlatformSet or individual SupportedPlatform. Extract and map Swift language version, build settings, unsafe flags to appropriate DSL properties.",
+            "status": "pending",
+            "testStrategy": "Unit test each conversion method with various SPM configurations, verify all properties are mapped correctly, test edge cases like custom build settings and complex dependency requirements"
+          },
+          {
+            "id": 4,
+            "title": "Generate PackageDSL file structure from converted data",
+            "description": "Use existing PackageWriter to create proper Package/ directory structure with component files",
+            "dependencies": [
+              "9.3"
+            ],
+            "details": "Integrate SPMToPackageDSLConverter output with PackageWriter to generate file structure. Create Package/ directory at specified location, write component files (Products/, Dependencies/, Targets/, TestTargets/) using ComponentWriter, generate Index.swift with proper imports and Package() definition using PackageIndexWriter. Ensure proper file paths and directory creation using FileManager.",
+            "status": "pending",
+            "testStrategy": "Test file generation creates expected directory structure, verify generated files compile correctly, test that all components are properly written to their respective directories"
+          },
+          {
+            "id": 5,
+            "title": "Implement RoundTripValidator for conversion verification",
+            "description": "Create validator that ensures converted PackageDSL generates equivalent Package.swift",
+            "dependencies": [
+              "9.4"
+            ],
+            "details": "Create RoundTripValidator.swift that generates Package.swift from converted DSL using existing generation logic, executes 'swift package dump-package' on both original and generated Package.swift, compares the resulting JSON structures for equivalence. Report differences in products, targets, dependencies, platforms, or settings. Handle acceptable differences like ordering and whitespace. Provide detailed diff output for any data loss or transformation issues.",
+            "status": "pending",
+            "testStrategy": "Test round-trip validation with various Package.swift examples, verify validator detects data loss correctly, test that semantically equivalent but syntactically different Package.swift files pass validation"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Add Advanced Error Handling and User Experience Enhancements",
+        "description": "Implement comprehensive error handling, validation, and developer experience improvements",
+        "details": "Enhance error handling and developer experience:\n1. Create custom error types with actionable messages:\n   - PackageDSLError with specific cases for each failure type\n   - SPMError for Swift Package Manager failures\n   - ValidationError for configuration issues\n2. Implement error recovery suggestions:\n   - Suggest 'swift package resolve' for dependency issues\n   - Provide fix commands for common problems\n   - Show relevant documentation links\n3. Add verbose and quiet modes:\n   - '--verbose' flag showing detailed operations\n   - '--quiet' flag suppressing non-error output\n   - Progress indicators for long operations\n4. Implement watch mode for development:\n   - 'package watch' monitoring Package/ directory\n   - Auto-regenerate Package.swift on changes\n   - Run validation automatically\n5. Add shell completions:\n   - Generate completion scripts for bash/zsh/fish\n   - Provide command and option suggestions\n6. Create helpful diagnostics:\n   - Color-coded output for errors/warnings/success\n   - Diff view for validation mismatches\n   - Dependency graph visualization\n\nUse Swift 6.0 features:\n- Structured concurrency for parallel operations\n- AsyncSequence for watch mode\n- Swift Testing framework for better test output",
+        "testStrategy": "Test error messages are clear and actionable, verify watch mode detects file changes correctly, test shell completions work in different shells, validate verbose/quiet modes affect output appropriately, test error recovery suggestions are helpful",
+        "priority": "medium",
+        "dependencies": [
+          8,
+          9
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Custom Error Type Hierarchy",
+            "description": "Create comprehensive error types with specific cases for different failure scenarios",
+            "dependencies": [],
+            "details": "Extend the existing PackageDSLError enum with more specific error cases including SPMError for Swift Package Manager failures, ValidationError for configuration issues, FileSystemError for I/O operations, and DependencyError for dependency resolution issues. Each error case should include context information and suggested recovery actions. Define LocalizedError conformance with detailed error descriptions and recovery suggestions for each case.",
+            "status": "pending",
+            "testStrategy": "Unit test each error type with specific scenarios, verify error messages contain actionable information, test localized descriptions are clear and helpful"
+          },
+          {
+            "id": 2,
+            "title": "Implement Verbose and Quiet Output Modes",
+            "description": "Add command-line flags to control output verbosity levels",
+            "dependencies": [],
+            "details": "Modify Settings struct to add @Flag variables for --verbose and --quiet options. Create an OutputManager class that manages console output based on verbosity level. Implement methods for debug output (verbose only), regular output (default), error output (always shown), and quiet mode (errors only). Integrate with existing print statements in Initialize, Product, and Dump commands. Add progress indicators using Swift's AsyncStream for long-running operations like dependency resolution.",
+            "status": "pending",
+            "testStrategy": "Test that verbose flag shows detailed operations, verify quiet flag suppresses non-error output, ensure progress indicators appear for operations taking longer than 2 seconds"
+          },
+          {
+            "id": 3,
+            "title": "Create Watch Mode for Development",
+            "description": "Implement file system monitoring to auto-regenerate Package.swift on changes",
+            "dependencies": [
+              "10.2"
+            ],
+            "details": "Add a new Watch command to Package+Command that monitors the Package/ directory for changes. Implement using Darwin's FSEvents API or cross-platform file watching solution. Use AsyncSequence to handle file change events and debounce rapid changes. Auto-regenerate Package.swift when .swift files in Package/ directory change. Run validation automatically after regeneration and display results using the OutputManager. Support interruption with Ctrl+C gracefully.",
+            "status": "pending",
+            "testStrategy": "Test file change detection works reliably, verify debouncing prevents excessive regeneration, test graceful shutdown on interrupt signal, validate regenerated Package.swift matches expected output"
+          },
+          {
+            "id": 4,
+            "title": "Add Shell Completion Support",
+            "description": "Generate and install completion scripts for bash, zsh, and fish shells",
+            "dependencies": [
+              "10.2"
+            ],
+            "details": "Implement CompletionCommand using ArgumentParser's built-in completion generation capabilities. Add 'package completion' command that generates scripts for bash, zsh, and fish. Include installation instructions for each shell type. Enhance existing commands with completion annotations for better suggestions. Add custom completion logic for dynamic values like existing target names and dependency URLs. Create helper method to detect user's shell and provide tailored installation instructions.",
+            "status": "pending",
+            "testStrategy": "Generate completion scripts for each shell type and verify syntax, test completions work for all commands and options, verify dynamic completions suggest appropriate values"
+          },
+          {
+            "id": 5,
+            "title": "Implement Diagnostic Output with Colors and Diffs",
+            "description": "Add color-coded output and diff visualization for better developer experience",
+            "dependencies": [
+              "10.1",
+              "10.2"
+            ],
+            "details": "Create DiagnosticRenderer class that formats output with ANSI color codes when terminal supports it. Implement color schemes for errors (red), warnings (yellow), success (green), and info (blue). Add diff visualization for validation mismatches showing expected vs actual Package.swift content using a line-by-line diff algorithm. Create dependency graph visualization using ASCII art or simple tree structure. Integrate with OutputManager to respect verbose/quiet modes. Add --no-color flag to disable colors when needed.",
+            "status": "pending",
+            "testStrategy": "Test color output on different terminal types, verify diff output clearly shows differences, test dependency graph renders correctly for complex dependency trees, ensure --no-color flag disables all color output"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-14T21:02:02.251Z",
+      "updated": "2025-08-22T19:58:38.569Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
