@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:brightdigit/SyntaxKit.git
 	branch = packagedslkit
-	commit = 61fb4862f0554894a22d7c17aa9a29b9a47a2c51
-	parent = d83c77ca033b02f145d915a3a57c7db2347aa160
+	commit = 03359e2b938dc189321d68eae0f5a436fce7fb62
+	parent = ca93f30796aef9273f496b58ab471bc9ac962d0c
 	method = merge
 	cmdver = 0.4.9
