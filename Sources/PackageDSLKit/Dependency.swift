@@ -126,7 +126,7 @@ import SwiftPackageManagerKit
 
 extension Dependency {
   /// Initialize Dependency from SPM data
-  public init?(spmDependency: SPMDependency) {
+  public init?(spmDependency: SwiftPackageManagerKit.Dependency) {
     let identity = spmDependency.identity
     
     self.init(

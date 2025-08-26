@@ -39,9 +39,11 @@ public struct Target: TypeSource {
 
 import SwiftPackageManagerKit
 
+
+
 extension Target {
   /// Initialize Target from SPM data (for regular and executable targets)
-  public init?(spmTarget: SPMTarget) {
+  public init?(spmTarget: SwiftPackageManagerKit.Target) {
     // Only convert regular and executable targets, skip test targets
     guard spmTarget.type == .regular || spmTarget.type == .executable else {
       return nil

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a dependency location (remote or file system)
-public enum SPMDependencyLocation: Codable, Hashable {
+public enum DependencyLocation: Codable, Hashable {
     case remote(urlString: String)
     case fileSystem(path: String)
     
@@ -43,7 +43,7 @@ public enum SPMDependencyLocation: Codable, Hashable {
 }
 
 /// Represents a trait for a dependency
-public struct SPMDependencyTrait: Codable, Hashable {
+public struct DependencyTrait: Codable, Hashable {
     public let name: String
     
     public init(name: String) {
@@ -52,19 +52,19 @@ public struct SPMDependencyTrait: Codable, Hashable {
 }
 
 /// Represents a source control dependency
-public struct SPMSourceControlDependency: Codable, Hashable {
+public struct SourceControlDependency: Codable, Hashable {
     public let identity: String
-    public let location: SPMDependencyLocation
+    public let location: DependencyLocation
     public let productFilter: String?
-    public let requirement: SPMVersionRequirement
-    public let traits: [SPMDependencyTrait]
+    public let requirement: VersionRequirement
+    public let traits: [DependencyTrait]
     
     public init(
         identity: String,
-        location: SPMDependencyLocation,
+        location: DependencyLocation,
         productFilter: String? = nil,
-        requirement: SPMVersionRequirement,
-        traits: [SPMDependencyTrait] = []
+        requirement: VersionRequirement,
+        traits: [DependencyTrait] = []
     ) {
         self.identity = identity
         self.location = location
@@ -75,17 +75,17 @@ public struct SPMSourceControlDependency: Codable, Hashable {
 }
 
 /// Represents a file system dependency
-public struct SPMFileSystemDependency: Codable, Hashable {
+public struct FileSystemDependency: Codable, Hashable {
     public let identity: String
     public let path: String
     public let productFilter: String?
-    public let traits: [SPMDependencyTrait]
+    public let traits: [DependencyTrait]
     
     public init(
         identity: String,
         path: String,
         productFilter: String? = nil,
-        traits: [SPMDependencyTrait] = []
+        traits: [DependencyTrait] = []
     ) {
         self.identity = identity
         self.path = path
@@ -95,9 +95,9 @@ public struct SPMFileSystemDependency: Codable, Hashable {
 }
 
 /// Represents a package dependency (can be source control or file system)
-public enum SPMDependency: Codable, Hashable {
-    case sourceControl(SPMSourceControlDependency)
-    case fileSystem(SPMFileSystemDependency)
+public enum Dependency: Codable, Hashable {
+    case sourceControl(SourceControlDependency)
+    case fileSystem(FileSystemDependency)
     
     private enum CodingKeys: String, CodingKey {
         case sourceControl
@@ -107,14 +107,14 @@ public enum SPMDependency: Codable, Hashable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        if let sourceControl = try? container.decode([SPMSourceControlDependency].self, forKey: .sourceControl) {
+        if let sourceControl = try? container.decode([SourceControlDependency].self, forKey: .sourceControl) {
             guard let dependency = sourceControl.first else {
                 throw DecodingError.dataCorrupted(
                     DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty source control dependency array")
                 )
             }
             self = .sourceControl(dependency)
-        } else if let fileSystem = try? container.decode([SPMFileSystemDependency].self, forKey: .fileSystem) {
+        } else if let fileSystem = try? container.decode([FileSystemDependency].self, forKey: .fileSystem) {
             guard let dependency = fileSystem.first else {
                 throw DecodingError.dataCorrupted(
                     DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty file system dependency array")

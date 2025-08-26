@@ -82,9 +82,10 @@ public struct SupportedPlatformSet: TypeSource, ComponentBuildable {
 
 import SwiftPackageManagerKit
 
+
 extension SupportedPlatformSet {
   /// Initialize SupportedPlatformSet from SPM platform data
-  public init?(spmPlatforms: [SPMPlatform]) {
+  public init?(spmPlatforms: [SwiftPackageManagerKit.Platform]) {
     guard !spmPlatforms.isEmpty else {
       return nil
     }

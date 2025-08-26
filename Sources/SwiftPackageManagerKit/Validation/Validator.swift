@@ -1,7 +1,7 @@
 import Foundation
 
 /// Validator for Swift Package Manager package configurations
-public struct SPMValidator: Sendable {
+public struct Validator: Sendable {
     
     /// Configuration options for validation
     public struct Configuration: Sendable {
@@ -66,7 +66,7 @@ public struct SPMValidator: Sendable {
     /// Validate complete package structure and return all issues
     /// - Parameter package: The package information to validate
     /// - Returns: ValidationResult containing all found issues
-    public func validate(_ package: SPMPackageInfo) -> ValidationResult {
+    public func validate(_ package: PackageInfo) -> ValidationResult {
         var issues: [ValidationIssue] = []
         
         // Basic structure validation
@@ -104,7 +104,7 @@ public struct SPMValidator: Sendable {
     /// Validate basic package structure
     /// - Parameter package: Package to validate
     /// - Returns: Array of validation issues
-    public func validatePackageStructure(_ package: SPMPackageInfo) -> [ValidationIssue] {
+    public func validatePackageStructure(_ package: PackageInfo) -> [ValidationIssue] {
         var issues: [ValidationIssue] = []
         
         // Check that all product targets exist
@@ -146,7 +146,7 @@ public struct SPMValidator: Sendable {
     /// Validate package dependencies
     /// - Parameter package: Package to validate
     /// - Returns: Array of validation issues
-    public func validateDependencies(_ package: SPMPackageInfo) -> [ValidationIssue] {
+    public func validateDependencies(_ package: PackageInfo) -> [ValidationIssue] {
         var issues: [ValidationIssue] = []
         
         // Get all available product names from dependencies
@@ -176,7 +176,7 @@ public struct SPMValidator: Sendable {
     /// Validate version requirements for dependencies
     /// - Parameter dependencies: Array of package dependencies to validate
     /// - Returns: Array of validation issues
-    public func validateVersionRequirements(_ dependencies: [SPMDependency]) -> [ValidationIssue] {
+    public func validateVersionRequirements(_ dependencies: [Dependency]) -> [ValidationIssue] {
         var issues: [ValidationIssue] = []
         
         for dependency in dependencies {
@@ -250,7 +250,7 @@ public struct SPMValidator: Sendable {
     /// Validate platform specifications
     /// - Parameter platforms: Array of platforms to validate
     /// - Returns: Array of validation issues
-    public func validatePlatforms(_ platforms: [SPMPlatform]) -> [ValidationIssue] {
+    public func validatePlatforms(_ platforms: [Platform]) -> [ValidationIssue] {
         var issues: [ValidationIssue] = []
         
         let supportedPlatforms = ["macos", "ios", "watchos", "tvos", "linux", "windows"]
@@ -296,7 +296,7 @@ public struct SPMValidator: Sendable {
     /// Detect circular dependencies in target dependency graph
     /// - Parameter package: Package to analyze
     /// - Returns: Array of validation issues for circular dependencies
-    public func detectCircularDependencies(in package: SPMPackageInfo) -> [ValidationIssue] {
+    public func detectCircularDependencies(in package: PackageInfo) -> [ValidationIssue] {
         var issues: [ValidationIssue] = []
         let targetMap = Dictionary(uniqueKeysWithValues: package.targets.map { ($0.name, $0) })
         
@@ -321,7 +321,7 @@ public struct SPMValidator: Sendable {
     /// Find orphaned targets (targets not used by any product)
     /// - Parameter package: Package to analyze
     /// - Returns: Array of validation issues for orphaned targets
-    public func findOrphanedTargets(in package: SPMPackageInfo) -> [ValidationIssue] {
+    public func findOrphanedTargets(in package: PackageInfo) -> [ValidationIssue] {
         var issues: [ValidationIssue] = []
         
         // Get all targets used by products
@@ -340,7 +340,7 @@ public struct SPMValidator: Sendable {
     /// Check for missing test targets
     /// - Parameter package: Package to analyze
     /// - Returns: Array of validation issues for missing test targets
-    public func checkTestTargets(in package: SPMPackageInfo) -> [ValidationIssue] {
+    public func checkTestTargets(in package: PackageInfo) -> [ValidationIssue] {
         var issues: [ValidationIssue] = []
         
         let testTargets = Set(package.targets.filter { $0.type == .test }.map { $0.name })
@@ -392,7 +392,7 @@ public struct SPMValidator: Sendable {
     /// Recursive function to detect cycles in dependency graph
     private func hasCycle(
         target: String,
-        targetMap: [String: SPMTarget],
+        targetMap: [String: Target],
         visited: inout Set<String>,
         recursionStack: inout Set<String>,
         path: inout [String]
@@ -431,15 +431,15 @@ public struct SPMValidator: Sendable {
 
 // MARK: - Convenience Extensions
 
-extension SPMValidator {
+extension Validator {
     
     /// Shared validator instance with default configuration
-    public static let shared = SPMValidator()
+    public static let shared = Validator()
     
     /// Quick validation with default configuration
     /// - Parameter package: Package to validate
     /// - Returns: ValidationResult
-    public static func validate(_ package: SPMPackageInfo) -> ValidationResult {
+    public static func validate(_ package: PackageInfo) -> ValidationResult {
         return shared.validate(package)
     }
 }

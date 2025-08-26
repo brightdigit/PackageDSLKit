@@ -1,7 +1,7 @@
 import Foundation
 
 /// SPM command execution errors
-public enum SPMExecutorError: Error, LocalizedError {
+public enum ExecutorError: Error, LocalizedError {
     case invalidPackagePath
     case swiftNotFound
     case packageNotFound
@@ -25,7 +25,7 @@ public enum SPMExecutorError: Error, LocalizedError {
 }
 
 /// Executor for Swift Package Manager commands
-public struct SPMExecutor {
+public struct Executor {
     
     /// The package directory
     public let packageDirectory: URL
@@ -41,7 +41,7 @@ public struct SPMExecutor {
         // Verify the directory exists and contains a Package.swift
         let packageSwiftPath = packageDirectory.appendingPathComponent("Package.swift")
         guard FileManager.default.fileExists(atPath: packageSwiftPath.path) else {
-            throw SPMExecutorError.packageNotFound
+            throw ExecutorError.packageNotFound
         }
         
         self.packageDirectory = packageDirectory
@@ -50,9 +50,9 @@ public struct SPMExecutor {
     
     /// Execute `swift package dump-package` and return parsed package info
     /// - Parameter timeout: Optional timeout override
-    /// - Returns: Parsed SPMPackageInfo
-    /// - Throws: SPMExecutorError on failure
-    public func dumpPackage(timeout: TimeInterval? = nil) async throws -> SPMPackageInfo {
+    /// - Returns: Parsed PackageInfo
+    /// - Throws: ExecutorError on failure
+    public func dumpPackage(timeout: TimeInterval? = nil) async throws -> PackageInfo {
         let actualTimeout = timeout ?? defaultTimeout
         
         do {
@@ -63,31 +63,31 @@ public struct SPMExecutor {
             )
             
             guard let jsonData = result.standardOutput.data(using: .utf8) else {
-                throw SPMExecutorError.invalidJSON("Could not convert output to UTF-8 data")
+                throw ExecutorError.invalidJSON("Could not convert output to UTF-8 data")
             }
             
             let decoder = JSONDecoder()
             do {
-                return try decoder.decode(SPMPackageInfo.self, from: jsonData)
+                return try decoder.decode(PackageInfo.self, from: jsonData)
             } catch {
-                throw SPMExecutorError.invalidJSON(error.localizedDescription)
+                throw ExecutorError.invalidJSON(error.localizedDescription)
             }
             
         } catch let error as ProcessRunnerError {
             switch error {
             case .timeout:
-                throw SPMExecutorError.commandFailed("package dump-package", "Command timed out after \(actualTimeout) seconds")
+                throw ExecutorError.commandFailed("package dump-package", "Command timed out after \(actualTimeout) seconds")
             case .nonZeroExit(let code, let stderr):
-                throw SPMExecutorError.commandFailed("package dump-package", "Exit code \(code): \(stderr)")
+                throw ExecutorError.commandFailed("package dump-package", "Exit code \(code): \(stderr)")
             case .executionFailed(let message):
-                throw SPMExecutorError.commandFailed("package dump-package", message)
+                throw ExecutorError.commandFailed("package dump-package", message)
             }
         }
     }
     
     /// Execute `swift package resolve` to resolve dependencies
     /// - Parameter timeout: Optional timeout override
-    /// - Throws: SPMExecutorError on failure
+    /// - Throws: ExecutorError on failure
     public func resolvePackage(timeout: TimeInterval? = nil) async throws {
         let actualTimeout = timeout ?? defaultTimeout
         
@@ -100,11 +100,11 @@ public struct SPMExecutor {
         } catch let error as ProcessRunnerError {
             switch error {
             case .timeout:
-                throw SPMExecutorError.commandFailed("package resolve", "Command timed out after \(actualTimeout) seconds")
+                throw ExecutorError.commandFailed("package resolve", "Command timed out after \(actualTimeout) seconds")
             case .nonZeroExit(let code, let stderr):
-                throw SPMExecutorError.commandFailed("package resolve", "Exit code \(code): \(stderr)")
+                throw ExecutorError.commandFailed("package resolve", "Exit code \(code): \(stderr)")
             case .executionFailed(let message):
-                throw SPMExecutorError.commandFailed("package resolve", message)
+                throw ExecutorError.commandFailed("package resolve", message)
             }
         }
     }
@@ -114,7 +114,7 @@ public struct SPMExecutor {
     ///   - target: Optional specific target to build
     ///   - configuration: Build configuration (.debug or .release)
     ///   - timeout: Optional timeout override
-    /// - Throws: SPMExecutorError on failure
+    /// - Throws: ExecutorError on failure
     public func buildPackage(
         target: String? = nil,
         configuration: BuildConfiguration = .debug,
@@ -150,11 +150,11 @@ public struct SPMExecutor {
             let command = "build" + (target.map { " --target \($0)" } ?? "")
             switch error {
             case .timeout:
-                throw SPMExecutorError.commandFailed(command, "Command timed out after \(actualTimeout) seconds")
+                throw ExecutorError.commandFailed(command, "Command timed out after \(actualTimeout) seconds")
             case .nonZeroExit(let code, let stderr):
-                throw SPMExecutorError.commandFailed(command, "Exit code \(code): \(stderr)")
+                throw ExecutorError.commandFailed(command, "Exit code \(code): \(stderr)")
             case .executionFailed(let message):
-                throw SPMExecutorError.commandFailed(command, message)
+                throw ExecutorError.commandFailed(command, message)
             }
         }
     }
@@ -163,7 +163,7 @@ public struct SPMExecutor {
     /// - Parameters:
     ///   - target: Optional specific test target to run
     ///   - timeout: Optional timeout override
-    /// - Throws: SPMExecutorError on failure
+    /// - Throws: ExecutorError on failure
     public func testPackage(
         target: String? = nil,
         timeout: TimeInterval? = nil
@@ -188,11 +188,11 @@ public struct SPMExecutor {
             let command = "test" + (target.map { " --target \($0)" } ?? "")
             switch error {
             case .timeout:
-                throw SPMExecutorError.commandFailed(command, "Command timed out after \(actualTimeout) seconds")
+                throw ExecutorError.commandFailed(command, "Command timed out after \(actualTimeout) seconds")
             case .nonZeroExit(let code, let stderr):
-                throw SPMExecutorError.commandFailed(command, "Exit code \(code): \(stderr)")
+                throw ExecutorError.commandFailed(command, "Exit code \(code): \(stderr)")
             case .executionFailed(let message):
-                throw SPMExecutorError.commandFailed(command, message)
+                throw ExecutorError.commandFailed(command, message)
             }
         }
     }
@@ -200,7 +200,7 @@ public struct SPMExecutor {
     /// Get basic package information (name, tools version) quickly
     /// - Parameter timeout: Optional timeout override  
     /// - Returns: Tuple of package name and tools version
-    /// - Throws: SPMExecutorError on failure
+    /// - Throws: ExecutorError on failure
     public func getPackageInfo(timeout: TimeInterval? = nil) async throws -> (name: String, toolsVersion: String) {
         let packageInfo = try await dumpPackage(timeout: timeout)
         return (name: packageInfo.name, toolsVersion: packageInfo.toolsVersion.version)
@@ -215,25 +215,25 @@ public enum BuildConfiguration {
 
 // MARK: - Convenience Extensions
 
-extension SPMExecutor {
+extension Executor {
     
-    /// Create SPMExecutor for the current working directory
+    /// Create Executor for the current working directory
     /// - Parameter defaultTimeout: Default timeout for commands
-    /// - Returns: SPMExecutor instance
-    /// - Throws: SPMExecutorError if no Package.swift found
-    public static func current(defaultTimeout: TimeInterval = 60) throws -> SPMExecutor {
+    /// - Returns: Executor instance
+    /// - Throws: ExecutorError if no Package.swift found
+    public static func current(defaultTimeout: TimeInterval = 60) throws -> Executor {
         let currentDirectory = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-        return try SPMExecutor(packageDirectory: currentDirectory, defaultTimeout: defaultTimeout)
+        return try Executor(packageDirectory: currentDirectory, defaultTimeout: defaultTimeout)
     }
     
-    /// Create SPMExecutor for a specific path
+    /// Create Executor for a specific path
     /// - Parameters:
     ///   - path: Path to package directory
     ///   - defaultTimeout: Default timeout for commands
-    /// - Returns: SPMExecutor instance
-    /// - Throws: SPMExecutorError if path invalid or no Package.swift found
-    public static func at(path: String, defaultTimeout: TimeInterval = 60) throws -> SPMExecutor {
+    /// - Returns: Executor instance
+    /// - Throws: ExecutorError if path invalid or no Package.swift found
+    public static func at(path: String, defaultTimeout: TimeInterval = 60) throws -> Executor {
         let url = URL(fileURLWithPath: path)
-        return try SPMExecutor(packageDirectory: url, defaultTimeout: defaultTimeout)
+        return try Executor(packageDirectory: url, defaultTimeout: defaultTimeout)
     }
 }

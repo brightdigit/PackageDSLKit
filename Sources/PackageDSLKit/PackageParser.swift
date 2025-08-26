@@ -38,14 +38,14 @@ public struct PackageParser: Sendable, Hashable, Codable {
     -> PackageSpecifications
   {
     // Use SPM JSON parsing instead of SwiftSyntax parsing
-    let executor: SPMExecutor
+    let executor: Executor
     do {
-      executor = try SPMExecutor(packageDirectory: directoryURL)
+      executor = try Executor(packageDirectory: directoryURL)
     } catch {
       throw .other(error)
     }
     
-    let packageInfo: SPMPackageInfo
+    let packageInfo: PackageInfo
     do {
       packageInfo = try await executor.dumpPackage()
     } catch {

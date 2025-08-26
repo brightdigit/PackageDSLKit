@@ -44,9 +44,10 @@ extension TestTarget {
 
 import SwiftPackageManagerKit
 
+
 extension TestTarget {
   /// Initialize TestTarget from SPM data (for test targets only)
-  public init?(spmTarget: SPMTarget) {
+  public init?(spmTarget: SwiftPackageManagerKit.Target) {
     // Only convert test targets
     guard spmTarget.type == .test else {
       return nil

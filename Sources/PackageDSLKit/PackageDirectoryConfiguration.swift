@@ -55,7 +55,7 @@ public struct PackageDirectoryConfiguration: Sendable, Hashable, Codable {
 
 extension PackageDirectoryConfiguration {
   // New SPM-based initializer
-  internal init(from packageInfo: SPMPackageInfo) throws(PackageDSLError) {
+  internal init(from packageInfo: PackageInfo) throws(PackageDSLError) {
     // Convert SPM data to PackageDSLKit data structures
     let products = packageInfo.products.compactMap { Product(spmProduct: $0) }
     let dependencies = packageInfo.dependencies.compactMap { Dependency(spmDependency: $0) }

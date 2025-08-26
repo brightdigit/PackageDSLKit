@@ -1,7 +1,7 @@
 import Foundation
 
 /// Errors that can occur during SPM analysis
-public enum SPMAnalysisError: Error, LocalizedError {
+public enum AnalysisError: Error, LocalizedError {
     case invalidJSON(String)
     case malformedPackageStructure(String)
     case unsupportedFormat(String)
@@ -19,7 +19,7 @@ public enum SPMAnalysisError: Error, LocalizedError {
 }
 
 /// Analyzer for parsing Swift Package Manager JSON output
-public struct SPMAnalyzer: Sendable {
+public struct Analyzer: Sendable {
     
     /// JSON decoder with custom configuration for SPM data
     private let decoder: JSONDecoder
@@ -37,15 +37,15 @@ public struct SPMAnalyzer: Sendable {
     
     /// Analyze package JSON data and return parsed package information
     /// - Parameter data: Raw JSON data from swift package dump-package
-    /// - Returns: Parsed SPMPackageInfo
-    /// - Throws: SPMAnalysisError for parsing failures
-    public func analyzePackage(data: Data) throws -> SPMPackageInfo {
+    /// - Returns: Parsed PackageInfo
+    /// - Throws: AnalysisError for parsing failures
+    public func analyzePackage(data: Data) throws -> PackageInfo {
         guard !data.isEmpty else {
-            throw SPMAnalysisError.invalidJSON("Empty data provided")
+            throw AnalysisError.invalidJSON("Empty data provided")
         }
         
         do {
-            let packageInfo = try decoder.decode(SPMPackageInfo.self, from: data)
+            let packageInfo = try decoder.decode(PackageInfo.self, from: data)
             
             // Basic validation to ensure we have essential fields
             try validateBasicStructure(packageInfo)
@@ -53,42 +53,42 @@ public struct SPMAnalyzer: Sendable {
             return packageInfo
             
         } catch let decodingError as DecodingError {
-            throw SPMAnalysisError.invalidJSON(decodingError.localizedDescription)
-        } catch let error as SPMAnalysisError {
+            throw AnalysisError.invalidJSON(decodingError.localizedDescription)
+        } catch let error as AnalysisError {
             throw error
         } catch {
-            throw SPMAnalysisError.malformedPackageStructure(error.localizedDescription)
+            throw AnalysisError.malformedPackageStructure(error.localizedDescription)
         }
     }
     
     /// Analyze package from JSON string
     /// - Parameter jsonString: JSON string from swift package dump-package
-    /// - Returns: Parsed SPMPackageInfo
-    /// - Throws: SPMAnalysisError for parsing failures
-    public func analyzePackage(jsonString: String) throws -> SPMPackageInfo {
+    /// - Returns: Parsed PackageInfo
+    /// - Throws: AnalysisError for parsing failures
+    public func analyzePackage(jsonString: String) throws -> PackageInfo {
         guard let data = jsonString.data(using: .utf8) else {
-            throw SPMAnalysisError.invalidJSON("Could not convert string to UTF-8 data")
+            throw AnalysisError.invalidJSON("Could not convert string to UTF-8 data")
         }
         return try analyzePackage(data: data)
     }
     
     /// Analyze package directly from file path
     /// - Parameter filePath: Path to JSON file containing dump-package output
-    /// - Returns: Parsed SPMPackageInfo
-    /// - Throws: SPMAnalysisError for parsing failures
-    public func analyzePackage(filePath: String) throws -> SPMPackageInfo {
+    /// - Returns: Parsed PackageInfo
+    /// - Throws: AnalysisError for parsing failures
+    public func analyzePackage(filePath: String) throws -> PackageInfo {
         do {
             let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
             return try analyzePackage(data: data)
         } catch {
-            throw SPMAnalysisError.invalidJSON("Could not read file at \(filePath): \(error.localizedDescription)")
+            throw AnalysisError.invalidJSON("Could not read file at \(filePath): \(error.localizedDescription)")
         }
     }
     
     /// Extract basic package summary from analyzed data
     /// - Parameter packageInfo: Parsed package information
     /// - Returns: Dictionary with key package metrics
-    public func extractSummary(from packageInfo: SPMPackageInfo) -> [String: Any] {
+    public func extractSummary(from packageInfo: PackageInfo) -> [String: Any] {
         return [
             "name": packageInfo.name,
             "toolsVersion": packageInfo.toolsVersion.version,
@@ -106,16 +106,16 @@ public struct SPMAnalyzer: Sendable {
     
     /// Perform basic validation on parsed package structure
     /// - Parameter packageInfo: Parsed package information to validate
-    /// - Throws: SPMAnalysisError if basic structure is invalid
-    private func validateBasicStructure(_ packageInfo: SPMPackageInfo) throws {
+    /// - Throws: AnalysisError if basic structure is invalid
+    private func validateBasicStructure(_ packageInfo: PackageInfo) throws {
         // Validate package name is not empty
         guard !packageInfo.name.isEmpty else {
-            throw SPMAnalysisError.malformedPackageStructure("Package name cannot be empty")
+            throw AnalysisError.malformedPackageStructure("Package name cannot be empty")
         }
         
         // Validate tools version is present
         guard !packageInfo.toolsVersion.version.isEmpty else {
-            throw SPMAnalysisError.malformedPackageStructure("Tools version cannot be empty")
+            throw AnalysisError.malformedPackageStructure("Tools version cannot be empty")
         }
         
         // Validate that products reference existing targets
@@ -123,7 +123,7 @@ public struct SPMAnalyzer: Sendable {
         for product in packageInfo.products {
             for targetName in product.targets {
                 guard targetNames.contains(targetName) else {
-                    throw SPMAnalysisError.malformedPackageStructure(
+                    throw AnalysisError.malformedPackageStructure(
                         "Product '\(product.name)' references non-existent target '\(targetName)'"
                     )
                 }
@@ -134,19 +134,19 @@ public struct SPMAnalyzer: Sendable {
 
 // MARK: - Convenience Extensions
 
-extension SPMAnalyzer {
+extension Analyzer {
     
     /// Default shared analyzer instance
-    public static let shared = SPMAnalyzer()
+    public static let shared = Analyzer()
     
     /// Quick analysis of package data with error handling
     /// - Parameter data: JSON data from swift package dump-package
-    /// - Returns: Result containing either SPMPackageInfo or SPMAnalysisError
-    public static func analyze(_ data: Data) -> Result<SPMPackageInfo, SPMAnalysisError> {
+    /// - Returns: Result containing either PackageInfo or AnalysisError
+    public static func analyze(_ data: Data) -> Result<PackageInfo, AnalysisError> {
         do {
             let packageInfo = try shared.analyzePackage(data: data)
             return .success(packageInfo)
-        } catch let error as SPMAnalysisError {
+        } catch let error as AnalysisError {
             return .failure(error)
         } catch {
             return .failure(.malformedPackageStructure(error.localizedDescription))
@@ -155,12 +155,12 @@ extension SPMAnalyzer {
     
     /// Quick analysis of package JSON string with error handling
     /// - Parameter jsonString: JSON string from swift package dump-package
-    /// - Returns: Result containing either SPMPackageInfo or SPMAnalysisError
-    public static func analyze(_ jsonString: String) -> Result<SPMPackageInfo, SPMAnalysisError> {
+    /// - Returns: Result containing either PackageInfo or AnalysisError
+    public static func analyze(_ jsonString: String) -> Result<PackageInfo, AnalysisError> {
         do {
             let packageInfo = try shared.analyzePackage(jsonString: jsonString)
             return .success(packageInfo)
-        } catch let error as SPMAnalysisError {
+        } catch let error as AnalysisError {
             return .failure(error)
         } catch {
             return .failure(.malformedPackageStructure(error.localizedDescription))

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents product type in a Swift package
-public enum SPMProductType: Codable, Hashable {
+public enum ProductType: Codable, Hashable {
     case library(LibraryType)
     case executable
     case plugin
@@ -50,15 +50,15 @@ public enum SPMProductType: Codable, Hashable {
 }
 
 /// Represents a product in a Swift package
-public struct SPMProduct: Codable, Hashable {
+public struct Product: Codable, Hashable {
     public let name: String
-    public let type: SPMProductType
+    public let type: ProductType
     public let targets: [String]
     public let settings: [String] // Product-specific settings
     
     public init(
         name: String,
-        type: SPMProductType,
+        type: ProductType,
         targets: [String],
         settings: [String] = []
     ) {

@@ -58,7 +58,7 @@ import SwiftPackageManagerKit
 
 extension Product {
   /// Initialize Product from SPM data
-  public init?(spmProduct: SPMProduct) {
+  public init?(spmProduct: SwiftPackageManagerKit.Product) {
     // Convert SPMProductType to ProductType
     let productType: ProductType
     switch spmProduct.type {

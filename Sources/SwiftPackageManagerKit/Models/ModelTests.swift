@@ -1,38 +1,38 @@
 import Foundation
 
 /// Simple test utility for validating SPM models
-public struct SPMModelValidator {
+public struct ModelValidator {
     
     /// Test parsing JSON data with SPM models
-    public static func validateJSON(_ jsonData: Data) throws -> SPMPackageInfo {
+    public static func validateJSON(_ jsonData: Data) throws -> PackageInfo {
         let decoder = JSONDecoder()
-        return try decoder.decode(SPMPackageInfo.self, from: jsonData)
+        return try decoder.decode(PackageInfo.self, from: jsonData)
     }
     
     /// Test round-trip encoding/decoding
-    public static func validateRoundTrip(_ packageInfo: SPMPackageInfo) throws -> Bool {
+    public static func validateRoundTrip(_ packageInfo: PackageInfo) throws -> Bool {
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
         
         let encoded = try encoder.encode(packageInfo)
-        let decoded = try decoder.decode(SPMPackageInfo.self, from: encoded)
+        let decoded = try decoder.decode(PackageInfo.self, from: encoded)
         
         return decoded == packageInfo
     }
     
     /// Create sample package info for testing
-    public static func createSamplePackage() -> SPMPackageInfo {
-        let platform = SPMPlatform(platformName: "macos", version: "13.0")
-        let toolsVersion = SPMToolsVersion(version: "6.0.0")
-        let packageKind = SPMPackageKind.root("/path/to/package")
+    public static func createSamplePackage() -> PackageInfo {
+        let platform = Platform(platformName: "macos", version: "13.0")
+        let toolsVersion = ToolsVersion(version: "6.0.0")
+        let packageKind = PackageKind.root("/path/to/package")
         
-        let product = SPMProduct(
+        let product = Product(
             name: "TestLibrary",
             type: .library(.automatic),
             targets: ["TestTarget"]
         )
         
-        let target = SPMTarget(
+        let target = Target(
             name: "TestTarget",
             type: .regular,
             dependencies: [],
@@ -42,7 +42,7 @@ public struct SPMModelValidator {
             packageAccess: true
         )
         
-        return SPMPackageInfo(
+        return PackageInfo(
             name: "TestPackage",
             packageKind: packageKind,
             platforms: [platform],

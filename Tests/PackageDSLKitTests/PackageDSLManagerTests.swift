@@ -184,7 +184,7 @@ struct PackageDSLManagerTests {
         try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
         
         // Test SPM commands through our SPMExecutor
-        let spmExecutor = try SPMExecutor(packageDirectory: tempDirectory, defaultTimeout: 60)
+        let spmExecutor = try Executor(packageDirectory: tempDirectory, defaultTimeout: 60)
         
         // Test package dump-package
         let packageInfo = try await spmExecutor.dumpPackage()

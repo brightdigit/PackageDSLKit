@@ -4,20 +4,20 @@ import Foundation
 // All model types are available through their individual files
 
 /// Convenience extensions for working with SPM models
-extension SPMPackageInfo {
+extension PackageInfo {
     
     /// Find a target by name
-    public func target(named name: String) -> SPMTarget? {
+    public func target(named name: String) -> Target? {
         return targets.first { $0.name == name }
     }
     
     /// Find a product by name
-    public func product(named name: String) -> SPMProduct? {
+    public func product(named name: String) -> Product? {
         return products.first { $0.name == name }
     }
     
     /// Get all library products
-    public var libraryProducts: [SPMProduct] {
+    public var libraryProducts: [Product] {
         return products.filter {
             if case .library = $0.type {
                 return true
@@ -27,7 +27,7 @@ extension SPMPackageInfo {
     }
     
     /// Get all executable products
-    public var executableProducts: [SPMProduct] {
+    public var executableProducts: [Product] {
         return products.filter {
             if case .executable = $0.type {
                 return true
@@ -37,7 +37,7 @@ extension SPMPackageInfo {
     }
 }
 
-extension SPMTarget {
+extension Target {
     
     /// Get all product dependencies
     public var productDependencies: [String] {
@@ -60,7 +60,7 @@ extension SPMTarget {
     }
 }
 
-extension SPMDependency {
+extension Dependency {
     
     /// Get the URL string for remote dependencies
     public var urlString: String? {

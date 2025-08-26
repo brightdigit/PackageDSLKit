@@ -1,9 +1,9 @@
 import Foundation
 
 /// Represents a target dependency (can be by name or product)
-public enum SPMTargetDependency: Codable, Hashable {
-    case byName(String, condition: SPMTargetDependencyCondition?)
-    case product(String, String, condition: SPMTargetDependencyCondition?)
+public enum TargetDependency: Codable, Hashable {
+    case byName(String, condition: TargetDependencyCondition?)
+    case product(String, String, condition: TargetDependencyCondition?)
     
     private enum CodingKeys: String, CodingKey {
         case byName
@@ -15,12 +15,12 @@ public enum SPMTargetDependency: Codable, Hashable {
         
         if let byNameArray = try? container.decode([String?].self, forKey: .byName) {
             let name = byNameArray[0] ?? ""
-            let condition: SPMTargetDependencyCondition? = nil // Simplified for now
+            let condition: TargetDependencyCondition? = nil // Simplified for now
             self = .byName(name, condition: condition)
         } else if let productArray = try? container.decode([String?].self, forKey: .product) {
             let productName = productArray[0] ?? ""
             let packageName = productArray[1] ?? ""
-            let condition: SPMTargetDependencyCondition? = nil // Simplified for now
+            let condition: TargetDependencyCondition? = nil // Simplified for now
             self = .product(productName, packageName, condition: condition)
         } else {
             throw DecodingError.dataCorrupted(
@@ -42,7 +42,7 @@ public enum SPMTargetDependency: Codable, Hashable {
 }
 
 /// Represents platform-specific conditions for dependencies
-public struct SPMTargetDependencyCondition: Codable, Hashable {
+public struct TargetDependencyCondition: Codable, Hashable {
     public let platformNames: [String]?
     
     public init(platformNames: [String]? = nil) {
@@ -51,7 +51,7 @@ public struct SPMTargetDependencyCondition: Codable, Hashable {
 }
 
 /// Represents resource rules for targets
-public enum SPMResourceRule: Codable, Hashable {
+public enum ResourceRule: Codable, Hashable {
     case copy
     case process
     
@@ -87,18 +87,18 @@ public enum SPMResourceRule: Codable, Hashable {
 }
 
 /// Represents a resource in a target
-public struct SPMResource: Codable, Hashable {
+public struct Resource: Codable, Hashable {
     public let path: String
-    public let rule: SPMResourceRule
+    public let rule: ResourceRule
     
-    public init(path: String, rule: SPMResourceRule) {
+    public init(path: String, rule: ResourceRule) {
         self.path = path
         self.rule = rule
     }
 }
 
 /// Represents target types
-public enum SPMTargetType: String, Codable, Hashable {
+public enum TargetType: String, Codable, Hashable {
     case regular
     case executable
     case test
@@ -107,21 +107,21 @@ public enum SPMTargetType: String, Codable, Hashable {
 }
 
 /// Represents a target in a Swift package
-public struct SPMTarget: Codable, Hashable {
+public struct Target: Codable, Hashable {
     public let name: String
-    public let type: SPMTargetType
-    public let dependencies: [SPMTargetDependency]
+    public let type: TargetType
+    public let dependencies: [TargetDependency]
     public let exclude: [String]
-    public let resources: [SPMResource]
+    public let resources: [Resource]
     public let settings: [String] // Target-specific settings
     public let packageAccess: Bool
     
     public init(
         name: String,
-        type: SPMTargetType,
-        dependencies: [SPMTargetDependency] = [],
+        type: TargetType,
+        dependencies: [TargetDependency] = [],
         exclude: [String] = [],
-        resources: [SPMResource] = [],
+        resources: [Resource] = [],
         settings: [String] = [],
         packageAccess: Bool = true
     ) {

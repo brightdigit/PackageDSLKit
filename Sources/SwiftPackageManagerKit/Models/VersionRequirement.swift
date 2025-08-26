@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents version requirements for dependencies
-public enum SPMVersionRequirement: Codable, Hashable {
+public enum VersionRequirement: Codable, Hashable {
     case range(lowerBound: String, upperBound: String)
     case exact(String)
     case revision(String)

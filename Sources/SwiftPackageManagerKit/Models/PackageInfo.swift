@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents the package kind
-public enum SPMPackageKind: Codable, Hashable {
+public enum PackageKind: Codable, Hashable {
     case root(String)
     case local(String)
     case remote
@@ -45,7 +45,7 @@ public enum SPMPackageKind: Codable, Hashable {
 }
 
 /// Represents the tools version
-public struct SPMToolsVersion: Codable, Hashable {
+public struct ToolsVersion: Codable, Hashable {
     public let version: String
     
     private enum CodingKeys: String, CodingKey {
@@ -68,14 +68,14 @@ public struct SPMToolsVersion: Codable, Hashable {
 }
 
 /// Represents the complete package information from swift package dump-package
-public struct SPMPackageInfo: Codable, Hashable {
+public struct PackageInfo: Codable, Hashable {
     public let name: String
-    public let packageKind: SPMPackageKind
-    public let platforms: [SPMPlatform]
-    public let products: [SPMProduct]
-    public let dependencies: [SPMDependency]
-    public let targets: [SPMTarget]
-    public let toolsVersion: SPMToolsVersion
+    public let packageKind: PackageKind
+    public let platforms: [Platform]
+    public let products: [Product]
+    public let dependencies: [Dependency]
+    public let targets: [Target]
+    public let toolsVersion: ToolsVersion
     public let traits: [String]
     public let cLanguageStandard: String?
     public let cxxLanguageStandard: String?
@@ -85,12 +85,12 @@ public struct SPMPackageInfo: Codable, Hashable {
     
     public init(
         name: String,
-        packageKind: SPMPackageKind,
-        platforms: [SPMPlatform] = [],
-        products: [SPMProduct] = [],
-        dependencies: [SPMDependency] = [],
-        targets: [SPMTarget] = [],
-        toolsVersion: SPMToolsVersion,
+        packageKind: PackageKind,
+        platforms: [Platform] = [],
+        products: [Product] = [],
+        dependencies: [Dependency] = [],
+        targets: [Target] = [],
+        toolsVersion: ToolsVersion,
         traits: [String] = [],
         cLanguageStandard: String? = nil,
         cxxLanguageStandard: String? = nil,

@@ -191,11 +191,11 @@ extension PackageDSLManager {
       try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
       
       // Execute swift package dump-package
-      let executor = try SPMExecutor(packageDirectory: tempDirectory)
+      let executor = try Executor(packageDirectory: tempDirectory)
       let spmPackageInfo = try await executor.dumpPackage()
       
       // Validate using SPMValidator
-      let validator = SPMValidator()
+      let validator = Validator()
       let result = validator.validate(spmPackageInfo)
       
       // Clean up temporary directory
@@ -203,7 +203,7 @@ extension PackageDSLManager {
       
       return result
       
-    } catch let error as SPMExecutorError {
+    } catch let error as ExecutorError {
       // Clean up on error
       try? FileManager.default.removeItem(at: tempDirectory)
       throw PackageError.packageGenerationFailed("SPM execution failed: \(error.localizedDescription)")
