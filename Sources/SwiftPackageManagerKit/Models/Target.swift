@@ -13,14 +13,27 @@ public enum TargetDependency: Codable, Hashable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        if let byNameArray = try? container.decode([String?].self, forKey: .byName) {
-            let name = byNameArray[0] ?? ""
-            let condition: TargetDependencyCondition? = nil // Simplified for now
+        if container.contains(.byName) {
+            var unkeyedContainer = try container.nestedUnkeyedContainer(forKey: .byName)
+            let name = try unkeyedContainer.decode(String.self)
+            let _ = try? unkeyedContainer.decode(String?.self) // Skip null value
+            // TODO: Handle condition if needed
+            let condition: TargetDependencyCondition? = nil 
             self = .byName(name, condition: condition)
-        } else if let productArray = try? container.decode([String?].self, forKey: .product) {
-            let productName = productArray[0] ?? ""
-            let packageName = productArray[1] ?? ""
-            let condition: TargetDependencyCondition? = nil // Simplified for now
+        } else if container.contains(.product) {
+            var unkeyedContainer = try container.nestedUnkeyedContainer(forKey: .product)
+            let productName = try unkeyedContainer.decode(String.self)
+            let packageName = try unkeyedContainer.decode(String.self)
+            let _ = try? unkeyedContainer.decode(String?.self) // Skip null value
+            
+            // Try to decode condition if present
+            let condition: TargetDependencyCondition?
+            if !unkeyedContainer.isAtEnd {
+                condition = try? unkeyedContainer.decode(TargetDependencyCondition.self)
+            } else {
+                condition = nil
+            }
+            
             self = .product(productName, packageName, condition: condition)
         } else {
             throw DecodingError.dataCorrupted(

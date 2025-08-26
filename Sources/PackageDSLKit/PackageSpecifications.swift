@@ -57,7 +57,6 @@ public struct PackageSpecifications: Sendable, Hashable, Codable {
 
 extension PackageSpecifications {
   public init(from directoryConfiguration: PackageDirectoryConfiguration) throws(PackageDSLError) {
-    try directoryConfiguration.validate()
     self.products = directoryConfiguration.products
     self.dependencies = directoryConfiguration.dependencies
     self.targets = directoryConfiguration.targets

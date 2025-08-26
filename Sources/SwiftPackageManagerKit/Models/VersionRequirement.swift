@@ -22,10 +22,15 @@ public enum VersionRequirement: Codable, Hashable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        if let rangeContainer = try? container.nestedContainer(keyedBy: RangeKeys.self, forKey: .range) {
-            let lowerBound = try rangeContainer.decode(String.self, forKey: .lowerBound)
-            let upperBound = try rangeContainer.decode(String.self, forKey: .upperBound)
-            self = .range(lowerBound: lowerBound, upperBound: upperBound)
+        if container.contains(.range) {
+            // The range is an array with one object containing lowerBound and upperBound
+            let rangeArray = try container.decode([RangeInfo].self, forKey: .range)
+            guard let rangeInfo = rangeArray.first else {
+                throw DecodingError.dataCorrupted(
+                    DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty range array")
+                )
+            }
+            self = .range(lowerBound: rangeInfo.lowerBound, upperBound: rangeInfo.upperBound)
         } else if let exact = try? container.decode(String.self, forKey: .exact) {
             self = .exact(exact)
         } else if let revision = try? container.decode(String.self, forKey: .revision) {
@@ -37,6 +42,11 @@ public enum VersionRequirement: Codable, Hashable {
                 DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unknown version requirement type")
             )
         }
+    }
+    
+    private struct RangeInfo: Codable {
+        let lowerBound: String
+        let upperBound: String
     }
     
     public func encode(to encoder: Encoder) throws {

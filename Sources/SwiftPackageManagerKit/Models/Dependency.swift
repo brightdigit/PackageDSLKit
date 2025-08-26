@@ -16,22 +16,23 @@ public enum DependencyLocation: Codable, Hashable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        dump(container)
       
-      //let otherRemote = try container.decode([RemoteKeys].self, forKey: .remote)
-      //let otherContainer = container.nestedUnkeyedContainer(forKey: .remote)
-      
-      if let otherRemote = try container.decode([Remote].self, forKey: .remote).first{
-          dump(otherRemote)
-            
-          self = .remote(urlString: otherRemote.urlString)
-        } else if let path = try? container.decode(String.self, forKey: .fileSystem) {
-            self = .fileSystem(path: path)
-        } else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unknown dependency location type")
-            )
-        }
+      if container.contains(.remote) {
+          let remoteArray = try container.decode([Remote].self, forKey: .remote)
+          guard let remote = remoteArray.first else {
+              throw DecodingError.dataCorrupted(
+                  DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty remote array")
+              )
+          }
+          self = .remote(urlString: remote.urlString)
+      } else if container.contains(.fileSystem) {
+          let fileSystemPath = try container.decode(String.self, forKey: .fileSystem)
+          self = .fileSystem(path: fileSystemPath)
+      } else {
+          throw DecodingError.dataCorrupted(
+              DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unknown dependency location type")
+          )
+      }
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -112,57 +113,28 @@ public enum Dependency: Codable, Hashable {
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-      let sourceControl : [SourceControlDependency]?
-      do {
-        sourceControl = try container.decode([SourceControlDependency].self, forKey: .sourceControl)
-      } catch {
-        print("Invalid source control: \(error.localizedDescription)")
-        sourceControl = nil
+      
+      if container.contains(.sourceControl) {
+          let sourceControlArray = try container.decode([SourceControlDependency].self, forKey: .sourceControl)
+          guard let dependency = sourceControlArray.first else {
+              throw DecodingError.dataCorrupted(
+                  DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty source control dependency array")
+              )
+          }
+          self = .sourceControl(dependency)
+      } else if container.contains(.fileSystem) {
+          let fileSystemArray = try container.decode([FileSystemDependency].self, forKey: .fileSystem)
+          guard let dependency = fileSystemArray.first else {
+              throw DecodingError.dataCorrupted(
+                  DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty file system dependency array")
+              )
+          }
+          self = .fileSystem(dependency)
+      } else {
+          throw DecodingError.dataCorrupted(
+              DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unknown dependency type")
+          )
       }
-      if let sourceControl {
-        guard let dependency = sourceControl.first else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty source control dependency array")
-            )
-        }
-        self = .sourceControl(dependency)
-        return
-      }
-      let fileSystem : [FileSystemDependency]?
-      do {
-        fileSystem = try container.decode([FileSystemDependency].self, forKey: .fileSystem)
-      } catch {
-        print("Invalid fileSystem: \(error.localizedDescription)")
-        fileSystem = nil
-      }
-      if let fileSystem {
-        guard let dependency = fileSystem.first else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty source control dependency array")
-            )
-        }
-        self = .fileSystem(dependency)
-        return
-      }
-//        if let sourceControl = try? container.decode([SourceControlDependency].self, forKey: .sourceControl) {
-//            guard let dependency = sourceControl.first else {
-//                throw DecodingError.dataCorrupted(
-//                    DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty source control dependency array")
-//                )
-//            }
-//            self = .sourceControl(dependency)
-//        } else if let fileSystem = try? container.decode([FileSystemDependency].self, forKey: .fileSystem) {
-//            guard let dependency = fileSystem.first else {
-//                throw DecodingError.dataCorrupted(
-//                    DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty file system dependency array")
-//                )
-//            }
-//            self = .fileSystem(dependency)
-//        } else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unknown dependency type")
-            )
-        //}
     }
     
     public func encode(to encoder: Encoder) throws {
