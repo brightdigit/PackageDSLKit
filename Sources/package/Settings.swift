@@ -51,6 +51,6 @@ internal struct Settings: ParsableArguments, FileManagerContainer {
   }
 
   internal var dslSourcesURL: URL {
-    self.pathURL.appendingPathComponent("Package")
+    self.pathURL
   }
 }

@@ -40,6 +40,7 @@ public struct Executor {
     public init(packageDirectory: URL, defaultTimeout: TimeInterval = 60) throws {
         // Verify the directory exists and contains a Package.swift
         let packageSwiftPath = packageDirectory.appendingPathComponent("Package.swift")
+      print(packageSwiftPath)
         guard FileManager.default.fileExists(atPath: packageSwiftPath.path) else {
             throw ExecutorError.packageNotFound
         }
@@ -62,6 +63,7 @@ public struct Executor {
                 timeout: actualTimeout
             )
             
+          print(result.standardOutput)
             guard let jsonData = result.standardOutput.data(using: .utf8) else {
                 throw ExecutorError.invalidJSON("Could not convert output to UTF-8 data")
             }
@@ -70,6 +72,7 @@ public struct Executor {
             do {
                 return try decoder.decode(PackageInfo.self, from: jsonData)
             } catch {
+              dump(error)
                 throw ExecutorError.invalidJSON(error.localizedDescription)
             }
             
