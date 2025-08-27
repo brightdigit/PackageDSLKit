@@ -1,6 +1,6 @@
 //
 //  Source.swift
-//  PackageDSLKit
+//  SyntaxKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
