@@ -142,11 +142,16 @@ struct PackageDSLManagerTests {
 
     // Note: Full SPM validation would require proper directory structure with Sources/
     // The core functionality is validated above, and detailed SPM integration is tested
-    // in the validateGeneratedPackageWithSPMCommands test
+    // in the validateGeneratedPackageWithSPMValidation test
   }
 
-  @Test
-  func validateGeneratedPackageWithSPMCommands() async throws {
+  @Test(
+    .disabled(
+      if: ProcessInfo.processInfo.shouldDisableSPMValidation(),
+      "SPM commands unreliable in GitHub CI via Xcode"
+    )
+  )
+  func validateGeneratedPackageWithSPMValidation() async throws {
     let tempDirectory = FileManager.default.temporaryDirectory
       .appendingPathComponent("PackageDSLManagerTests-SPMValidation-\(UUID().uuidString)")
     let packageManager = await PackageDSLManager(
