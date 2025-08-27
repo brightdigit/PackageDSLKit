@@ -30,7 +30,6 @@
 import SyntaxKit
 
 public struct ComponentWriter: Sendable, StructureWriter {
-  
   /// Creates a ComponentWriter that uses SyntaxKit for code generation
   public init() {
   }
@@ -41,10 +40,10 @@ public struct ComponentWriter: Sendable, StructureWriter {
     let properties: [CodeBlock] = component.properties.values.map { property in
       PropertyWriter.syntaxKitNode(from: property)
     }
-    
+
     // Create struct with inheritance
     let structDecl = Struct(component.name, members: properties)
-    
+
     // Add inheritance using the array overload we added to SyntaxKit
     return structDecl.inherits(component.inheritedTypes)
   }

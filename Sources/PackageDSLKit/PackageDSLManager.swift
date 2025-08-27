@@ -42,7 +42,7 @@ public enum PackageError: Error, LocalizedError {
   case validationFailed([ValidationIssue])
   case packageGenerationFailed(String)
   case cascadeRemovalRequired(String, [String])
-  
+
   public var errorDescription: String? {
     switch self {
     case .duplicateTargetName(let name):
@@ -79,39 +79,38 @@ public enum TargetType: String, Sendable, Hashable, Codable, CaseIterable {
 
 /// The main SDK entry point for package manipulation using PackageDSL
 @MainActor
-public final class PackageDSLManager: Sendable {
-  
+public final class PackageDSLManager {
   // MARK: - Properties
-  
+
   /// The URL of the package directory
   public let packageURL: URL
-  
+
   /// The name of the package
   public private(set) var packageName: String
-  
+
   /// Products in the package
   public private(set) var products: [Product]
-  
+
   /// Targets in the package
   public private(set) var targets: [Target]
-  
+
   /// Test targets in the package
   public private(set) var testTargets: [TestTarget]
-  
+
   /// Package dependencies
   public private(set) var dependencies: [Dependency]
-  
+
   /// Supported platform sets
   public private(set) var supportedPlatformSets: [SupportedPlatformSet]
-  
+
   /// Swift settings
   public private(set) var swiftSettings: [SwiftSettingRef]
-  
+
   /// Package modifiers
   public private(set) var modifiers: [Modifier]
-  
+
   // MARK: - Initialization
-  
+
   /// Initialize PackageDSLManager with a package URL
   /// - Parameter packageURL: The URL to the package directory
   public init(packageURL: URL) {
@@ -125,7 +124,7 @@ public final class PackageDSLManager: Sendable {
     self.swiftSettings = []
     self.modifiers = []
   }
-  
+
   /// Initialize PackageDSLManager with a package URL and name
   /// - Parameters:
   ///   - packageURL: The URL to the package directory
@@ -141,9 +140,9 @@ public final class PackageDSLManager: Sendable {
     self.swiftSettings = []
     self.modifiers = []
   }
-  
+
   // MARK: - Package Configuration
-  
+
   /// Set the package name
   /// - Parameter name: The new package name
   /// - Returns: Self for method chaining
@@ -152,9 +151,9 @@ public final class PackageDSLManager: Sendable {
     self.packageName = name
     return self
   }
-  
+
   // MARK: - Internal Specifications
-  
+
   /// Get the current package specifications
   internal var specifications: PackageSpecifications {
     PackageSpecifications(
@@ -172,7 +171,6 @@ public final class PackageDSLManager: Sendable {
 // MARK: - Validation
 
 extension PackageDSLManager {
-  
   /// Validate the current package configuration against SPM
   /// - Returns: ValidationResult containing any issues found
   /// - Throws: PackageError on validation setup failures
@@ -180,58 +178,60 @@ extension PackageDSLManager {
     // Create a temporary Package.swift file for validation
     let tempDirectory = FileManager.default.temporaryDirectory
       .appendingPathComponent("PackageDSLKit-validation-\(UUID().uuidString)")
-    
+
     do {
       // Create temporary directory
       try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
-      
+
       // Generate traditional Package.swift for SPM validation
       let packageSwiftContent = generateTraditionalPackageSwift()
       let packageSwiftFile = tempDirectory.appendingPathComponent("Package.swift")
       try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
-      
+
       // Execute swift package dump-package
       let executor = try Executor(packageDirectory: tempDirectory)
       let spmPackageInfo = try await executor.dumpPackage()
-      
+
       // Validate using SPMValidator
       let validator = Validator()
       let result = validator.validate(spmPackageInfo)
-      
+
       // Clean up temporary directory
       try? FileManager.default.removeItem(at: tempDirectory)
-      
+
       return result
-      
     } catch let error as ExecutorError {
       // Clean up on error
       try? FileManager.default.removeItem(at: tempDirectory)
-      throw PackageError.packageGenerationFailed("SPM execution failed: \(error.localizedDescription)")
+      throw PackageError.packageGenerationFailed(
+        "SPM execution failed: \(error.localizedDescription)")
     } catch {
-      // Clean up on error  
+      // Clean up on error
       try? FileManager.default.removeItem(at: tempDirectory)
       throw PackageError.packageGenerationFailed("Validation failed: \(error.localizedDescription)")
     }
   }
-  
+
   /// Generate traditional Package.swift content from current configuration
   /// - Returns: String containing Package.swift content
   public func generateTraditionalPackageSwift() -> String {
     var content = """
-    // swift-tools-version: 5.9
-    import PackageDescription
-    
-    let package = Package(
-        name: "\(packageName)"
-    """
-    
+      // swift-tools-version: 5.9
+      import PackageDescription
+
+      let package = Package(
+          name: "\(packageName)"
+      """
+
     // Add products if any
     if !products.isEmpty {
       content += ",\n        products: [\n"
       for (index, product) in products.enumerated() {
-        let productTargets = product.dependencies.map { "\"" + $0.name + "\"" }.joined(separator: ", ")
+        let productTargets = product.dependencies.map { "\"" + $0.name + "\"" }.joined(
+          separator: ", ")
         let productTypeString = product.productType == .library ? "library" : "executable"
-        content += "            .\(productTypeString)(name: \"\(product.typeName)\", targets: [\(productTargets)])"
+        content +=
+          "            .\(productTypeString)(name: \"\(product.typeName)\", targets: [\(productTargets)])"
         if index < products.count - 1 {
           content += ","
         }
@@ -239,14 +239,15 @@ extension PackageDSLManager {
       }
       content += "        ]"
     }
-    
+
     // Add dependencies if any
     if !dependencies.isEmpty {
       content += ",\n        dependencies: [\n"
       for (index, dependency) in dependencies.enumerated() {
         let dependencyString = dependency.dependency ?? ""
         // Remove quotes if they exist around the dependency string
-        let cleanDependency = dependencyString.hasPrefix("\"") && dependencyString.hasSuffix("\"") 
+        let cleanDependency =
+          dependencyString.hasPrefix("\"") && dependencyString.hasSuffix("\"")
           ? String(dependencyString.dropFirst().dropLast())
           : dependencyString
         content += "            " + cleanDependency
@@ -257,25 +258,28 @@ extension PackageDSLManager {
       }
       content += "        ]"
     }
-    
+
     // Add targets
-    let allTargets = targets + testTargets.map { testTarget in
-      Target(typeName: testTarget.typeName, dependencies: testTarget.dependencies)
-    }
-    
+    let allTargets =
+      targets
+      + testTargets.map { testTarget in
+        Target(typeName: testTarget.typeName, dependencies: testTarget.dependencies)
+      }
+
     if !allTargets.isEmpty {
       content += ",\n        targets: [\n"
       for (index, target) in allTargets.enumerated() {
         let isTestTarget = testTargets.contains { $0.typeName == target.typeName }
         let targetType = isTestTarget ? "testTarget" : "target"
-        
+
         if target.dependencies.isEmpty {
           content += "            .\(targetType)(name: \"\(target.typeName)\")"
         } else {
           let targetDeps = target.dependencies.map { "\"" + $0.name + "\"" }.joined(separator: ", ")
-          content += "            .\(targetType)(name: \"\(target.typeName)\", dependencies: [\(targetDeps)])"
+          content +=
+            "            .\(targetType)(name: \"\(target.typeName)\", dependencies: [\(targetDeps)])"
         }
-        
+
         if index < allTargets.count - 1 {
           content += ","
         }
@@ -283,11 +287,11 @@ extension PackageDSLManager {
       }
       content += "        ]"
     }
-    
+
     content += "\n    )\n"
     return content
   }
-  
+
   /// Validate the package and throw if there are any error-level issues
   /// - Throws: PackageError.validationFailed if validation errors are found
   public func validateOrThrow() async throws {
@@ -302,7 +306,6 @@ extension PackageDSLManager {
 // MARK: - Package Type Creation
 
 extension PackageDSLManager {
-  
   /// Create a package with the specified type
   /// - Parameters:
   ///   - name: The package name (optional, uses current packageName if nil)
@@ -313,7 +316,7 @@ extension PackageDSLManager {
     if let name = name {
       self.packageName = name
     }
-    
+
     // Create default target and product for non-empty packages
     switch type {
     case .library:
@@ -324,7 +327,7 @@ extension PackageDSLManager {
         // This should not happen in normal usage as we're creating a new package
         assertionFailure("Failed to create default library target and product: \(error)")
       }
-      
+
     case .executable:
       do {
         try addTarget(name: packageName, type: .executable)
@@ -333,15 +336,15 @@ extension PackageDSLManager {
         // This should not happen in normal usage as we're creating a new package
         assertionFailure("Failed to create default executable target and product: \(error)")
       }
-      
+
     case .empty:
       // Empty package has no default targets or products
       break
     }
-    
+
     return self
   }
-  
+
   /// Add a target to the package
   /// - Parameters:
   ///   - name: The target name
@@ -350,26 +353,28 @@ extension PackageDSLManager {
   /// - Returns: Self for method chaining
   /// - Throws: PackageError if target name already exists
   @discardableResult
-  public func addTarget(name: String, type: TargetType, dependencies: [DependencyRef] = []) throws -> PackageDSLManager {
+  public func addTarget(name: String, type: TargetType, dependencies: [DependencyRef] = []) throws
+    -> PackageDSLManager
+  {
     // Check for duplicate target names
     let existingNames = targets.map(\.typeName) + testTargets.map(\.typeName)
     guard !existingNames.contains(name) else {
       throw PackageError.duplicateTargetName(name)
     }
-    
+
     switch type {
     case .library, .executable:
       let target = Target(typeName: name, dependencies: dependencies)
       targets.append(target)
-      
+
     case .test:
       let testTarget = TestTarget(typeName: name, dependencies: dependencies)
       testTargets.append(testTarget)
     }
-    
+
     return self
   }
-  
+
   /// Remove a target from the package
   /// - Parameters:
   ///   - name: The target name to remove
@@ -383,12 +388,12 @@ extension PackageDSLManager {
     guard existingTargetNames.contains(name) else {
       throw PackageError.targetNotFound(name)
     }
-    
+
     // Find products that depend on this target
     let dependentProducts = products.filter { product in
       product.dependencies.contains { $0.name == name }
     }
-    
+
     // Find targets that depend on this target
     let dependentRegularTargets = targets.filter { target in
       target.dependencies.contains { $0.name == name }
@@ -396,38 +401,38 @@ extension PackageDSLManager {
     let dependentTestTargets = testTargets.filter { testTarget in
       testTarget.dependencies.contains { $0.name == name }
     }
-    
+
     // Check for cascade removal requirements
-    let allDependents = dependentProducts.map(\.typeName) + 
-                       dependentRegularTargets.map(\.typeName) + 
-                       dependentTestTargets.map(\.typeName)
+    let allDependents =
+      dependentProducts.map(\.typeName) + dependentRegularTargets.map(\.typeName)
+      + dependentTestTargets.map(\.typeName)
     if !allDependents.isEmpty && !force {
       throw PackageError.cascadeRemovalRequired(name, allDependents)
     }
-    
+
     // Remove the target
     targets.removeAll { $0.typeName == name }
     testTargets.removeAll { $0.typeName == name }
-    
+
     // If force is enabled, clean up dependencies
     if force {
       // Remove products that reference this target
       products.removeAll { product in
         product.dependencies.contains { $0.name == name }
       }
-      
+
       // Remove target dependencies from other targets
       targets = targets.map { target in
         let filteredDependencies = target.dependencies.filter { $0.name != name }
         return Target(typeName: target.typeName, dependencies: filteredDependencies)
       }
-      
+
       testTargets = testTargets.map { testTarget in
         let filteredDependencies = testTarget.dependencies.filter { $0.name != name }
         return TestTarget(typeName: testTarget.typeName, dependencies: filteredDependencies)
       }
     }
-    
+
     return self
   }
 }
@@ -435,7 +440,6 @@ extension PackageDSLManager {
 // MARK: - Product Management
 
 extension PackageDSLManager {
-  
   /// Add a product to the package
   /// - Parameters:
   ///   - name: The product name
@@ -444,12 +448,14 @@ extension PackageDSLManager {
   /// - Returns: Self for method chaining
   /// - Throws: PackageError if product name already exists or targets don't exist
   @discardableResult
-  public func addProduct(name: String, type: ProductType, targets: [String]) throws -> PackageDSLManager {
+  public func addProduct(name: String, type: ProductType, targets: [String]) throws
+    -> PackageDSLManager
+  {
     // Check for duplicate product names
     guard !products.contains(where: { $0.typeName == name }) else {
       throw PackageError.duplicateProductName(name)
     }
-    
+
     // Verify all target names exist
     let allTargetNames = self.targets.map(\.typeName) + testTargets.map(\.typeName)
     for targetName in targets {
@@ -457,21 +463,21 @@ extension PackageDSLManager {
         throw PackageError.targetNotFound(targetName)
       }
     }
-    
+
     // Create dependency references for the targets
     let targetDependencies = targets.map { DependencyRef(name: $0) }
-    
+
     let product = Product(
       typeName: name,
       name: name,
       dependencies: targetDependencies,
       productType: type
     )
-    
+
     products.append(product)
     return self
   }
-  
+
   /// Remove a product from the package
   /// - Parameter name: The product name to remove
   /// - Returns: Self for method chaining
@@ -482,7 +488,7 @@ extension PackageDSLManager {
     guard products.contains(where: { $0.typeName == name }) else {
       throw PackageError.productNotFound(name)
     }
-    
+
     // Remove the product
     products.removeAll { $0.typeName == name }
     return self
@@ -492,7 +498,6 @@ extension PackageDSLManager {
 // MARK: - Dependency Management
 
 extension PackageDSLManager {
-  
   /// Add a URL-based package dependency
   /// - Parameters:
   ///   - url: The URL of the package repository
@@ -500,25 +505,27 @@ extension PackageDSLManager {
   /// - Returns: Self for method chaining
   /// - Throws: PackageError if dependency already exists
   @discardableResult
-  public func addDependency(url: String, requirement: VersionRequirement) throws -> PackageDSLManager {
+  public func addDependency(url: String, requirement: VersionRequirement) throws
+    -> PackageDSLManager
+  {
     let name = extractPackageName(from: url)
-    
+
     // Check for duplicate dependency names
     guard !dependencies.contains(where: { $0.typeName == name }) else {
       throw PackageError.duplicateDependencyName(name)
     }
-    
+
     let dependency = Dependency(
       typeName: name,
       type: .package,
       dependency: "\".package(url: \"\(url)\", \(requirement.asSPMString()))\"",
       package: DependencyRef(name: name)
     )
-    
+
     dependencies.append(dependency)
     return self
   }
-  
+
   /// Add a local path-based package dependency
   /// - Parameter path: The local file system path to the package
   /// - Returns: Self for method chaining
@@ -526,23 +533,23 @@ extension PackageDSLManager {
   @discardableResult
   public func addDependency(path: String) throws -> PackageDSLManager {
     let name = URL(fileURLWithPath: path).lastPathComponent
-    
+
     // Check for duplicate dependency names
     guard !dependencies.contains(where: { $0.typeName == name }) else {
       throw PackageError.duplicateDependencyName(name)
     }
-    
+
     let dependency = Dependency(
       typeName: name,
       type: .package,
       dependency: "\".package(path: \"\(path)\")\"",
       package: DependencyRef(name: name)
     )
-    
+
     dependencies.append(dependency)
     return self
   }
-  
+
   /// Add a registry-based package dependency
   /// - Parameters:
   ///   - identity: The package identity in the registry
@@ -550,23 +557,25 @@ extension PackageDSLManager {
   /// - Returns: Self for method chaining
   /// - Throws: PackageError if dependency already exists
   @discardableResult
-  public func addDependency(identity: String, requirement: VersionRequirement) throws -> PackageDSLManager {
+  public func addDependency(identity: String, requirement: VersionRequirement) throws
+    -> PackageDSLManager
+  {
     // Check for duplicate dependency names
     guard !dependencies.contains(where: { $0.typeName == identity }) else {
       throw PackageError.duplicateDependencyName(identity)
     }
-    
+
     let dependency = Dependency(
       typeName: identity,
       type: .package,
       dependency: "\".package(id: \"\(identity)\", \(requirement.asSPMString()))\"",
       package: DependencyRef(name: identity)
     )
-    
+
     dependencies.append(dependency)
     return self
   }
-  
+
   /// Remove a package dependency
   /// - Parameters:
   ///   - name: The dependency name to remove
@@ -579,7 +588,7 @@ extension PackageDSLManager {
     guard dependencies.contains(where: { $0.typeName == name }) else {
       throw PackageError.dependencyNotFound(name)
     }
-    
+
     // Find targets that depend on this dependency
     let dependentRegularTargets = targets.filter { target in
       target.dependencies.contains { $0.name == name }
@@ -587,16 +596,17 @@ extension PackageDSLManager {
     let dependentTestTargets = testTargets.filter { testTarget in
       testTarget.dependencies.contains { $0.name == name }
     }
-    
+
     // Check for cascade removal requirements
-    let allDependentTargets = dependentRegularTargets.map(\.typeName) + dependentTestTargets.map(\.typeName)
+    let allDependentTargets =
+      dependentRegularTargets.map(\.typeName) + dependentTestTargets.map(\.typeName)
     if !allDependentTargets.isEmpty && !force {
       throw PackageError.cascadeRemovalRequired(name, allDependentTargets)
     }
-    
+
     // Remove the dependency
     dependencies.removeAll { $0.typeName == name }
-    
+
     // Remove dependency references from targets (always clean up references)
     targets = targets.map { target in
       let filteredDependencies = target.dependencies.filter { $0.name != name }
@@ -605,7 +615,7 @@ extension PackageDSLManager {
         dependencies: filteredDependencies
       )
     }
-    
+
     // Remove dependency references from test targets
     testTargets = testTargets.map { testTarget in
       let filteredDependencies = testTarget.dependencies.filter { $0.name != name }
@@ -614,23 +624,23 @@ extension PackageDSLManager {
         dependencies: filteredDependencies
       )
     }
-    
+
     return self
   }
-  
+
   /// Helper method to extract package name from URL
   private func extractPackageName(from url: String) -> String {
     guard let urlObject = URL(string: url) else {
       return url.components(separatedBy: "/").last ?? url
     }
-    
+
     let pathComponent = urlObject.lastPathComponent
-    
+
     // Remove .git suffix if present
     if pathComponent.hasSuffix(".git") {
       return String(pathComponent.dropLast(4))
     }
-    
+
     return pathComponent
   }
 }
@@ -646,7 +656,7 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
   case exact(String)
   case revision(String)
   case branch(String)
-  
+
   /// Convert to SPM-compatible string representation
   internal func asSPMString() -> String {
     switch self {
@@ -666,13 +676,13 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
       return "branch: \"\(branch)\""
     }
   }
-  
+
   /// Parse a version requirement from a string
   /// - Parameter string: String representation of version requirement
   /// - Returns: Parsed VersionRequirement or nil if invalid
   public static func parse(_ string: String) -> VersionRequirement? {
     let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
-    
+
     // Check for range (..<)
     if trimmed.contains("..<") {
       let components = trimmed.components(separatedBy: "..<")
@@ -681,39 +691,39 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
       let to = components[1].trimmingCharacters(in: CharacterSet(charactersIn: "\""))
       return .range(from: from, to: to)
     }
-    
+
     // Check for exact version
     if trimmed.hasPrefix("exact:") {
       let version = trimmed.dropFirst(6).trimmingCharacters(in: CharacterSet(charactersIn: " \""))
       return .exact(version)
     }
-    
+
     // Check for revision
     if trimmed.hasPrefix("revision:") {
       let revision = trimmed.dropFirst(9).trimmingCharacters(in: CharacterSet(charactersIn: " \""))
       return .revision(revision)
     }
-    
+
     // Check for branch
     if trimmed.hasPrefix("branch:") {
       let branch = trimmed.dropFirst(7).trimmingCharacters(in: CharacterSet(charactersIn: " \""))
       return .branch(branch)
     }
-    
+
     // Check for from version
     if trimmed.hasPrefix("from:") {
       let version = trimmed.dropFirst(5).trimmingCharacters(in: CharacterSet(charactersIn: " \""))
       return .from(version)
     }
-    
+
     // Default to from version for plain version strings
     if isValidVersionString(trimmed) {
       return .from(trimmed)
     }
-    
+
     return nil
   }
-  
+
   /// Validate if a string is a valid semantic version
   private static func isValidVersionString(_ string: String) -> Bool {
     let versionPattern = #"^\d+\.\d+\.\d+(-[a-zA-Z0-9\.-]+)?(\+[a-zA-Z0-9\.-]+)?$"#
@@ -724,7 +734,6 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
 // MARK: - Code Generation
 
 extension PackageDSLManager {
-  
   /// Generate DSL component files in the package directory
   /// - Throws: PackageError on generation failures
   /// - Returns: Self for method chaining
@@ -735,21 +744,22 @@ extension PackageDSLManager {
       let packageWriter = PackageWriter()
       try packageWriter.write(specifications, to: packageURL)
       return self
-      
     } catch let error as PackageDSLError {
-      throw PackageError.packageGenerationFailed("DSL generation failed: \(error.localizedDescription)")
+      throw PackageError.packageGenerationFailed(
+        "DSL generation failed: \(error.localizedDescription)")
     } catch {
-      throw PackageError.packageGenerationFailed("Package generation failed: \(error.localizedDescription)")
+      throw PackageError.packageGenerationFailed(
+        "Package generation failed: \(error.localizedDescription)")
     }
   }
-  
+
   /// Check if the package directory has existing DSL component files
   /// - Returns: True if DSL components exist, false otherwise
   public func hasDSLComponents() -> Bool {
     let indexFile = packageURL.appendingPathComponent("Index.swift")
     return FileManager.default.fileExists(atPath: indexFile.path)
   }
-  
+
   /// Check if the package directory has a traditional Package.swift file
   /// - Returns: True if Package.swift exists, false otherwise
   public func hasTraditionalPackageSwift() -> Bool {
@@ -761,18 +771,19 @@ extension PackageDSLManager {
 // MARK: - Fluent API Extensions
 
 extension PackageDSLManager {
-  
   /// Fluent API method to add multiple dependencies at once
   /// - Parameter dependencies: Array of (url, requirement) tuples
   /// - Returns: Self for method chaining
   @discardableResult
-  public func addDependencies(_ dependencies: [(url: String, requirement: VersionRequirement)]) throws -> PackageDSLManager {
+  public func addDependencies(_ dependencies: [(url: String, requirement: VersionRequirement)])
+    throws -> PackageDSLManager
+  {
     for (url, requirement) in dependencies {
       try addDependency(url: url, requirement: requirement)
     }
     return self
   }
-  
+
   /// Fluent API method to add multiple path dependencies at once
   /// - Parameter paths: Array of local paths
   /// - Returns: Self for method chaining
@@ -783,7 +794,7 @@ extension PackageDSLManager {
     }
     return self
   }
-  
+
   /// Convenience method to add dependency with string version requirement
   /// - Parameters:
   ///   - url: The URL of the package repository
@@ -791,13 +802,14 @@ extension PackageDSLManager {
   /// - Returns: Self for method chaining
   /// - Throws: PackageError if dependency already exists or version string is invalid
   @discardableResult
-  public func addDependency(url: String, version versionString: String) throws -> PackageDSLManager {
+  public func addDependency(url: String, version versionString: String) throws -> PackageDSLManager
+  {
     guard let requirement = VersionRequirement.parse(versionString) else {
       throw PackageError.invalidConfiguration("Invalid version requirement: \(versionString)")
     }
     return try addDependency(url: url, requirement: requirement)
   }
-  
+
   /// Convenience method to add registry dependency with string version requirement
   /// - Parameters:
   ///   - identity: The package identity in the registry
@@ -805,7 +817,9 @@ extension PackageDSLManager {
   /// - Returns: Self for method chaining
   /// - Throws: PackageError if dependency already exists or version string is invalid
   @discardableResult
-  public func addDependency(identity: String, version versionString: String) throws -> PackageDSLManager {
+  public func addDependency(identity: String, version versionString: String) throws
+    -> PackageDSLManager
+  {
     guard let requirement = VersionRequirement.parse(versionString) else {
       throw PackageError.invalidConfiguration("Invalid version requirement: \(versionString)")
     }

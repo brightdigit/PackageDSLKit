@@ -34,8 +34,8 @@ public enum SupportCodeBlock {
   nonisolated(unsafe) public static var content: String = {
     readSupportCode()
   }()
-  
-  // For backward compatibility - returns the same content as .content  
+
+  // For backward compatibility - returns the same content as .content
   nonisolated(unsafe) public static var syntaxNode: SupportCodeBlockContent = {
     SupportCodeBlockContent(content: content)
   }()
@@ -53,7 +53,7 @@ public enum SupportCodeBlock {
 // Backward compatibility wrapper to replace SyntaxProtocol usage
 public struct SupportCodeBlockContent {
   public let content: String
-  
+
   public var trimmedDescription: String {
     content.trimmingCharacters(in: .whitespacesAndNewlines)
   }

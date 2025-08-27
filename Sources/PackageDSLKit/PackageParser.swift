@@ -33,8 +33,9 @@ import SwiftPackageManagerKit
 public struct PackageParser: Sendable, Hashable, Codable {
   public init() {
   }
-  
-  public func parse(at directoryURL: URL, with fileManager: FileManager) async throws(PackageDSLError)
+
+  public func parse(at directoryURL: URL, with fileManager: FileManager)
+    async throws(PackageDSLError)
     -> PackageSpecifications
   {
     // Use SPM JSON parsing instead of SwiftSyntax parsing
@@ -44,7 +45,7 @@ public struct PackageParser: Sendable, Hashable, Codable {
     } catch {
       throw .other(error)
     }
-    
+
     let packageInfo: PackageInfo
     do {
       packageInfo = try await executor.dumpPackage()

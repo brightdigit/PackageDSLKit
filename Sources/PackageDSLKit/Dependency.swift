@@ -27,6 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import SwiftPackageManagerKit
+
 public struct Dependency: TypeSource {
   public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
     public typealias RawValue = Int
@@ -122,13 +124,11 @@ extension Int {
   }
 }
 
-import SwiftPackageManagerKit
-
 extension Dependency {
   /// Initialize Dependency from SPM data
   public init?(spmDependency: SwiftPackageManagerKit.Dependency) {
     let identity = spmDependency.identity
-    
+
     self.init(
       typeName: identity,
       type: .package,  // SPM dependencies are package dependencies

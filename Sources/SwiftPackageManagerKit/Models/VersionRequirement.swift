@@ -2,67 +2,69 @@ import Foundation
 
 /// Represents version requirements for dependencies
 public enum VersionRequirement: Codable, Hashable {
-    case range(lowerBound: String, upperBound: String)
-    case exact(String)
-    case revision(String)
-    case branch(String)
-    
-    private enum CodingKeys: String, CodingKey {
-        case range
-        case exact
-        case revision
-        case branch
+  case range(lowerBound: String, upperBound: String)
+  case exact(String)
+  case revision(String)
+  case branch(String)
+
+  private enum CodingKeys: String, CodingKey {
+    case range
+    case exact
+    case revision
+    case branch
+  }
+
+  private enum RangeKeys: String, CodingKey {
+    case lowerBound
+    case upperBound
+  }
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+
+    if container.contains(.range) {
+      // The range is an array with one object containing lowerBound and upperBound
+      let rangeArray = try container.decode([RangeInfo].self, forKey: .range)
+      guard let rangeInfo = rangeArray.first else {
+        throw DecodingError.dataCorrupted(
+          DecodingError.Context(
+            codingPath: decoder.codingPath, debugDescription: "Empty range array")
+        )
+      }
+      self = .range(lowerBound: rangeInfo.lowerBound, upperBound: rangeInfo.upperBound)
+    } else if let exact = try? container.decode(String.self, forKey: .exact) {
+      self = .exact(exact)
+    } else if let revision = try? container.decode(String.self, forKey: .revision) {
+      self = .revision(revision)
+    } else if let branch = try? container.decode(String.self, forKey: .branch) {
+      self = .branch(branch)
+    } else {
+      throw DecodingError.dataCorrupted(
+        DecodingError.Context(
+          codingPath: decoder.codingPath, debugDescription: "Unknown version requirement type")
+      )
     }
-    
-    private enum RangeKeys: String, CodingKey {
-        case lowerBound
-        case upperBound
+  }
+
+  private struct RangeInfo: Codable {
+    let lowerBound: String
+    let upperBound: String
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+
+    switch self {
+    case .range(let lowerBound, let upperBound):
+      var rangeContainer = container.nestedContainer(keyedBy: RangeKeys.self, forKey: .range)
+      try rangeContainer.encode(lowerBound, forKey: .lowerBound)
+      try rangeContainer.encode(upperBound, forKey: .upperBound)
+    case .exact(let version):
+      try container.encode(version, forKey: .exact)
+    case .revision(let revision):
+      try container.encode(revision, forKey: .revision)
+    case .branch(let branch):
+      try container.encode(branch, forKey: .branch)
     }
-    
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        if container.contains(.range) {
-            // The range is an array with one object containing lowerBound and upperBound
-            let rangeArray = try container.decode([RangeInfo].self, forKey: .range)
-            guard let rangeInfo = rangeArray.first else {
-                throw DecodingError.dataCorrupted(
-                    DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Empty range array")
-                )
-            }
-            self = .range(lowerBound: rangeInfo.lowerBound, upperBound: rangeInfo.upperBound)
-        } else if let exact = try? container.decode(String.self, forKey: .exact) {
-            self = .exact(exact)
-        } else if let revision = try? container.decode(String.self, forKey: .revision) {
-            self = .revision(revision)
-        } else if let branch = try? container.decode(String.self, forKey: .branch) {
-            self = .branch(branch)
-        } else {
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Unknown version requirement type")
-            )
-        }
-    }
-    
-    private struct RangeInfo: Codable {
-        let lowerBound: String
-        let upperBound: String
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        
-        switch self {
-        case .range(let lowerBound, let upperBound):
-            var rangeContainer = container.nestedContainer(keyedBy: RangeKeys.self, forKey: .range)
-            try rangeContainer.encode(lowerBound, forKey: .lowerBound)
-            try rangeContainer.encode(upperBound, forKey: .upperBound)
-        case .exact(let version):
-            try container.encode(version, forKey: .exact)
-        case .revision(let revision):
-            try container.encode(revision, forKey: .revision)
-        case .branch(let branch):
-            try container.encode(branch, forKey: .branch)
-        }
-    }
+  }
 }

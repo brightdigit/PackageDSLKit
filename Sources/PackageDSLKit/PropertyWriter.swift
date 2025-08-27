@@ -37,7 +37,7 @@ public enum PropertyWriter {
   public static func syntaxKitNode(from property: Property) -> ComputedProperty {
     // Convert string code blocks to SyntaxKit CodeBlocks
     let codeBlocks: [CodeBlock] = property.code.map { Literal.ref($0) }
-    
+
     // Create a computed property with the code blocks as body
     // For now, we'll just use the first code block or create an empty return
     if let firstCodeBlock = codeBlocks.first {

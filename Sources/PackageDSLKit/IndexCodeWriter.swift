@@ -27,7 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
 public protocol IndexCodeWriter: Sendable {
   func writeIndex(_ index: Index) throws(PackageDSLError) -> String
 }

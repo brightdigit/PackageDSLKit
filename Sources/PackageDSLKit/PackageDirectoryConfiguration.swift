@@ -61,8 +61,10 @@ extension PackageDirectoryConfiguration {
     let dependencies = packageInfo.dependencies.compactMap { Dependency(spmDependency: $0) }
     let targets = packageInfo.targets.compactMap { Target(spmTarget: $0) }
     let testTargets = packageInfo.targets.compactMap { TestTarget(spmTarget: $0) }
-    let supportedPlatformSets = packageInfo.platforms.isEmpty ? [] : [SupportedPlatformSet(spmPlatforms: packageInfo.platforms)].compactMap { $0 }
-    
+    let supportedPlatformSets =
+      packageInfo.platforms.isEmpty
+      ? [] : [SupportedPlatformSet(spmPlatforms: packageInfo.platforms)].compactMap { $0 }
+
     // Create index based on SPM data
     let entries = products.map(EntryRef.init)
     let dependencyRefs = dependencies.map(DependencyRef.init)
@@ -71,10 +73,10 @@ extension PackageDirectoryConfiguration {
       entries: entries,
       dependencies: dependencyRefs,
       testTargets: testTargetRefs,
-      swiftSettings: [], // TODO: Extract from SPM if available
-      modifiers: [] // TODO: Extract from SPM if available
+      swiftSettings: [],  // TODO: Extract from SPM if available
+      modifiers: []  // TODO: Extract from SPM if available
     )
-    
+
     self.init(
       index: index,
       products: products,
@@ -84,7 +86,7 @@ extension PackageDirectoryConfiguration {
       supportedPlatformSets: supportedPlatformSets
     )
   }
-  
+
   // Legacy SwiftSyntax-based initializer removed - use SPM-based parsing instead
 
   internal func createComponents() -> [Component] {

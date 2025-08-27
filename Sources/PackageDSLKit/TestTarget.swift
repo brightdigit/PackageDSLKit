@@ -27,6 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import SwiftPackageManagerKit
+
 public struct TestTarget: TypeSource {
   public let typeName: String
   public let dependencies: [DependencyRef]
@@ -42,9 +44,6 @@ extension TestTarget {
   }
 }
 
-import SwiftPackageManagerKit
-
-
 extension TestTarget {
   /// Initialize TestTarget from SPM data (for test targets only)
   public init?(spmTarget: SwiftPackageManagerKit.Target) {
@@ -52,7 +51,7 @@ extension TestTarget {
     guard spmTarget.type == .test else {
       return nil
     }
-    
+
     // Convert dependencies
     let dependencies: [DependencyRef] = spmTarget.dependencies.compactMap { dependency in
       switch dependency {
@@ -62,7 +61,7 @@ extension TestTarget {
         return DependencyRef(name: productName)
       }
     }
-    
+
     self.init(
       typeName: spmTarget.name,
       dependencies: dependencies

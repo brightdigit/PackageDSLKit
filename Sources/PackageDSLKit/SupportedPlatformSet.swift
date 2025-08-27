@@ -27,6 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+import SwiftPackageManagerKit
+
 public struct SupportedPlatformSet: TypeSource, ComponentBuildable {
   public static let directoryName: String = "Platforms"
 
@@ -80,27 +82,26 @@ public struct SupportedPlatformSet: TypeSource, ComponentBuildable {
   }
 }
 
-import SwiftPackageManagerKit
-
-
 extension SupportedPlatformSet {
   /// Initialize SupportedPlatformSet from SPM platform data
   public init?(spmPlatforms: [SwiftPackageManagerKit.Platform]) {
     guard !spmPlatforms.isEmpty else {
       return nil
     }
-    
+
     // Convert SPM platforms to SupportedPlatform
     let platforms: Set<SupportedPlatform> = Set(
       spmPlatforms.compactMap { spmPlatform in
-        SupportedPlatform(osName: spmPlatform.platformName, version: Int(spmPlatform.version.components(separatedBy: ".").first ?? "0") ?? 0)
+        SupportedPlatform(
+          osName: spmPlatform.platformName,
+          version: Int(spmPlatform.version.components(separatedBy: ".").first ?? "0") ?? 0)
       }
     )
-    
+
     guard !platforms.isEmpty else {
       return nil
     }
-    
+
     self.init(
       typeName: "Platforms",  // Default name
       platforms: platforms

@@ -27,7 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-
 public struct Index: Sendable, Hashable, Codable {
   public let entries: [EntryRef]
   public let dependencies: [DependencyRef]

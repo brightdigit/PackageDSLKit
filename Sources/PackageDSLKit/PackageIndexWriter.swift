@@ -34,49 +34,49 @@ public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
   }
   // IndexCodeWriter protocol implementation - delegates to SyntaxKit version
   public func writeIndex(_ index: Index) throws(PackageDSLError) -> String {
-    return try syntaxKitWriteIndex(index)
+    try syntaxKitWriteIndex(index)
   }
-  
+
   /// Creates index using SyntaxKit
   public func syntaxKitWriteIndex(_ index: Index) throws(PackageDSLError) -> String {
     // Create import declaration
     let importDecl = Import("PackageDescription")
-    
+
     // Helper function to create parameter for each section
     func createParameter(name: String, items: [String]) -> ParameterExp? {
       guard !items.isEmpty else { return nil }
-      
+
       // Create closure with function calls
       // For simplicity, use the first item for now
-      
+
       let closure = Closure(body: items.first.map { [Call($0)] } ?? [])
-      
+
       return ParameterExp(name: name, value: closure)
     }
-    
+
     // Create labeled parameters
     let parameters: [ParameterExp] = [
       createParameter(name: "entries", items: index.entries.map(\.name)),
       createParameter(name: "dependencies", items: index.dependencies.map(\.name)),
       createParameter(name: "testTargets", items: index.testTargets.map(\.name)),
-      createParameter(name: "swiftSettings", items: index.swiftSettings.map(\.name))
+      createParameter(name: "swiftSettings", items: index.swiftSettings.map(\.name)),
     ].compactMap { $0 }
-    
+
     // Create Package initialization
     // For simplicity, use the first few parameters
     let packageInit = Init("Package", params: Array(parameters.prefix(4)))
-    
+
     // Create let package = Package(...) variable
     let packageVar = Variable(.let, name: "package", equals: packageInit)
-    
+
     // Combine import and package declaration
     let codeBlocks: [CodeBlock] = [importDecl, packageVar]
-    
+
     // Convert to syntax using SyntaxKit's code generation
     let lines = codeBlocks.map { codeBlock in
       codeBlock.syntax.trimmedDescription
     }
-    
+
     return lines.joined(separator: "\n")
   }
 }
