@@ -27,66 +27,9 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import SwiftPackageManagerKit
+import Foundation
 
 public struct Dependency: TypeSource, Sendable {
-  public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
-    public typealias RawValue = Int
-
-    public static let package = DependencyType(rawValue: 1)
-    public static let target = DependencyType(rawValue: 2)
-
-    private static let strings: [String] = ["PackageDependency", "TargetDependency"]
-
-    public var rawValue: Int
-    public init(rawValue: Int) {
-      self.rawValue = rawValue
-    }
-    internal struct InvalidValueError: Error, Sendable {
-      internal init?(invalidCount: Int) {
-        guard invalidCount != 0 else {
-          return nil
-        }
-        assert(invalidCount > 0)
-        self.invalidCount = invalidCount
-      }
-
-      internal init?(valuesCount: Int, indiciesCount: Int) {
-        self.init(invalidCount: indiciesCount - valuesCount)
-      }
-
-      internal let invalidCount: Int
-    }
-    internal init?(stringsThrows strings: [String]) throws(InvalidValueError) {
-      let indicies = strings.map {
-        Self.strings.firstIndex(of: $0)
-      }
-      let rawValues = indicies.compactMap(\.self).map { $0 + 1 }
-      if rawValues.isEmpty {
-        return nil
-      }
-      if let error = InvalidValueError(valuesCount: rawValues.count, indiciesCount: indicies.count)
-      {
-        assert(error.invalidCount > 0)
-        throw error
-      }
-      let rawValue = rawValues.reduce(0) { $0 + $1 }
-      self.init(rawValue: rawValue)
-    }
-    public init?(strings: [String]) {
-      do {
-        try self.init(stringsThrows: strings)
-      } catch {
-        assertionFailure("Invalid Values Passed: \(error.invalidCount)")
-        return nil
-      }
-    }
-
-    internal func asInheritedTypes() -> [String] {
-      rawValue.powerOfTwoExponents().map { Self.strings[$0] }
-    }
-  }
-
   public let typeName: String
 
   public let type: DependencyType
@@ -95,7 +38,7 @@ public struct Dependency: TypeSource, Sendable {
 
   public init(
     typeName: String,
-    type: Dependency.DependencyType,
+    type: DependencyType,
     dependency: String? = nil,
     package: DependencyRef? = nil
   ) {
@@ -106,34 +49,4 @@ public struct Dependency: TypeSource, Sendable {
   }
 }
 
-extension Int {
-  fileprivate func powerOfTwoExponents() -> [Int] {
-    var number = self
-    var exponents: [Int] = []
-    var currentExponent = 0
 
-    while number > 0 {
-      if number & 1 == 1 {
-        exponents.append(currentExponent)
-      }
-      number >>= 1
-      currentExponent += 1
-    }
-
-    return exponents
-  }
-}
-
-extension Dependency {
-  /// Initialize Dependency from SPM data
-  public init?(spmDependency: SwiftPackageManagerKit.Dependency) {
-    let identity = spmDependency.identity
-
-    self.init(
-      typeName: identity,
-      type: .package,  // SPM dependencies are package dependencies
-      dependency: nil,
-      package: DependencyRef(name: identity)
-    )
-  }
-}

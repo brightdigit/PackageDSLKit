@@ -54,29 +54,65 @@ public struct PackageDirectoryConfiguration: Sendable, Hashable, Codable {
 }
 
 extension PackageDirectoryConfiguration {
-  // New SPM-based initializer
+  // SPM-based initializer - converts PackageInfo to PackageDirectoryConfiguration
   internal init(from packageInfo: PackageInfo) throws(PackageDSLError) {
-    // Convert SPM data to PackageDSLKit data structures
+    // Convert SPM products to PackageDSLKit products
     let products = packageInfo.products.compactMap { Product(spmProduct: $0) }
-    let dependencies = packageInfo.dependencies.compactMap { Dependency(spmDependency: $0) }
+    
+    // Convert SPM targets to PackageDSLKit targets (excluding test targets)
     let targets = packageInfo.targets.compactMap { Target(spmTarget: $0) }
+    
+    // Convert SPM targets to PackageDSLKit test targets (only test targets)
     let testTargets = packageInfo.targets.compactMap { TestTarget(spmTarget: $0) }
-    let supportedPlatformSets =
-      packageInfo.platforms.isEmpty
-      ? [] : [SupportedPlatformSet(spmPlatforms: packageInfo.platforms)].compactMap { $0 }
-
-    // Create index based on SPM data
-    let entries = products.map(EntryRef.init)
-    let dependencyRefs = dependencies.map(DependencyRef.init)
-    let testTargetRefs = testTargets.map(TestTargetRef.init)
+    
+    // Convert SPM dependencies to PackageDSLKit dependencies
+    let dependencies = packageInfo.dependencies.compactMap { spmDependency -> Dependency? in
+      switch spmDependency {
+      case .sourceControl(let sourceControlDep):
+        return Dependency(
+          typeName: sourceControlDep.identity,
+          type: .package,
+          dependency: sourceControlDep.identity,
+          package: DependencyRef(name: sourceControlDep.identity)
+        )
+      case .fileSystem(let fileSystemDep):
+        return Dependency(
+          typeName: fileSystemDep.identity,
+          type: .package,
+          dependency: fileSystemDep.identity,
+          package: DependencyRef(name: fileSystemDep.identity)
+        )
+      }
+    }
+    
+    // Convert SPM platforms to PackageDSLKit supported platform sets
+    let supportedPlatformSets = packageInfo.platforms.compactMap { platform -> SupportedPlatformSet? in
+      // Create a single platform set for all platforms
+      guard let platformSet = SupportedPlatformSet(spmPlatforms: [platform]) else {
+        return nil
+      }
+      return platformSet
+    }
+    
+    // Create index from the converted components
+    let entries = products.map { EntryRef(name: $0.typeName) }
+    let dependencyRefs = dependencies.map { DependencyRef(name: $0.typeName) }
+    let testTargetRefs = testTargets.map { TestTargetRef(name: $0.typeName) }
+    
+    // Create swift settings from tools version
+    let swiftSettings: [SwiftSettingRef] = []
+    
+    // Create modifiers (empty for now, can be extended later)
+    let modifiers: [Modifier] = []
+    
     let index = Index(
       entries: entries,
       dependencies: dependencyRefs,
       testTargets: testTargetRefs,
-      swiftSettings: [],  // TODO: Extract from SPM if available
-      modifiers: []  // TODO: Extract from SPM if available
+      swiftSettings: swiftSettings,
+      modifiers: modifiers
     )
-
+    
     self.init(
       index: index,
       products: products,
@@ -86,8 +122,6 @@ extension PackageDirectoryConfiguration {
       supportedPlatformSets: supportedPlatformSets
     )
   }
-
-  // Legacy SwiftSyntax-based initializer removed - use SPM-based parsing instead
 
   internal func createComponents() -> [Component] {
     var components: [Component] = []

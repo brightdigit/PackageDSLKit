@@ -1,13 +1,13 @@
 //
-//  Models.swift
-//  SyntaxKit
+//  ProcessRunnerError.swift
+//  SwiftPackageManagerKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -27,10 +27,22 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
-// Note: This file previously provided convenience extensions for SPM models
-// All model types and extensions are now available through their individual files:
-// - PackageInfo+Extensions.swift
-// - Target+Extensions.swift  
-// - Dependency+Extensions.swift
+/// Error types for ProcessRunner
+public enum ProcessRunnerError: Error, LocalizedError, Sendable {
+  case timeout
+  case executionFailed(String)
+  case nonZeroExit(Int32, String)
+
+  public var errorDescription: String? {
+    switch self {
+    case .timeout:
+      return "Process execution timed out"
+    case .executionFailed(let message):
+      return "Process execution failed: \(message)"
+    case .nonZeroExit(let code, let stderr):
+      return "Process exited with code \(code): \(stderr)"
+    }
+  }
+}

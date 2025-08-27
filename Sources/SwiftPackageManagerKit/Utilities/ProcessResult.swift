@@ -1,13 +1,13 @@
 //
-//  Models.swift
-//  SyntaxKit
+//  ProcessResult.swift
+//  SwiftPackageManagerKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -27,10 +27,36 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
-// Note: This file previously provided convenience extensions for SPM models
-// All model types and extensions are now available through their individual files:
-// - PackageInfo+Extensions.swift
-// - Target+Extensions.swift  
-// - Dependency+Extensions.swift
+/// Result of a process execution
+public struct ProcessResult: Sendable {
+  /// The process identifier
+  public let processIdentifier: Int32
+
+  /// The termination status of the process (exit code)
+  public let exitCode: Int32
+
+  /// Standard output as a string
+  public let standardOutput: String
+
+  /// Standard error as a string
+  public let standardError: String
+
+  /// Whether the process succeeded (exit code 0)
+  public var isSuccess: Bool {
+    exitCode == 0
+  }
+
+  public init(
+    processIdentifier: Int32,
+    exitCode: Int32,
+    standardOutput: String,
+    standardError: String
+  ) {
+    self.processIdentifier = processIdentifier
+    self.exitCode = exitCode
+    self.standardOutput = standardOutput
+    self.standardError = standardError
+  }
+}

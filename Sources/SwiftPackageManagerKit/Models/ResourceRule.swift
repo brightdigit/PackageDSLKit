@@ -1,6 +1,6 @@
 //
-//  SupportCodeBlock.swift
-//  SyntaxKit
+//  ResourceRule.swift
+//  SwiftPackageManagerKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -29,22 +29,39 @@
 
 import Foundation
 
-public enum SupportCodeBlock: Sendable {
-  // Replaced SwiftSyntax parsing with direct string reading
-  nonisolated(unsafe) public static var content: String = {
-    readSupportCode()
-  }()
-  
-  // For backward compatibility - returns the same content as .content
-  nonisolated(unsafe) public static var syntaxNode: SupportCodeBlockContent = {
-    SupportCodeBlockContent(content: content)
-  }()
+/// Represents resource rules for targets
+public enum ResourceRule: Codable, Hashable, Sendable {
+  case copy
+  case process
 
-  // swift-format-ignore NeverForceUnwrap NeverUseForceTry
-  private static func readSupportCode() -> String {
-    let url = Bundle.module.url(forResource: "PackageDSL.swift", withExtension: "txt")!
-    let text = try! String(contentsOf: url, encoding: .utf8)
-    // swiftlint:enable force_try force_unwrapping
-    return text
+  private enum CodingKeys: String, CodingKey {
+    case copy
+    case process
+  }
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+
+    if container.contains(.copy) {
+      self = .copy
+    } else if container.contains(.process) {
+      self = .process
+    } else {
+      throw DecodingError.dataCorrupted(
+        DecodingError.Context(
+          codingPath: decoder.codingPath, debugDescription: "Unknown resource rule type")
+      )
+    }
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+
+    switch self {
+    case .copy:
+      try container.encode([String: String](), forKey: .copy)
+    case .process:
+      try container.encode([String: String](), forKey: .process)
+    }
   }
 }

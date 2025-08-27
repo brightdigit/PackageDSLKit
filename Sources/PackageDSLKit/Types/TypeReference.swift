@@ -27,18 +27,6 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct BasicTypeReference: TypeReference, Sendable {
-  public let name: String
-  public init(name: String) {
-    self.name = name
-  }
-}
-
-public typealias EntryRef = BasicTypeReference
-public typealias DependencyRef = BasicTypeReference
-public typealias TestTargetRef = BasicTypeReference
-public typealias SwiftSettingRef = BasicTypeReference
-
 public protocol TypeReference: Sendable, Hashable, Codable {
   var name: String { get }
 }

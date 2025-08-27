@@ -48,10 +48,9 @@ internal struct DependencyTypeTests {
     ),
   ]) internal func initializeFromStrings(_ value: TestRow) {
     let actualResult = Result {
-      try Dependency.DependencyType(stringsThrows: value.strings)
+      try DependencyType(stringsThrows: value.strings)
     }.mapError {
-      // swiftlint:disable:next force_cast
-      $0 as! Dependency.DependencyType.InvalidValueError
+      $0 as! DependencyType.InvalidValueError
     }
 
     switch (value.expectedRawValue, actualResult) {

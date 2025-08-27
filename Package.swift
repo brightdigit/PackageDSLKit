@@ -80,7 +80,11 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
   name: "PackageDSLKit",
   platforms: [
-    .macOS(.v13)
+    .macOS(.v13),
+    .iOS(.v13),
+    .watchOS(.v6),
+    .tvOS(.v13),
+    .visionOS(.v1)
   ],
   products: [
     .library(name: "PackageDSLKit", targets: ["PackageDSLKit"]),

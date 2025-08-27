@@ -29,30 +29,6 @@
 
 public import Foundation
 
-/// SPM command execution errors
-public enum ExecutorError: Error, LocalizedError, Sendable {
-  case invalidPackagePath
-  case swiftNotFound
-  case packageNotFound
-  case invalidJSON(String)
-  case commandFailed(String, String)  // command, error message
-
-  public var errorDescription: String? {
-    switch self {
-    case .invalidPackagePath:
-      return "Invalid package path provided"
-    case .swiftNotFound:
-      return "Swift executable not found in PATH"
-    case .packageNotFound:
-      return "Package.swift not found in the specified directory"
-    case .invalidJSON(let error):
-      return "Invalid JSON response from swift package dump-package: \(error)"
-    case .commandFailed(let command, let error):
-      return "Swift command '\(command)' failed: \(error)"
-    }
-  }
-}
-
 /// Executor for Swift Package Manager commands
 public struct Executor: Sendable {
   /// The package directory
@@ -243,11 +219,7 @@ public struct Executor: Sendable {
   }
 }
 
-/// Build configuration options
-public enum BuildConfiguration: Sendable {
-  case debug
-  case release
-}
+
 
 // MARK: - Convenience Extensions
 

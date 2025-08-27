@@ -1,13 +1,13 @@
 //
-//  Models.swift
-//  SyntaxKit
+//  PackageInfo+Extensions.swift
+//  SwiftPackageManagerKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -29,8 +29,35 @@
 
 import Foundation
 
-// Note: This file previously provided convenience extensions for SPM models
-// All model types and extensions are now available through their individual files:
-// - PackageInfo+Extensions.swift
-// - Target+Extensions.swift  
-// - Dependency+Extensions.swift
+/// Convenience extensions for working with PackageInfo
+extension PackageInfo {
+  /// Find a target by name
+  public func target(named name: String) -> Target? {
+    targets.first { $0.name == name }
+  }
+
+  /// Find a product by name
+  public func product(named name: String) -> Product? {
+    products.first { $0.name == name }
+  }
+
+  /// Get all library products
+  public var libraryProducts: [Product] {
+    products.filter {
+      if case .library = $0.type {
+        return true
+      }
+      return false
+    }
+  }
+
+  /// Get all executable products
+  public var executableProducts: [Product] {
+    products.filter {
+      if case .executable = $0.type {
+        return true
+      }
+      return false
+    }
+  }
+}

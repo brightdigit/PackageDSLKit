@@ -29,56 +29,6 @@
 
 public import Foundation
 
-/// Result of a process execution
-public struct ProcessResult: Sendable {
-  /// The process identifier
-  public let processIdentifier: Int32
-
-  /// The termination status of the process (exit code)
-  public let exitCode: Int32
-
-  /// Standard output as a string
-  public let standardOutput: String
-
-  /// Standard error as a string
-  public let standardError: String
-
-  /// Whether the process succeeded (exit code 0)
-  public var isSuccess: Bool {
-    exitCode == 0
-  }
-
-  public init(
-    processIdentifier: Int32,
-    exitCode: Int32,
-    standardOutput: String,
-    standardError: String
-  ) {
-    self.processIdentifier = processIdentifier
-    self.exitCode = exitCode
-    self.standardOutput = standardOutput
-    self.standardError = standardError
-  }
-}
-
-/// Error types for ProcessRunner
-public enum ProcessRunnerError: Error, LocalizedError, Sendable {
-  case timeout
-  case executionFailed(String)
-  case nonZeroExit(Int32, String)
-
-  public var errorDescription: String? {
-    switch self {
-    case .timeout:
-      return "Process execution timed out"
-    case .executionFailed(let message):
-      return "Process execution failed: \(message)"
-    case .nonZeroExit(let code, let stderr):
-      return "Process exited with code \(code): \(stderr)"
-    }
-  }
-}
-
 /// Async process runner using swift-subprocess
 public struct ProcessRunner: Sendable {
   /// Execute a command with arguments

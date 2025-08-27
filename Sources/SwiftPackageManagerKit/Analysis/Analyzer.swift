@@ -29,24 +29,6 @@
 
 public import Foundation
 
-/// Errors that can occur during SPM analysis
-public enum AnalysisError: Error, LocalizedError, Sendable {
-  case invalidJSON(String)
-  case malformedPackageStructure(String)
-  case unsupportedFormat(String)
-
-  public var errorDescription: String? {
-    switch self {
-    case .invalidJSON(let details):
-      return "Invalid JSON format: \(details)"
-    case .malformedPackageStructure(let details):
-      return "Malformed package structure: \(details)"
-    case .unsupportedFormat(let details):
-      return "Unsupported format: \(details)"
-    }
-  }
-}
-
 /// Analyzer for parsing Swift Package Manager JSON output
 public struct Analyzer: Sendable {
   /// JSON decoder with custom configuration for SPM data
