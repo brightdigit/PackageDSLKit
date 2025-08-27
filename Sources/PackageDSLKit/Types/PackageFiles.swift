@@ -1,5 +1,5 @@
 //
-//  ProductType.swift
+//  PackageFiles.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,20 +27,25 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public enum ProductType: String, Sendable, Hashable, Codable {
-  case library
-  case executable
-}
+import Foundation
 
-extension ProductType {
-  public init?(type: PackageType) {
-    switch type {
-    case .empty:
-      return nil
-    case .library:
-      self = .library
-    case .executable:
-      self = .executable
-    }
+public struct PackageFiles: PackageFilesFactory, Sendable {
+  public static let `default`: PackageFilesFactory = PackageFiles()
+
+  private static let defaultTypes:
+    [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface] = [
+      .fileManager: { FileManager.default }
+    ]
+
+  private let types: [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface]
+
+  internal init(
+    types: [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface]? = nil
+  ) {
+    self.types = types ?? Self.defaultTypes
+  }
+
+  public func interface(for type: PackageFilesInterfaceType) -> any PackageFilesInterface {
+    self.types[type]!()
   }
 }

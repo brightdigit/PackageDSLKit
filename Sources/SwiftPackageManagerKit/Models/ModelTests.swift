@@ -1,7 +1,7 @@
 import Foundation
 
 /// Simple test utility for validating SPM models
-public struct ModelValidator {
+public struct ModelValidator: Sendable {
   /// Test parsing JSON data with SPM models
   public static func validateJSON(_ jsonData: Data) throws -> PackageInfo {
     let decoder = JSONDecoder()

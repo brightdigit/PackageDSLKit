@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents version requirements for dependencies
-public enum VersionRequirement: Codable, Hashable {
+public enum VersionRequirement: Codable, Hashable, Sendable {
   case range(lowerBound: String, upperBound: String)
   case exact(String)
   case revision(String)
@@ -46,7 +46,7 @@ public enum VersionRequirement: Codable, Hashable {
     }
   }
 
-  private struct RangeInfo: Codable {
+  private struct RangeInfo: Codable, Sendable {
     let lowerBound: String
     let upperBound: String
   }

@@ -31,7 +31,7 @@ import Foundation
 import SwiftPackageManagerKit
 
 /// Errors that can occur during package manipulation
-public enum PackageError: Error, LocalizedError {
+public enum PackageError: Error, LocalizedError, Sendable {
   case duplicateTargetName(String)
   case duplicateProductName(String)
   case duplicateDependencyName(String)
@@ -79,7 +79,7 @@ public enum TargetType: String, Sendable, Hashable, Codable, CaseIterable {
 
 /// The main SDK entry point for package manipulation using PackageDSL
 @MainActor
-public final class PackageDSLManager {
+public final class PackageDSLManager: Sendable {
   // MARK: - Properties
 
   /// The URL of the package directory
@@ -738,18 +738,15 @@ extension PackageDSLManager {
   /// - Throws: PackageError on generation failures
   /// - Returns: Self for method chaining
   @discardableResult
-  public func generatePackageSwift() throws -> PackageDSLManager {
+  public func generatePackageSwift() throws(PackageError)  -> PackageDSLManager {
     do {
       // Use PackageWriter to generate DSL component files
       let packageWriter = PackageWriter()
       try packageWriter.write(specifications, to: packageURL)
       return self
-    } catch let error as PackageDSLError {
+    } catch let error {
       throw PackageError.packageGenerationFailed(
         "DSL generation failed: \(error.localizedDescription)")
-    } catch {
-      throw PackageError.packageGenerationFailed(
-        "Package generation failed: \(error.localizedDescription)")
     }
   }
 

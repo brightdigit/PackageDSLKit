@@ -1,5 +1,5 @@
 //
-//  PackageFiles.swift
+//  SupportCodeBlock.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -29,23 +29,32 @@
 
 import Foundation
 
-public struct PackageFiles: PackageFilesFactory {
-  public static let `default`: PackageFilesFactory = PackageFiles()
+public enum SupportCodeBlock: Sendable {
+  // Replaced SwiftSyntax parsing with direct string reading
+  nonisolated(unsafe) public static var content: String = {
+    readSupportCode()
+  }()
 
-  private static let defaultTypes:
-    [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface] = [
-      .fileManager: { FileManager.default }
-    ]
+  // For backward compatibility - returns the same content as .content
+  nonisolated(unsafe) public static var syntaxNode: SupportCodeBlockContent = {
+    SupportCodeBlockContent(content: content)
+  }()
 
-  private let types: [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface]
-
-  internal init(
-    types: [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface]? = nil
-  ) {
-    self.types = types ?? Self.defaultTypes
+  // swift-format-ignore NeverForceUnwrap NeverUseForceTry
+  private static func readSupportCode() -> String {
+    // swiftlint:disable force_try force_unwrapping
+    let url = Bundle.module.url(forResource: "PackageDSL.swift", withExtension: "txt")!
+    let text = try! String(contentsOf: url, encoding: .utf8)
+    // swiftlint:enable force_try force_unwrapping
+    return text
   }
+}
 
-  public func interface(for type: PackageFilesInterfaceType) -> any PackageFilesInterface {
-    self.types[type]!()
+// Backward compatibility wrapper to replace SyntaxProtocol usage
+public struct SupportCodeBlockContent: Sendable {
+  public let content: String
+
+  public var trimmedDescription: String {
+    content.trimmingCharacters(in: .whitespacesAndNewlines)
   }
 }

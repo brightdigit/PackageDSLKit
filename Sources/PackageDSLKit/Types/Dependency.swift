@@ -29,7 +29,7 @@
 
 import SwiftPackageManagerKit
 
-public struct Dependency: TypeSource {
+public struct Dependency: TypeSource, Sendable {
   public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
     public typealias RawValue = Int
 
@@ -42,7 +42,7 @@ public struct Dependency: TypeSource {
     public init(rawValue: Int) {
       self.rawValue = rawValue
     }
-    internal struct InvalidValueError: Error {
+    internal struct InvalidValueError: Error, Sendable {
       internal init?(invalidCount: Int) {
         guard invalidCount != 0 else {
           return nil

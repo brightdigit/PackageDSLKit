@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a target dependency (can be by name or product)
-public enum TargetDependency: Codable, Hashable {
+public enum TargetDependency: Codable, Hashable, Sendable {
   case byName(String, condition: TargetDependencyCondition?)
   case product(String, String, condition: TargetDependencyCondition?)
 
@@ -56,7 +56,7 @@ public enum TargetDependency: Codable, Hashable {
 }
 
 /// Represents platform-specific conditions for dependencies
-public struct TargetDependencyCondition: Codable, Hashable {
+public struct TargetDependencyCondition: Codable, Hashable, Sendable {
   public let platformNames: [String]?
 
   public init(platformNames: [String]? = nil) {
@@ -65,7 +65,7 @@ public struct TargetDependencyCondition: Codable, Hashable {
 }
 
 /// Represents resource rules for targets
-public enum ResourceRule: Codable, Hashable {
+public enum ResourceRule: Codable, Hashable, Sendable {
   case copy
   case process
 
@@ -102,7 +102,7 @@ public enum ResourceRule: Codable, Hashable {
 }
 
 /// Represents a resource in a target
-public struct Resource: Codable, Hashable {
+public struct Resource: Codable, Hashable, Sendable {
   public let path: String
   public let rule: ResourceRule
 
@@ -113,7 +113,7 @@ public struct Resource: Codable, Hashable {
 }
 
 /// Represents target types
-public enum TargetType: String, Codable, Hashable {
+public enum TargetType: String, Codable, Hashable, Sendable {
   case regular
   case executable
   case test
@@ -122,7 +122,7 @@ public enum TargetType: String, Codable, Hashable {
 }
 
 /// Represents a target in a Swift package
-public struct Target: Codable, Hashable {
+public struct Target: Codable, Hashable, Sendable {
   public let name: String
   public let type: TargetType
   public let dependencies: [TargetDependency]

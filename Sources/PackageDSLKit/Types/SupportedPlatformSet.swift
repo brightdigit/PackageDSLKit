@@ -29,7 +29,7 @@
 
 import SwiftPackageManagerKit
 
-public struct SupportedPlatformSet: TypeSource, ComponentBuildable {
+public struct SupportedPlatformSet: TypeSource, ComponentBuildable, Sendable {
   public static let directoryName: String = "Platforms"
 
   public let typeName: String

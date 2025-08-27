@@ -1,5 +1,5 @@
 //
-//  Property.swift
+//  TypeReference.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,55 +27,30 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct Property: Sendable, Hashable, Codable {
+public struct BasicTypeReference: TypeReference, Sendable {
   public let name: String
-  public let type: String
-  public let code: [String]
-  public init(
-    name: String,
-    type: String,
-    code: [String]
-  ) {
+  public init(name: String) {
     self.name = name
-    self.type = type
-    self.code = code
   }
 }
 
-extension Property {
-  internal init?(name: String, type: String, code: [String?], disallowEmpty: Bool) {
-    let code = code.compactMap(\.self)
-    guard !code.isEmpty || !disallowEmpty else {
-      return nil
-    }
-    self.init(name: name, type: type, code: code)
+public typealias EntryRef = BasicTypeReference
+public typealias DependencyRef = BasicTypeReference
+public typealias TestTargetRef = BasicTypeReference
+public typealias SwiftSettingRef = BasicTypeReference
+
+public protocol TypeReference: Sendable, Hashable, Codable {
+  var name: String { get }
+}
+
+extension TypeReference {
+  public func asFunctionCall() -> String {
+    "\(name)()"
   }
 }
 
-extension Property {
-  internal struct MissingFieldsError: OptionSet, Error {
-    internal var rawValue: Int
-
-    internal typealias RawValue = Int
-
-    internal static let name = MissingFieldsError(rawValue: 1)
-    internal static let type = MissingFieldsError(rawValue: 2)
-    // static let code = MissingFieldsError(rawValue: 4)
-  }
-
-  internal init(name: String?, type: String?, code: [String]) throws(MissingFieldsError) {
-    var error: MissingFieldsError = []
-    if name == nil {
-      error.insert(.name)
-    }
-    if type == nil {
-      error.insert(.type)
-    }
-    if !error.isEmpty {
-      throw error
-    } else {
-      assert(name != nil && type != nil)
-      self.init(name: name ?? "", type: type ?? "", code: code)
-    }
+extension BasicTypeReference {
+  public init(source: any TypeSource) {
+    self.init(name: source.typeName)
   }
 }

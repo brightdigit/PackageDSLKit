@@ -31,7 +31,7 @@ import ArgumentParser
 import PackageDSLKit
 
 extension Package {
-  internal struct Dump: AsyncParsableCommand {
+  internal struct Dump: AsyncParsableCommand, Sendable {
     @OptionGroup internal var settings: Settings
     internal func run() async throws {
       print(settings.dslSourcesURL)

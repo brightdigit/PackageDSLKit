@@ -1,5 +1,5 @@
 //
-//  SwiftVersion.swift
+//  SwiftVersion+Extensions.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -28,70 +28,6 @@
 //
 
 import Foundation
-
-public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, CustomStringConvertible
-{
-  internal struct ParsingError: OptionSet, Error {
-    internal let rawValue: Int
-
-    internal init(rawValue: Int) {
-      self.rawValue = rawValue
-    }
-    fileprivate init?(major: Int?, minor: Int?) {
-      var error = ParsingError()
-
-      if major == nil {
-        error.insert(.major)
-      }
-
-      if minor == nil {
-        error.insert(.minor)
-      }
-
-      guard error.rawValue > 0 else {
-        return nil
-      }
-      self = error
-    }
-
-    internal static let major: ParsingError = .init(rawValue: 1 << 0)
-    internal static let minor: ParsingError = .init(rawValue: 1 << 1)
-  }
-  public let major: Int
-  public let minor: Int
-
-  public var description: String {
-    [major, minor].map(\.description).joined(separator: ".")
-  }
-  public init(major: Int, minor: Int) {
-    self.major = major
-    self.minor = minor
-  }
-
-  internal init(throwing value: String) throws(ParsingError) {
-    let components = value.components(separatedBy: ".")
-    let major: Int? = .init(components[0])
-    let minor: Int? = .init(components[1])
-    try self.init(major: major, minor: minor)
-  }
-  internal init(major: Int?, minor: Int?) throws(ParsingError) {
-    if let major = major, let minor = minor {
-      self.init(major: major, minor: minor)
-    } else if let error = ParsingError(major: major, minor: minor) {
-      throw error
-    } else {
-      assertionFailure("Should never reach here")
-      throw .init(rawValue: 0)
-    }
-  }
-  public init(stringLiteral value: String) {
-    do {
-      try self.init(throwing: value)
-    } catch {
-      fatalError("Invalid String Literal: \(value)")
-    }
-  }
-}
 
 extension SwiftVersion {
   public static func readFrom(packageSwiftFileURL: URL) -> SwiftVersion? {

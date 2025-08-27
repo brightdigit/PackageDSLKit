@@ -1,12 +1,12 @@
 import Foundation
 
 /// Represents product type in a Swift package
-public enum ProductType: Codable, Hashable {
+public enum ProductType: Codable, Hashable, Sendable {
   case library(LibraryType)
   case executable
   case plugin
 
-  public enum LibraryType: String, Codable, Hashable {
+  public enum LibraryType: String, Codable, Hashable, Sendable {
     case automatic
     case dynamic
     case `static`
@@ -51,7 +51,7 @@ public enum ProductType: Codable, Hashable {
 }
 
 /// Represents a product in a Swift package
-public struct Product: Codable, Hashable {
+public struct Product: Codable, Hashable, Sendable {
   public let name: String
   public let type: ProductType
   public let targets: [String]

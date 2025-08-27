@@ -1,5 +1,5 @@
 //
-//  PropertyWriter.swift
+//  Property+Extensions.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,27 +27,40 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SyntaxKit
+extension Property {
+  internal init?(name: String, type: String, code: [String?], disallowEmpty: Bool) {
+    let code = code.compactMap(\.self)
+    guard !code.isEmpty || !disallowEmpty else {
+      return nil
+    }
+    self.init(name: name, type: type, code: code)
+  }
+}
 
-// Use SyntaxKit's Literal for string code blocks
-private typealias StringCodeBlock = Literal
+extension Property {
+  internal struct MissingFieldsError: OptionSet, Error, Sendable {
+    internal var rawValue: Int
 
-public enum PropertyWriter {
-  /// Creates a property variable using SyntaxKit
-  public static func syntaxKitNode(from property: Property) -> ComputedProperty {
-    // Convert string code blocks to SyntaxKit CodeBlocks
-    let codeBlocks: [CodeBlock] = property.code.map { Literal.ref($0) }
+    internal typealias RawValue = Int
 
-    // Create a computed property with the code blocks as body
-    // For now, we'll just use the first code block or create an empty return
-    if let firstCodeBlock = codeBlocks.first {
-      return ComputedProperty(property.name, type: property.type) {
-        firstCodeBlock
-      }
+    internal static let name = MissingFieldsError(rawValue: 1)
+    internal static let type = MissingFieldsError(rawValue: 2)
+    // static let code = MissingFieldsError(rawValue: 4)
+  }
+
+  internal init(name: String?, type: String?, code: [String]) throws(MissingFieldsError) {
+    var error: MissingFieldsError = []
+    if name == nil {
+      error.insert(.name)
+    }
+    if type == nil {
+      error.insert(.type)
+    }
+    if !error.isEmpty {
+      throw error
     } else {
-      return ComputedProperty(property.name, type: property.type) {
-        // Empty computed property body
-      }
+      assert(name != nil && type != nil)
+      self.init(name: name ?? "", type: type ?? "", code: code)
     }
   }
 }

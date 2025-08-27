@@ -29,7 +29,7 @@
 
 import SwiftPackageManagerKit
 
-public struct Product: TypeSource {
+public struct Product: TypeSource, Sendable {
   public let typeName: String
   public let name: String?
   public let dependencies: [DependencyRef]

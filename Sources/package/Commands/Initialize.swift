@@ -32,7 +32,7 @@ import Foundation
 import PackageDSLKit
 
 extension Package {
-  internal struct Initialize: ParsableCommand {
+  internal struct Initialize: ParsableCommand, Sendable {
     @OptionGroup internal var settings: Settings
 
     @Option

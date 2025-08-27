@@ -1,5 +1,5 @@
 //
-//  TypeReference.swift
+//  PropertyWriter.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the “Software”), to deal in the Software without
+//  files (the "Software"), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -27,30 +27,27 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public struct BasicTypeReference: TypeReference {
-  public let name: String
-  public init(name: String) {
-    self.name = name
-  }
-}
+import SyntaxKit
 
-public typealias EntryRef = BasicTypeReference
-public typealias DependencyRef = BasicTypeReference
-public typealias TestTargetRef = BasicTypeReference
-public typealias SwiftSettingRef = BasicTypeReference
+// Use SyntaxKit's Literal for string code blocks
+private typealias StringCodeBlock = Literal
 
-public protocol TypeReference: Sendable, Hashable, Codable {
-  var name: String { get }
-}
+public enum PropertyWriter: Sendable {
+  /// Creates a property variable using SyntaxKit
+  public static func syntaxKitNode(from property: Property) -> ComputedProperty {
+    // Convert string code blocks to SyntaxKit CodeBlocks
+    let codeBlocks: [CodeBlock] = property.code.map { Literal.ref($0) }
 
-extension TypeReference {
-  public func asFunctionCall() -> String {
-    "\(name)()"
-  }
-}
-
-extension BasicTypeReference {
-  public init(source: any TypeSource) {
-    self.init(name: source.typeName)
+    // Create a computed property with the code blocks as body
+    // For now, we'll just use the first code block or create an empty return
+    if let firstCodeBlock = codeBlocks.first {
+      return ComputedProperty(property.name, type: property.type) {
+        firstCodeBlock
+      }
+    } else {
+      return ComputedProperty(property.name, type: property.type) {
+        // Empty computed property body
+      }
+    }
   }
 }

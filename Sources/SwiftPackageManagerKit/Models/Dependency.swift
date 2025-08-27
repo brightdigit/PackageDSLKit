@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a dependency location (remote or file system)
-public enum DependencyLocation: Codable, Hashable {
+public enum DependencyLocation: Codable, Hashable, Sendable {
   case remote(urlString: String)
   case fileSystem(path: String)
 
@@ -10,7 +10,7 @@ public enum DependencyLocation: Codable, Hashable {
     case fileSystem
   }
 
-  private struct Remote: Codable {
+  private struct Remote: Codable, Sendable {
     let urlString: String
   }
 
@@ -52,7 +52,7 @@ public enum DependencyLocation: Codable, Hashable {
 }
 
 /// Represents a trait for a dependency
-public struct DependencyTrait: Codable, Hashable {
+public struct DependencyTrait: Codable, Hashable, Sendable {
   public let name: String
 
   public init(name: String) {
@@ -61,7 +61,7 @@ public struct DependencyTrait: Codable, Hashable {
 }
 
 /// Represents a source control dependency
-public struct SourceControlDependency: Codable, Hashable {
+public struct SourceControlDependency: Codable, Hashable, Sendable {
   public let identity: String
   public let location: DependencyLocation
   public let productFilter: String?
@@ -84,7 +84,7 @@ public struct SourceControlDependency: Codable, Hashable {
 }
 
 /// Represents a file system dependency
-public struct FileSystemDependency: Codable, Hashable {
+public struct FileSystemDependency: Codable, Hashable, Sendable {
   public let identity: String
   public let path: String
   public let productFilter: String?
@@ -104,7 +104,7 @@ public struct FileSystemDependency: Codable, Hashable {
 }
 
 /// Represents a package dependency (can be source control or file system)
-public enum Dependency: Codable, Hashable {
+public enum Dependency: Codable, Hashable, Sendable {
   case sourceControl(SourceControlDependency)
   case fileSystem(FileSystemDependency)
 

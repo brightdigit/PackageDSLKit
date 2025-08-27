@@ -1,5 +1,5 @@
 //
-//  TestTarget.swift
+//  ComponentBuildable.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,44 +27,12 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftPackageManagerKit
+import Foundation
 
-public struct TestTarget: TypeSource {
-  public let typeName: String
-  public let dependencies: [DependencyRef]
-  public init(typeName: String, dependencies: [DependencyRef] = []) {
-    self.typeName = typeName
-    self.dependencies = dependencies
-  }
-}
-
-extension TestTarget {
-  public init(for product: Product) {
-    self.init(typeName: product.typeName + "Tests")
-  }
-}
-
-extension TestTarget {
-  /// Initialize TestTarget from SPM data (for test targets only)
-  public init?(spmTarget: SwiftPackageManagerKit.Target) {
-    // Only convert test targets
-    guard spmTarget.type == .test else {
-      return nil
-    }
-
-    // Convert dependencies
-    let dependencies: [DependencyRef] = spmTarget.dependencies.compactMap { dependency in
-      switch dependency {
-      case .byName(let name, _):
-        return DependencyRef(name: name)
-      case .product(let productName, _, _):
-        return DependencyRef(name: productName)
-      }
-    }
-
-    self.init(
-      typeName: spmTarget.name,
-      dependencies: dependencies
-    )
-  }
+internal protocol ComponentBuildable: Sendable {
+  associatedtype Requirements = Void
+  static var directoryName: String { get }
+  init(component: Component, requirements: Requirements)
+  static func requirements(from component: Component) -> Requirements?
+  func createComponent() -> Component
 }

@@ -1,5 +1,5 @@
 //
-//  Dependency.swift
+//  Property.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,16 +27,17 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import ArgumentParser
-
-extension Package {
-  internal struct Dependency: ParsableCommand, Sendable {
-  }
-}
-extension Package.Dependency {
-  internal struct Add: ParsableCommand, Sendable {
-  }
-
-  internal struct Remove: ParsableCommand, Sendable {
+public struct Property: Sendable, Hashable, Codable {
+  public let name: String
+  public let type: String
+  public let code: [String]
+  public init(
+    name: String,
+    type: String,
+    code: [String]
+  ) {
+    self.name = name
+    self.type = type
+    self.code = code
   }
 }

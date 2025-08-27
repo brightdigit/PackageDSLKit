@@ -1,5 +1,5 @@
 //
-//  Target.swift
+//  TestTarget.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -29,21 +29,26 @@
 
 import SwiftPackageManagerKit
 
-public struct Target: TypeSource {
+public struct TestTarget: TypeSource, Sendable {
   public let typeName: String
   public let dependencies: [DependencyRef]
-
   public init(typeName: String, dependencies: [DependencyRef] = []) {
     self.typeName = typeName
     self.dependencies = dependencies
   }
 }
 
-extension Target {
-  /// Initialize Target from SPM data (for regular and executable targets)
+extension TestTarget {
+  public init(for product: Product) {
+    self.init(typeName: product.typeName + "Tests")
+  }
+}
+
+extension TestTarget {
+  /// Initialize TestTarget from SPM data (for test targets only)
   public init?(spmTarget: SwiftPackageManagerKit.Target) {
-    // Only convert regular and executable targets, skip test targets
-    guard spmTarget.type == .regular || spmTarget.type == .executable else {
+    // Only convert test targets
+    guard spmTarget.type == .test else {
       return nil
     }
 

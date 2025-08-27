@@ -1,7 +1,7 @@
 import Foundation
 
 /// Result of a process execution
-public struct ProcessResult {
+public struct ProcessResult: Sendable {
   /// The process identifier
   public let processIdentifier: Int32
 
@@ -33,7 +33,7 @@ public struct ProcessResult {
 }
 
 /// Error types for ProcessRunner
-public enum ProcessRunnerError: Error, LocalizedError {
+public enum ProcessRunnerError: Error, LocalizedError, Sendable {
   case timeout
   case executionFailed(String)
   case nonZeroExit(Int32, String)
@@ -51,7 +51,7 @@ public enum ProcessRunnerError: Error, LocalizedError {
 }
 
 /// Async process runner using swift-subprocess
-public struct ProcessRunner {
+public struct ProcessRunner: Sendable {
   /// Execute a command with arguments
   /// - Parameters:
   ///   - executable: The executable name or path

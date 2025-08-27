@@ -1,7 +1,7 @@
 import Foundation
 
 /// SPM command execution errors
-public enum ExecutorError: Error, LocalizedError {
+public enum ExecutorError: Error, LocalizedError, Sendable {
   case invalidPackagePath
   case swiftNotFound
   case packageNotFound
@@ -25,7 +25,7 @@ public enum ExecutorError: Error, LocalizedError {
 }
 
 /// Executor for Swift Package Manager commands
-public struct Executor {
+public struct Executor: Sendable {
   /// The package directory
   public let packageDirectory: URL
 
@@ -215,7 +215,7 @@ public struct Executor {
 }
 
 /// Build configuration options
-public enum BuildConfiguration {
+public enum BuildConfiguration: Sendable {
   case debug
   case release
 }

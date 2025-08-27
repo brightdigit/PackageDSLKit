@@ -1,5 +1,5 @@
 //
-//  ComponentBuildable.swift
+//  PackagePropertyDescriptor.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,31 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
-
-internal protocol ComponentBuildable {
-  associatedtype Requirements = Void
-  static var directoryName: String { get }
-  init(component: Component, requirements: Requirements)
-  static func requirements(from component: Component) -> Requirements?
-  func createComponent() -> Component
-}
-
-extension ComponentBuildable {
-  internal init?(component: Component) {
-    guard let requirements = Self.requirements(from: component) else {
-      return nil
-    }
-    self.init(component: component, requirements: requirements)
-  }
-
-  internal static func directoryURL(relativeTo packageDSLURL: URL) -> URL {
-    packageDSLURL.appending(path: self.directoryName, directoryHint: .isDirectory)
-  }
-}
-
-extension Component {
-  internal func isType<T: ComponentBuildable>(of type: T.Type) -> Bool {
-    type.requirements(from: self) != nil
-  }
+public protocol PackagePropertyDescriptor: Sendable {
+  static func get(from specifications: PackageSpecifications) -> [Self]
+  static func update(original: PackageSpecifications, transform: ([Self]) -> [Self])
+    -> PackageSpecifications
 }

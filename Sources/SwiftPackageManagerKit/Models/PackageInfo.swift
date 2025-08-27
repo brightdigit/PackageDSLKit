@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents the package kind
-public enum PackageKind: Codable, Hashable {
+public enum PackageKind: Codable, Hashable, Sendable {
   case root(String)
   case local(String)
   case remote
@@ -46,7 +46,7 @@ public enum PackageKind: Codable, Hashable {
 }
 
 /// Represents the tools version
-public struct ToolsVersion: Codable, Hashable {
+public struct ToolsVersion: Codable, Hashable, Sendable {
   public let version: String
 
   private enum CodingKeys: String, CodingKey {
@@ -69,7 +69,7 @@ public struct ToolsVersion: Codable, Hashable {
 }
 
 /// Represents the complete package information from swift package dump-package
-public struct PackageInfo: Codable, Hashable {
+public struct PackageInfo: Codable, Hashable, Sendable {
   public let name: String
   public let packageKind: PackageKind
   public let platforms: [Platform]

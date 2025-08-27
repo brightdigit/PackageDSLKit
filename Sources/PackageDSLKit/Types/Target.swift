@@ -1,5 +1,5 @@
 //
-//  PackagePropertyDescriptor.swift
+//  Target.swift
 //  PackageDSLKit
 //
 //  Created by Leo Dion.
@@ -27,8 +27,39 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public protocol PackagePropertyDescriptor {
-  static func get(from specifications: PackageSpecifications) -> [Self]
-  static func update(original: PackageSpecifications, transform: ([Self]) -> [Self])
-    -> PackageSpecifications
+import SwiftPackageManagerKit
+
+public struct Target: TypeSource, Sendable {
+  public let typeName: String
+  public let dependencies: [DependencyRef]
+
+  public init(typeName: String, dependencies: [DependencyRef] = []) {
+    self.typeName = typeName
+    self.dependencies = dependencies
+  }
+}
+
+extension Target {
+  /// Initialize Target from SPM data (for regular and executable targets)
+  public init?(spmTarget: SwiftPackageManagerKit.Target) {
+    // Only convert regular and executable targets, skip test targets
+    guard spmTarget.type == .regular || spmTarget.type == .executable else {
+      return nil
+    }
+
+    // Convert dependencies
+    let dependencies: [DependencyRef] = spmTarget.dependencies.compactMap { dependency in
+      switch dependency {
+      case .byName(let name, _):
+        return DependencyRef(name: name)
+      case .product(let productName, _, _):
+        return DependencyRef(name: productName)
+      }
+    }
+
+    self.init(
+      typeName: spmTarget.name,
+      dependencies: dependencies
+    )
+  }
 }
