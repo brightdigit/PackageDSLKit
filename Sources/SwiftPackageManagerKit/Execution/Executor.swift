@@ -36,12 +36,27 @@ public struct Executor: Sendable {
 
   /// Default timeout for SPM commands (in seconds)
   public let defaultTimeout: TimeInterval
+  
+  /// Closure type for executing Swift commands
+  public typealias SwiftCommandExecutor = @Sendable (
+    _ arguments: [String],
+    _ workingDirectory: URL?,
+    _ timeout: TimeInterval
+  ) async throws -> ProcessResult
 
-  /// Initialize with a package directory
+  /// The Swift command executor
+  private let swiftExecutor: SwiftCommandExecutor
+
+  /// Initialize with a package directory and Swift command executor
   /// - Parameters:
   ///   - packageDirectory: URL to the directory containing Package.swift
   ///   - defaultTimeout: Default timeout for commands (default: 60 seconds)
-  public init(packageDirectory: URL, defaultTimeout: TimeInterval = 60) throws {
+  ///   - swiftExecutor: Closure to execute Swift commands (defaults to ProcessRunner.swift)
+  public init(
+    packageDirectory: URL, 
+    defaultTimeout: TimeInterval = 60,
+    swiftExecutor: @escaping SwiftCommandExecutor
+  ) throws {
     // Verify the directory exists and contains a Package.swift
     let packageSwiftPath = packageDirectory.appendingPathComponent("Package.swift")
     print(packageSwiftPath)
@@ -51,7 +66,15 @@ public struct Executor: Sendable {
 
     self.packageDirectory = packageDirectory
     self.defaultTimeout = defaultTimeout
+    self.swiftExecutor = swiftExecutor
   }
+  
+#if canImport(Foundation) && (os(macOS) || os(Linux))
+  public init (
+    packageDirectory: URL) throws {
+      try self.init(packageDirectory: packageDirectory, swiftExecutor: ProcessRunner.swift)
+  }
+  #endif
 
   /// Execute `swift package dump-package` and return parsed package info
   /// - Parameter timeout: Optional timeout override
@@ -61,10 +84,10 @@ public struct Executor: Sendable {
     let actualTimeout = timeout ?? defaultTimeout
 
     do {
-      let result = try await ProcessRunner.swift(
-        arguments: ["package", "dump-package"],
-        workingDirectory: packageDirectory,
-        timeout: actualTimeout
+      let result = try await swiftExecutor(
+        ["package", "dump-package"],
+        packageDirectory,
+        actualTimeout
       )
 
       print(result.standardOutput)
@@ -99,10 +122,10 @@ public struct Executor: Sendable {
     let actualTimeout = timeout ?? defaultTimeout
 
     do {
-      _ = try await ProcessRunner.swift(
-        arguments: ["package", "resolve"],
-        workingDirectory: packageDirectory,
-        timeout: actualTimeout
+      _ = try await swiftExecutor(
+        ["package", "resolve"],
+        packageDirectory,
+        actualTimeout
       )
     } catch let error as ProcessRunnerError {
       switch error {
@@ -149,10 +172,10 @@ public struct Executor: Sendable {
     }
 
     do {
-      _ = try await ProcessRunner.swift(
-        arguments: arguments,
-        workingDirectory: packageDirectory,
-        timeout: actualTimeout
+      _ = try await swiftExecutor(
+        arguments,
+        packageDirectory,
+        actualTimeout
       )
     } catch let error as ProcessRunnerError {
       let command = "build" + (target.map { " --target \($0)" } ?? "")
@@ -188,10 +211,10 @@ public struct Executor: Sendable {
     }
 
     do {
-      _ = try await ProcessRunner.swift(
-        arguments: arguments,
-        workingDirectory: packageDirectory,
-        timeout: actualTimeout
+      _ = try await swiftExecutor(
+        arguments,
+        packageDirectory,
+        actualTimeout
       )
     } catch let error as ProcessRunnerError {
       let command = "test" + (target.map { " --target \($0)" } ?? "")
@@ -222,7 +245,7 @@ public struct Executor: Sendable {
 
 
 // MARK: - Convenience Extensions
-
+#if canImport(Foundation) && (os(macOS) || os(Linux))
 extension Executor {
   /// Create Executor for the current working directory
   /// - Parameter defaultTimeout: Default timeout for commands
@@ -244,3 +267,4 @@ extension Executor {
     return try Executor(packageDirectory: url, defaultTimeout: defaultTimeout)
   }
 }
+#endif

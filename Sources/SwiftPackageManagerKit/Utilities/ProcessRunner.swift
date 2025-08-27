@@ -27,10 +27,13 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
 
 /// Async process runner using swift-subprocess
-public struct ProcessRunner: Sendable {
+/// **Note:** This utility is only available on macOS and Linux platforms.
+/// It is not available on iOS, watchOS, tvOS, or visionOS due to platform limitations.
+#if canImport(Foundation) && (os(macOS) || os(Linux))
+public import Foundation
+public enum ProcessRunner {
   /// Execute a command with arguments
   /// - Parameters:
   ///   - executable: The executable name or path
@@ -152,3 +155,4 @@ public struct ProcessRunner: Sendable {
     )
   }
 }
+#endif

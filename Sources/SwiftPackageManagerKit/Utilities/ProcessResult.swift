@@ -27,9 +27,10 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
-
 /// Result of a process execution
+/// **Note:** This utility is only available on macOS and Linux platforms.
+/// It is not available on iOS, watchOS, tvOS, or visionOS due to platform limitations.
+
 public struct ProcessResult: Sendable {
   /// The process identifier
   public let processIdentifier: Int32

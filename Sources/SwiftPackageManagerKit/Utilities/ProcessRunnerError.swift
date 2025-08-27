@@ -30,6 +30,9 @@
 public import Foundation
 
 /// Error types for ProcessRunner
+/// **Note:** This utility is only available on macOS and Linux platforms.
+/// It is not available on iOS, watchOS, tvOS, or visionOS due to platform limitations.
+
 public enum ProcessRunnerError: Error, LocalizedError, Sendable {
   case timeout
   case executionFailed(String)
