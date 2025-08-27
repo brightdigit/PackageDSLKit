@@ -97,4 +97,24 @@ public struct Product: Codable, Hashable, Sendable {
     self.targets = targets
     self.settings = settings
   }
+
+  // Custom decoding to handle missing settings field
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+
+    self.name = try container.decode(String.self, forKey: .name)
+    self.type = try container.decode(ProductType.self, forKey: .type)
+    self.targets = try container.decode([String].self, forKey: .targets)
+
+    // Handle missing settings field gracefully
+    if container.contains(.settings) {
+      self.settings = try container.decode([String].self, forKey: .settings)
+    } else {
+      self.settings = []
+    }
+  }
+
+  private enum CodingKeys: String, CodingKey {
+    case name, type, targets, settings
+  }
 }

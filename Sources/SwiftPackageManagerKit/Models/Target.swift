@@ -177,4 +177,42 @@ public struct Target: Codable, Hashable, Sendable {
     self.settings = settings
     self.packageAccess = packageAccess
   }
+
+  // Custom decoding to handle missing optional fields gracefully
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+
+    self.name = try container.decode(String.self, forKey: .name)
+    self.type = try container.decode(TargetType.self, forKey: .type)
+    self.dependencies = try container.decode([TargetDependency].self, forKey: .dependencies)
+
+    // Handle missing optional fields gracefully
+    if container.contains(.exclude) {
+      self.exclude = try container.decode([String].self, forKey: .exclude)
+    } else {
+      self.exclude = []
+    }
+
+    if container.contains(.resources) {
+      self.resources = try container.decode([Resource].self, forKey: .resources)
+    } else {
+      self.resources = []
+    }
+
+    if container.contains(.settings) {
+      self.settings = try container.decode([String].self, forKey: .settings)
+    } else {
+      self.settings = []
+    }
+
+    if container.contains(.packageAccess) {
+      self.packageAccess = try container.decode(Bool.self, forKey: .packageAccess)
+    } else {
+      self.packageAccess = true
+    }
+  }
+
+  private enum CodingKeys: String, CodingKey {
+    case name, type, dependencies, exclude, resources, settings, packageAccess
+  }
 }
