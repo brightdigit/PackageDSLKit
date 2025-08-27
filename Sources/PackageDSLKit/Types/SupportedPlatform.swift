@@ -27,6 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+internal import Foundation
+
 public struct SupportedPlatform: Sendable, Hashable, Codable {
   public let osName: String
   public let version: Int

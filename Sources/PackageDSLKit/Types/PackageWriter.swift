@@ -27,7 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
+import SyntaxKit
 
 public struct PackageWriter: Sendable {
   private static let compoenentTypes: [any ComponentBuildable.Type] = [
@@ -43,11 +44,14 @@ public struct PackageWriter: Sendable {
   private let indexWriter: IndexCodeWriter
   private let componentWriter: StructureWriter
 
-  public init(
+  public init() {
+    self.init(componentWriter: ComponentWriter())
+  }
+  internal init(
     fileAccessor: any PackageFilesFactory = PackageFiles.default,
     fileInterfaceType: PackageFilesInterfaceType = .fileManager,
     indexWriter: any IndexCodeWriter = PackageIndexWriter(),
-    componentWriter: any StructureWriter = ComponentWriter()
+    componentWriter: any StructureWriter
   ) {
     self.fileAccessor = fileAccessor
     self.fileInterfaceType = fileInterfaceType
@@ -101,7 +105,7 @@ public struct PackageWriter: Sendable {
 
       let node = componentWriter.syntaxKitNode(from: component)
       do {
-        try node.syntax.description.write(to: filePath, atomically: true, encoding: .utf8)
+        try node.trimmedDescription.write(to: filePath, atomically: true, encoding: .utf8)
       } catch {
         throw .other(error)
       }

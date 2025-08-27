@@ -74,7 +74,7 @@ public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
 
     // Convert to syntax using SyntaxKit's code generation
     let lines = codeBlocks.map { codeBlock in
-      codeBlock.syntax.trimmedDescription
+      codeBlock.trimmedDescription
     }
 
     return lines.joined(separator: "\n")

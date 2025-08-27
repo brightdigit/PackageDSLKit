@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SyntaxKit
+public import SyntaxKit
 
 // Use SyntaxKit's Literal for string code blocks
 private typealias StringCodeBlock = Literal

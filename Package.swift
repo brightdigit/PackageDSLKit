@@ -44,7 +44,7 @@ let swiftSettings: [SwiftSetting] = [
   // SE-0427: Noncopyable generics
   .enableExperimentalFeature("NoncopyableGenerics"),
   // One-way closure parameters
-  .enableExperimentalFeature("OneWayClosureParameters"),
+  // .enableExperimentalFeature("OneWayClosureParameters"),
   // Raw layout types
   .enableExperimentalFeature("RawLayout"),
   // Reference bindings

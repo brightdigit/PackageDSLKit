@@ -29,6 +29,6 @@
 
 import SyntaxKit
 
-public protocol StructureWriter: Sendable {
+internal protocol StructureWriter: Sendable {
   func syntaxKitNode(from component: Component) -> Struct
 }

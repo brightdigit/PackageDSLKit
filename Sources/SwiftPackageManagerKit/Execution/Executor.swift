@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 /// SPM command execution errors
 public enum ExecutorError: Error, LocalizedError, Sendable {

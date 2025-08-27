@@ -29,13 +29,9 @@
 
 import SyntaxKit
 
-public struct ComponentWriter: Sendable, StructureWriter {
-  /// Creates a ComponentWriter that uses SyntaxKit for code generation
-  public init() {
-  }
-
+internal struct ComponentWriter: Sendable, StructureWriter {
   /// Creates a struct using SyntaxKit
-  public func syntaxKitNode(from component: Component) -> Struct {
+  func syntaxKitNode(from component: Component) -> Struct {
     // Convert properties to SyntaxKit CodeBlocks
     let properties: [CodeBlock] = component.properties.values.map { property in
       PropertyWriter.syntaxKitNode(from: property)

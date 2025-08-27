@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 /// Errors that can occur during SPM analysis
 public enum AnalysisError: Error, LocalizedError, Sendable {

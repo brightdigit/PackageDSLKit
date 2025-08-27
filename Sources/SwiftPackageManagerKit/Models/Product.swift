@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 /// Represents product type in a Swift package
 public enum ProductType: Codable, Hashable, Sendable {

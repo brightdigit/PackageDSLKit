@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftPackageManagerKit
+public import SwiftPackageManagerKit
 
 public struct TestTarget: TypeSource, Sendable {
   public let typeName: String

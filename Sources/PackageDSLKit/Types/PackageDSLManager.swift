@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 import SwiftPackageManagerKit
 
 /// Errors that can occur during package manipulation
@@ -39,7 +39,7 @@ public enum PackageError: Error, LocalizedError, Sendable {
   case productNotFound(String)
   case dependencyNotFound(String)
   case invalidConfiguration(String)
-  case validationFailed([ValidationIssue])
+  // case validationFailed([ValidationIssue])
   case packageGenerationFailed(String)
   case cascadeRemovalRequired(String, [String])
 
@@ -59,9 +59,9 @@ public enum PackageError: Error, LocalizedError, Sendable {
       return "Dependency '\(name)' not found"
     case .invalidConfiguration(let message):
       return "Invalid configuration: \(message)"
-    case .validationFailed(let issues):
-      let errorCount = issues.filter { $0.severity == .error }.count
-      return "Package validation failed with \(errorCount) error\(errorCount == 1 ? "" : "s")"
+    //    case .validationFailed(let issues):
+    //      let errorCount = issues.filter { $0.severity == .error }.count
+    //      return "Package validation failed with \(errorCount) error\(errorCount == 1 ? "" : "s")"
     case .packageGenerationFailed(let message):
       return "Failed to generate Package.swift: \(message)"
     case .cascadeRemovalRequired(let item, let dependents):
@@ -79,7 +79,7 @@ public enum TargetType: String, Sendable, Hashable, Codable, CaseIterable {
 
 /// The main SDK entry point for package manipulation using PackageDSL
 @MainActor
-public final class PackageDSLManager: Sendable {
+public final class PackageDSLManager {
   // MARK: - Properties
 
   /// The URL of the package directory
@@ -171,46 +171,46 @@ public final class PackageDSLManager: Sendable {
 // MARK: - Validation
 
 extension PackageDSLManager {
-  /// Validate the current package configuration against SPM
-  /// - Returns: ValidationResult containing any issues found
-  /// - Throws: PackageError on validation setup failures
-  public func validate() async throws -> ValidationResult {
-    // Create a temporary Package.swift file for validation
-    let tempDirectory = FileManager.default.temporaryDirectory
-      .appendingPathComponent("PackageDSLKit-validation-\(UUID().uuidString)")
-
-    do {
-      // Create temporary directory
-      try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
-
-      // Generate traditional Package.swift for SPM validation
-      let packageSwiftContent = generateTraditionalPackageSwift()
-      let packageSwiftFile = tempDirectory.appendingPathComponent("Package.swift")
-      try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
-
-      // Execute swift package dump-package
-      let executor = try Executor(packageDirectory: tempDirectory)
-      let spmPackageInfo = try await executor.dumpPackage()
-
-      // Validate using SPMValidator
-      let validator = Validator()
-      let result = validator.validate(spmPackageInfo)
-
-      // Clean up temporary directory
-      try? FileManager.default.removeItem(at: tempDirectory)
-
-      return result
-    } catch let error as ExecutorError {
-      // Clean up on error
-      try? FileManager.default.removeItem(at: tempDirectory)
-      throw PackageError.packageGenerationFailed(
-        "SPM execution failed: \(error.localizedDescription)")
-    } catch {
-      // Clean up on error
-      try? FileManager.default.removeItem(at: tempDirectory)
-      throw PackageError.packageGenerationFailed("Validation failed: \(error.localizedDescription)")
-    }
-  }
+  //  /// Validate the current package configuration against SPM
+  //  /// - Returns: ValidationResult containing any issues found
+  //  /// - Throws: PackageError on validation setup failures
+  //  public func validate() async throws -> ValidationResult {
+  //    // Create a temporary Package.swift file for validation
+  //    let tempDirectory = FileManager.default.temporaryDirectory
+  //      .appendingPathComponent("PackageDSLKit-validation-\(UUID().uuidString)")
+  //
+  //    do {
+  //      // Create temporary directory
+  //      try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
+  //
+  //      // Generate traditional Package.swift for SPM validation
+  //      let packageSwiftContent = generateTraditionalPackageSwift()
+  //      let packageSwiftFile = tempDirectory.appendingPathComponent("Package.swift")
+  //      try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
+  //
+  //      // Execute swift package dump-package
+  //      let executor = try Executor(packageDirectory: tempDirectory)
+  //      let spmPackageInfo = try await executor.dumpPackage()
+  //
+  //      // Validate using SPMValidator
+  //      let validator = Validator()
+  //      let result = validator.validate(spmPackageInfo)
+  //
+  //      // Clean up temporary directory
+  //      try? FileManager.default.removeItem(at: tempDirectory)
+  //
+  //      return result
+  //    } catch let error as ExecutorError {
+  //      // Clean up on error
+  //      try? FileManager.default.removeItem(at: tempDirectory)
+  //      throw PackageError.packageGenerationFailed(
+  //        "SPM execution failed: \(error.localizedDescription)")
+  //    } catch {
+  //      // Clean up on error
+  //      try? FileManager.default.removeItem(at: tempDirectory)
+  //      throw PackageError.packageGenerationFailed("Validation failed: \(error.localizedDescription)")
+  //    }
+  //  }
 
   /// Generate traditional Package.swift content from current configuration
   /// - Returns: String containing Package.swift content
@@ -292,15 +292,15 @@ extension PackageDSLManager {
     return content
   }
 
-  /// Validate the package and throw if there are any error-level issues
-  /// - Throws: PackageError.validationFailed if validation errors are found
-  public func validateOrThrow() async throws {
-    let result = try await validate()
-    let errors = result.issues.filter { $0.severity == .error }
-    if !errors.isEmpty {
-      throw PackageError.validationFailed(errors)
-    }
-  }
+  //  /// Validate the package and throw if there are any error-level issues
+  //  /// - Throws: PackageError.validationFailed if validation errors are found
+  //  public func validateOrThrow() async throws {
+  //    let result = try await validate()
+  //    let errors = result.issues.filter { $0.severity == .error }
+  //    if !errors.isEmpty {
+  //      throw PackageError.validationFailed(errors)
+  //    }
+  //  }
 }
 
 // MARK: - Package Type Creation
@@ -738,13 +738,13 @@ extension PackageDSLManager {
   /// - Throws: PackageError on generation failures
   /// - Returns: Self for method chaining
   @discardableResult
-  public func generatePackageSwift() throws(PackageError)  -> PackageDSLManager {
+  public func generatePackageSwift() throws(PackageError) -> PackageDSLManager {
     do {
       // Use PackageWriter to generate DSL component files
       let packageWriter = PackageWriter()
       try packageWriter.write(specifications, to: packageURL)
       return self
-    } catch let error {
+    } catch {
       throw PackageError.packageGenerationFailed(
         "DSL generation failed: \(error.localizedDescription)")
     }

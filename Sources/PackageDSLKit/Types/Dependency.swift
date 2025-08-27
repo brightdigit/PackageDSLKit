@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftPackageManagerKit
+public import SwiftPackageManagerKit
 
 public struct Dependency: TypeSource, Sendable {
   public struct DependencyType: OptionSet, Sendable, Hashable, Codable {

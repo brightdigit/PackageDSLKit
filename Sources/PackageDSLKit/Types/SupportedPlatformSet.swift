@@ -27,7 +27,8 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import SwiftPackageManagerKit
+internal import Foundation
+public import SwiftPackageManagerKit
 
 public struct SupportedPlatformSet: TypeSource, ComponentBuildable, Sendable {
   public static let directoryName: String = "Platforms"

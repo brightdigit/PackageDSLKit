@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
 /// Represents the package kind
 public enum PackageKind: Codable, Hashable, Sendable {
