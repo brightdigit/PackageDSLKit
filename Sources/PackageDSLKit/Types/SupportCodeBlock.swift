@@ -31,7 +31,7 @@ import Foundation
 
 public enum SupportCodeBlock: Sendable {
   // Replaced SwiftSyntax parsing with direct string reading
-  nonisolated(unsafe) public static var content: String = {
+  public static let content: String = {
     readSupportCode()
   }()
 
@@ -40,8 +40,9 @@ public enum SupportCodeBlock: Sendable {
     SupportCodeBlockContent(content: content)
   }()
 
-  // swift-format-ignore NeverForceUnwrap NeverUseForceTry
+  // swift-format-ignore: NeverForceUnwrap NeverUseForceTry
   private static func readSupportCode() -> String {
+    // swiftlint:disable force_try force_unwrapping
     let url = Bundle.module.url(forResource: "PackageDSL.swift", withExtension: "txt")!
     let text = try! String(contentsOf: url, encoding: .utf8)
     // swiftlint:enable force_try force_unwrapping

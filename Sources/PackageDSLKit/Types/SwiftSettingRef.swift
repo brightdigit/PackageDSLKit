@@ -1,5 +1,5 @@
 //
-//  ToolsVersion.swift
+//  SwiftSettingRef.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -27,27 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-import Foundation
+public import Foundation
 
-/// Represents the tools version
-public struct ToolsVersion: Codable, Hashable, Sendable {
-  public let version: String
-
-  private enum CodingKeys: String, CodingKey {
-    case version = "_version"
-  }
-
-  public init(version: String) {
-    self.version = version
-  }
-
-  public init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    self.version = try container.decode(String.self, forKey: .version)
-  }
-
-  public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(version, forKey: .version)
-  }
-}
+/// Type alias for Swift setting reference types
+public typealias SwiftSettingRef = BasicTypeReference

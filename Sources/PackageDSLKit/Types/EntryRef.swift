@@ -1,5 +1,5 @@
 //
-//  TypeAliases.swift
+//  EntryRef.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,8 +29,5 @@
 
 public import Foundation
 
-/// Type aliases for common reference types
+/// Type alias for entry reference types
 public typealias EntryRef = BasicTypeReference
-public typealias DependencyRef = BasicTypeReference
-public typealias TestTargetRef = BasicTypeReference
-public typealias SwiftSettingRef = BasicTypeReference

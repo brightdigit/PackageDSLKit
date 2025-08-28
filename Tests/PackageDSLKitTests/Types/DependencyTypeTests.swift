@@ -47,10 +47,21 @@ internal struct DependencyTypeTests {
       expectedRawValue: .invalid(1)
     ),
   ]) internal func initializeFromStrings(_ value: TestRow) {
-    let actualResult = Result {
-      try DependencyType(stringsThrows: value.strings)
-    }.mapError {
-      $0 as! DependencyType.InvalidValueError
+    let dependencyType: DependencyType?
+    let invalidValueError: DependencyType.InvalidValueError?
+    do {
+      dependencyType = try DependencyType(stringsThrows: value.strings)
+      invalidValueError = nil
+    } catch {
+      invalidValueError = error
+      dependencyType = nil
+    }
+
+    let actualResult: Result<DependencyType?, DependencyType.InvalidValueError>
+    if let invalidValueError {
+      actualResult = .failure(invalidValueError)
+    } else {
+      actualResult = .success(dependencyType)
     }
 
     switch (value.expectedRawValue, actualResult) {
