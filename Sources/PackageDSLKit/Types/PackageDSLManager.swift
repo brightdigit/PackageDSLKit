@@ -33,36 +33,36 @@ public import Foundation
 @MainActor
 public final class PackageDSLManager {
   // MARK: - Properties
-  
+
   /// The URL of the package directory
   public let packageURL: URL
-  
+
   /// The name of the package
   public private(set) var packageName: String
-  
+
   /// Products in the package
-  public private(set) var products: [Product]
-  
+  public fileprivate(set) var products: [Product]
+
   /// Targets in the package
-  public private(set) var targets: [Target]
-  
+  public fileprivate(set) var targets: [Target]
+
   /// Test targets in the package
-  public private(set) var testTargets: [TestTarget]
-  
+  public fileprivate(set) var testTargets: [TestTarget]
+
   /// Package dependencies
-  public private(set) var dependencies: [Dependency]
-  
+  public fileprivate(set) var dependencies: [Dependency]
+
   /// Supported platform sets
   public private(set) var supportedPlatformSets: [SupportedPlatformSet]
-  
+
   /// Swift settings
   public private(set) var swiftSettings: [SwiftSettingRef]
-  
+
   /// Package modifiers
   public private(set) var modifiers: [Modifier]
-  
+
   // MARK: - Initialization
-  
+
   /// Initialize PackageDSLManager with a package URL
   /// - Parameter packageURL: The URL to the package directory
   public init(packageURL: URL) {
@@ -76,7 +76,7 @@ public final class PackageDSLManager {
     self.swiftSettings = []
     self.modifiers = []
   }
-  
+
   /// Initialize PackageDSLManager with a package URL and name
   /// - Parameters:
   ///   - packageURL: The URL to the package directory
@@ -92,9 +92,9 @@ public final class PackageDSLManager {
     self.swiftSettings = []
     self.modifiers = []
   }
-  
+
   // MARK: - Package Configuration
-  
+
   /// Set the package name
   /// - Parameter name: The new package name
   /// - Returns: Self for method chaining
@@ -103,9 +103,9 @@ public final class PackageDSLManager {
     self.packageName = name
     return self
   }
-  
+
   // MARK: - Internal Specifications
-  
+
   /// Get the current package specifications
   internal var specifications: PackageSpecifications {
     PackageSpecifications(
@@ -117,219 +117,6 @@ public final class PackageDSLManager {
       swiftSettings: swiftSettings,
       modifiers: modifiers
     )
-  }
-  
-  /// Generate traditional Package.swift content from current configuration
-  /// - Returns: String containing Package.swift content
-  public func generateTraditionalPackageSwift() -> String {
-    var content = """
-      // swift-tools-version: 5.9
-      import PackageDescription
-      
-      let package = Package(
-          name: "\(packageName)"
-      """
-    
-    // Add products if any
-    if !products.isEmpty {
-      content += ",\n        products: [\n"
-      for (index, product) in products.enumerated() {
-        let productTargets = product.dependencies.map { "\"" + $0.name + "\"" }.joined(
-          separator: ", ")
-        let productTypeString = product.productType == .library ? "library" : "executable"
-        content +=
-        "            .\(productTypeString)(name: \"\(product.typeName)\", targets: [\(productTargets)])"
-        if index < products.count - 1 {
-          content += ","
-        }
-        content += "\n"
-      }
-      content += "        ]"
-    }
-    
-    // Add dependencies if any
-    if !dependencies.isEmpty {
-      content += ",\n        dependencies: [\n"
-      for (index, dependency) in dependencies.enumerated() {
-        let dependencyString = dependency.dependency ?? ""
-        // Remove quotes if they exist around the dependency string
-        let cleanDependency =
-        dependencyString.hasPrefix("\"") && dependencyString.hasSuffix("\"")
-        ? String(dependencyString.dropFirst().dropLast())
-        : dependencyString
-        content += "            " + cleanDependency
-        if index < dependencies.count - 1 {
-          content += ","
-        }
-        content += "\n"
-      }
-      content += "        ]"
-    }
-    
-    // Add targets
-    let allTargets =
-    targets
-    + testTargets.map { testTarget in
-      Target(typeName: testTarget.typeName, dependencies: testTarget.dependencies)
-    }
-    
-    if !allTargets.isEmpty {
-      content += ",\n        targets: [\n"
-      for (index, target) in allTargets.enumerated() {
-        let isTestTarget = testTargets.contains { $0.typeName == target.typeName }
-        let targetType = isTestTarget ? "testTarget" : "target"
-        
-        if target.dependencies.isEmpty {
-          content += "            .\(targetType)(name: \"\(target.typeName)\")"
-        } else {
-          let targetDeps = target.dependencies.map { "\"" + $0.name + "\"" }.joined(separator: ", ")
-          content +=
-          "            .\(targetType)(name: \"\(target.typeName)\", dependencies: [\(targetDeps)])"
-        }
-        
-        if index < allTargets.count - 1 {
-          content += ","
-        }
-        content += "\n"
-      }
-      content += "        ]"
-    }
-    
-    content += "\n    )\n"
-    return content
-  }
-}
-// MARK: - Package Type Creation
-
-extension PackageDSLManager {
-  /// Create a package with the specified type
-  /// - Parameters:
-  ///   - name: The package name (optional, uses current packageName if nil)
-  ///   - type: The package type (.library, .executable, or .empty)
-  /// - Returns: Self for method chaining
-  @discardableResult
-  public func createPackage(name: String? = nil, type: PackageType) -> PackageDSLManager {
-    if let name = name {
-      self.packageName = name
-    }
-
-    // Create default target and product for non-empty packages
-    switch type {
-    case .library:
-      do {
-        try addTarget(name: packageName, type: .library)
-        try addProduct(name: packageName, type: .library, targets: [packageName])
-      } catch {
-        // This should not happen in normal usage as we're creating a new package
-        assertionFailure("Failed to create default library target and product: \(error)")
-      }
-
-    case .executable:
-      do {
-        try addTarget(name: packageName, type: .executable)
-        try addProduct(name: packageName, type: .executable, targets: [packageName])
-      } catch {
-        // This should not happen in normal usage as we're creating a new package
-        assertionFailure("Failed to create default executable target and product: \(error)")
-      }
-
-    case .empty:
-      // Empty package has no default targets or products
-      break
-    }
-
-    return self
-  }
-
-  /// Add a target to the package
-  /// - Parameters:
-  ///   - name: The target name
-  ///   - type: The target type (.library, .executable, or .test)
-  ///   - dependencies: Target dependencies
-  /// - Returns: Self for method chaining
-  /// - Throws: PackageError if target name already exists
-  @discardableResult
-  public func addTarget(name: String, type: TargetType, dependencies: [DependencyRef] = []) throws
-    -> PackageDSLManager
-  {
-    // Check for duplicate target names
-    let existingNames = targets.map(\.typeName) + testTargets.map(\.typeName)
-    guard !existingNames.contains(name) else {
-      throw PackageError.duplicateTargetName(name)
-    }
-
-    switch type {
-    case .library, .executable:
-      let target = Target(typeName: name, dependencies: dependencies)
-      targets.append(target)
-
-    case .test:
-      let testTarget = TestTarget(typeName: name, dependencies: dependencies)
-      testTargets.append(testTarget)
-    }
-
-    return self
-  }
-
-  /// Remove a target from the package
-  /// - Parameters:
-  ///   - name: The target name to remove
-  ///   - force: If true, remove even if cascade removal is required
-  /// - Returns: Self for method chaining
-  /// - Throws: PackageError.cascadeRemovalRequired if target is used by products and force is false
-  @discardableResult
-  public func removeTarget(name: String, force: Bool = false) throws -> PackageDSLManager {
-    // Check if target exists
-    let existingTargetNames = targets.map(\.typeName) + testTargets.map(\.typeName)
-    guard existingTargetNames.contains(name) else {
-      throw PackageError.targetNotFound(name)
-    }
-
-    // Find products that depend on this target
-    let dependentProducts = products.filter { product in
-      product.dependencies.contains { $0.name == name }
-    }
-
-    // Find targets that depend on this target
-    let dependentRegularTargets = targets.filter { target in
-      target.dependencies.contains { $0.name == name }
-    }
-    let dependentTestTargets = testTargets.filter { testTarget in
-      testTarget.dependencies.contains { $0.name == name }
-    }
-
-    // Check for cascade removal requirements
-    let allDependents =
-      dependentProducts.map(\.typeName) + dependentRegularTargets.map(\.typeName)
-      + dependentTestTargets.map(\.typeName)
-    if !allDependents.isEmpty && !force {
-      throw PackageError.cascadeRemovalRequired(name, allDependents)
-    }
-
-    // Remove the target
-    targets.removeAll { $0.typeName == name }
-    testTargets.removeAll { $0.typeName == name }
-
-    // If force is enabled, clean up dependencies
-    if force {
-      // Remove products that reference this target
-      products.removeAll { product in
-        product.dependencies.contains { $0.name == name }
-      }
-
-      // Remove target dependencies from other targets
-      targets = targets.map { target in
-        let filteredDependencies = target.dependencies.filter { $0.name != name }
-        return Target(typeName: target.typeName, dependencies: filteredDependencies)
-      }
-
-      testTargets = testTargets.map { testTarget in
-        let filteredDependencies = testTarget.dependencies.filter { $0.name != name }
-        return TestTarget(typeName: testTarget.typeName, dependencies: filteredDependencies)
-      }
-    }
-
-    return self
   }
 }
 
@@ -390,7 +177,6 @@ extension PackageDSLManager {
     return self
   }
 }
-
 // MARK: - Dependency Management
 
 extension PackageDSLManager {
@@ -485,7 +271,16 @@ extension PackageDSLManager {
       throw PackageError.dependencyNotFound(name)
     }
 
-    // Find targets that depend on this dependency
+    let dependentTargets = findDependencyDependentTargets(name)
+    try validateDependencyRemoval(name: name, dependents: dependentTargets, force: force)
+
+    removeDependencyFromCollection(name)
+    cleanupDependencyReferences(name)
+
+    return self
+  }
+
+  private func findDependencyDependentTargets(_ name: String) -> [String] {
     let dependentRegularTargets = targets.filter { target in
       target.dependencies.contains { $0.name == name }
     }
@@ -493,16 +288,20 @@ extension PackageDSLManager {
       testTarget.dependencies.contains { $0.name == name }
     }
 
-    // Check for cascade removal requirements
-    let allDependentTargets =
-      dependentRegularTargets.map(\.typeName) + dependentTestTargets.map(\.typeName)
-    if !allDependentTargets.isEmpty && !force {
-      throw PackageError.cascadeRemovalRequired(name, allDependentTargets)
+    return dependentRegularTargets.map(\.typeName) + dependentTestTargets.map(\.typeName)
+  }
+
+  private func validateDependencyRemoval(name: String, dependents: [String], force: Bool) throws {
+    if !dependents.isEmpty && !force {
+      throw PackageError.cascadeRemovalRequired(name, dependents)
     }
+  }
 
-    // Remove the dependency
+  private func removeDependencyFromCollection(_ name: String) {
     dependencies.removeAll { $0.typeName == name }
+  }
 
+  private func cleanupDependencyReferences(_ name: String) {
     // Remove dependency references from targets (always clean up references)
     targets = targets.map { target in
       let filteredDependencies = target.dependencies.filter { $0.name != name }
@@ -520,8 +319,6 @@ extension PackageDSLManager {
         dependencies: filteredDependencies
       )
     }
-
-    return self
   }
 
   /// Helper method to extract package name from URL
@@ -538,42 +335,6 @@ extension PackageDSLManager {
     }
 
     return pathComponent
-  }
-}
-
-// MARK: - Version Requirements
-
-// MARK: - Code Generation
-
-extension PackageDSLManager {
-  /// Generate DSL component files in the package directory
-  /// - Throws: PackageError on generation failures
-  /// - Returns: Self for method chaining
-  @discardableResult
-  public func generatePackageSwift() throws(PackageError) -> PackageDSLManager {
-    do {
-      // Use PackageWriter to generate DSL component files
-      let packageWriter = PackageWriter()
-      try packageWriter.write(specifications, to: packageURL)
-      return self
-    } catch {
-      throw PackageError.packageGenerationFailed(
-        "DSL generation failed: \(error.localizedDescription)")
-    }
-  }
-
-  /// Check if the package directory has existing DSL component files
-  /// - Returns: True if DSL components exist, false otherwise
-  public func hasDSLComponents() -> Bool {
-    let indexFile = packageURL.appendingPathComponent("Index.swift")
-    return FileManager.default.fileExists(atPath: indexFile.path)
-  }
-
-  /// Check if the package directory has a traditional Package.swift file
-  /// - Returns: True if Package.swift exists, false otherwise
-  public func hasTraditionalPackageSwift() -> Bool {
-    let packageSwiftFile = packageURL.appendingPathComponent("Package.swift")
-    return FileManager.default.fileExists(atPath: packageSwiftFile.path)
   }
 }
 
@@ -633,5 +394,152 @@ extension PackageDSLManager {
       throw PackageError.invalidConfiguration("Invalid version requirement: \(versionString)")
     }
     return try addDependency(identity: identity, requirement: requirement)
+  }
+}
+
+// MARK: - Package Type Creation & Target Management
+
+extension PackageDSLManager {
+  /// Create a package with the specified type
+  /// - Parameters:
+  ///   - name: The package name (optional, uses current packageName if nil)
+  ///   - type: The package type (.library, .executable, or .empty)
+  /// - Returns: Self for method chaining
+  @discardableResult
+  public func createPackage(name: String? = nil, type: PackageType) -> PackageDSLManager {
+    if let name = name {
+      self.packageName = name
+    }
+
+    // Create default target and product for non-empty packages
+    switch type {
+    case .library:
+      self.createDefaultTarget(.library)
+
+    case .executable:
+      self.createDefaultTarget(.executable)
+
+    case .empty:
+      // Empty package has no default targets or products
+      break
+    }
+
+    return self
+  }
+
+  private func createDefaultTarget(_ targetType: TargetType) {
+    do {
+      try addTarget(name: packageName, type: targetType)
+      let productType: ProductType = targetType == .executable ? .executable : .library
+      try addProduct(name: packageName, type: productType, targets: [packageName])
+    } catch {
+      // This should not happen in normal usage as we're creating a new package
+      assertionFailure("Failed to create default target and product: \(error)")
+    }
+  }
+
+  /// Add a target to the package
+  /// - Parameters:
+  ///   - name: The target name
+  ///   - type: The target type (.library, .executable, or .test)
+  ///   - dependencies: Target dependencies
+  /// - Returns: Self for method chaining
+  /// - Throws: PackageError if target name already exists
+  @discardableResult
+  public func addTarget(name: String, type: TargetType, dependencies: [DependencyRef] = []) throws
+    -> PackageDSLManager
+  {
+    // Check for duplicate target names
+    let existingNames = targets.map(\.typeName) + testTargets.map(\.typeName)
+    guard !existingNames.contains(name) else {
+      throw PackageError.duplicateTargetName(name)
+    }
+
+    switch type {
+    case .library, .executable:
+      let target = Target(typeName: name, dependencies: dependencies)
+      targets.append(target)
+
+    case .test:
+      let testTarget = TestTarget(typeName: name, dependencies: dependencies)
+      testTargets.append(testTarget)
+    }
+
+    return self
+  }
+
+  /// Remove a target from the package
+  /// - Parameters:
+  ///   - name: The target name to remove
+  ///   - force: If true, remove even if cascade removal is required
+  /// - Returns: Self for method chaining
+  /// - Throws: PackageError.cascadeRemovalRequired if target is used by products and force is false
+  @discardableResult
+  public func removeTarget(name: String, force: Bool = false) throws -> PackageDSLManager {
+    try validateTargetExists(name)
+
+    let dependents = findTargetDependents(name)
+    try validateRemoval(targetName: name, dependents: dependents, force: force)
+
+    removeTargetFromCollections(name)
+
+    if force {
+      cleanupTargetReferences(name)
+    }
+
+    return self
+  }
+
+  private func validateTargetExists(_ name: String) throws {
+    let existingTargetNames = targets.map(\.typeName) + testTargets.map(\.typeName)
+    guard existingTargetNames.contains(name) else {
+      throw PackageError.targetNotFound(name)
+    }
+  }
+
+  private func findTargetDependents(_ name: String) -> [String] {
+    let dependentProducts = products.filter { product in
+      product.dependencies.contains { $0.name == name }
+    }
+
+    let dependentRegularTargets = targets.filter { target in
+      target.dependencies.contains { $0.name == name }
+    }
+
+    let dependentTestTargets = testTargets.filter { testTarget in
+      testTarget.dependencies.contains { $0.name == name }
+    }
+
+    return dependentProducts.map(\.typeName) + dependentRegularTargets.map(\.typeName)
+      + dependentTestTargets.map(\.typeName)
+  }
+
+  private func validateRemoval(targetName: String, dependents: [String], force: Bool) throws {
+    if !dependents.isEmpty && !force {
+      throw PackageError.cascadeRemovalRequired(targetName, dependents)
+    }
+  }
+
+  private func removeTargetFromCollections(_ name: String) {
+    targets.removeAll { $0.typeName == name }
+    testTargets.removeAll { $0.typeName == name }
+  }
+
+  private func cleanupTargetReferences(_ name: String) {
+    // Remove products that reference this target
+    products.removeAll { product in
+      product.dependencies.contains { $0.name == name }
+    }
+
+    // Remove target dependencies from other targets
+    targets = targets.map { target in
+      let filteredDependencies = target.dependencies.filter { $0.name != name }
+      return Target(typeName: target.typeName, dependencies: filteredDependencies)
+    }
+
+    testTargets = testTargets.map { testTarget in
+      let filteredDependencies = testTarget.dependencies.filter { $0.name != name }
+      return TestTarget(typeName: testTarget.typeName, dependencies: filteredDependencies)
+    }
   }
 }

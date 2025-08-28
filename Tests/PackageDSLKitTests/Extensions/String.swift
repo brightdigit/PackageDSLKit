@@ -15,7 +15,9 @@ extension String {
     var identifier = ""
 
     for _ in 0..<length {
-      identifier.append(validIdentifierCharacters.randomElement()!)
+      if let randomChar = validIdentifierCharacters.randomElement() {
+        identifier.append(randomChar)
+      }
     }
 
     return identifier

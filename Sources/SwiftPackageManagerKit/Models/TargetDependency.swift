@@ -78,7 +78,7 @@ public enum TargetDependency: Codable, Hashable, Sendable {
     switch self {
     case .byName(let name, _):
       try container.encode([name, nil], forKey: .byName)
-    case .product(let productName, let packageName, _):
+    case let .product(productName, packageName, _):
       try container.encode([productName, packageName, nil, nil], forKey: .product)
     }
   }

@@ -61,7 +61,7 @@ public enum PackageError: Error, LocalizedError, Sendable {
 
     case .packageGenerationFailed(let message):
       return "Failed to generate Package.swift: \(message)"
-    case .cascadeRemovalRequired(let item, let dependents):
+    case let .cascadeRemovalRequired(item, dependents):
       return "Cannot remove '\(item)' because it is used by: \(dependents.joined(separator: ", "))"
     }
   }
