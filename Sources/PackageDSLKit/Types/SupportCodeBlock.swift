@@ -34,7 +34,7 @@ public enum SupportCodeBlock: Sendable {
   nonisolated(unsafe) public static var content: String = {
     readSupportCode()
   }()
-  
+
   // For backward compatibility - returns the same content as .content
   nonisolated(unsafe) public static var syntaxNode: SupportCodeBlockContent = {
     SupportCodeBlockContent(content: content)

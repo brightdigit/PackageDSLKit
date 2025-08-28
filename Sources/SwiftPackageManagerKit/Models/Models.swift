@@ -32,5 +32,5 @@ import Foundation
 // Note: This file previously provided convenience extensions for SPM models
 // All model types and extensions are now available through their individual files:
 // - PackageInfo+Extensions.swift
-// - Target+Extensions.swift  
+// - Target+Extensions.swift
 // - Dependency+Extensions.swift

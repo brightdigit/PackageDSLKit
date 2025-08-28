@@ -5,24 +5,22 @@
 //  Created by Leo Dion on 8/27/25.
 //
 
-import Foundation
+package import Foundation
 
 extension URL {
-  
-  func polyfill () -> Polyfill {
-    return Polyfill(url: self)
+  package func polyfill() -> Polyfill {
+    Polyfill(url: self)
   }
-  
-  internal struct Polyfill : Sendable {
+
+  package struct Polyfill: Sendable {
     fileprivate init(url: URL) {
       self.url = url
     }
-    
-    private let url : URL
-    
-    internal func appending(component: String, isDirectory: Bool? = nil) -> URL {
-      
-      if #available(iOS 16.0, *) {
+
+    private let url: URL
+
+    package func appending(component: String, isDirectory: Bool? = nil) -> URL {
+      if #available(iOS 16.0, watchOS 9.0, tvOS 16.0, macOS 13.0, *) {
         switch isDirectory {
         case .none:
           return url.appending(component: component)
@@ -39,9 +37,9 @@ extension URL {
         }
       }
     }
-    
-    internal func path() -> String {
-      if #available(iOS 16.0, *) {
+
+    package func path() -> String {
+      if #available(iOS 16.0, watchOS 9.0, tvOS 16.0, macOS 13.0, *) {
         url.path()
       } else {
         url.path

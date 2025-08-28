@@ -32,7 +32,7 @@ public import Foundation
 /// Basic type reference implementation
 public struct BasicTypeReference: TypeReference, Sendable {
   public let name: String
-  
+
   public init(name: String) {
     self.name = name
   }

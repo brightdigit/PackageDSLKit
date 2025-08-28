@@ -42,7 +42,7 @@ public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
   public init(rawValue: Int) {
     self.rawValue = rawValue
   }
-  
+
   internal struct InvalidValueError: Error, Sendable {
     internal init?(invalidCount: Int) {
       guard invalidCount != 0 else {
@@ -58,7 +58,7 @@ public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
 
     internal let invalidCount: Int
   }
-  
+
   internal init?(stringsThrows strings: [String]) throws(InvalidValueError) {
     let indicies = strings.map {
       Self.strings.firstIndex(of: $0)
@@ -74,7 +74,7 @@ public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
     let rawValue = rawValues.reduce(0) { $0 + $1 }
     self.init(rawValue: rawValue)
   }
-  
+
   public init?(strings: [String]) {
     do {
       try self.init(stringsThrows: strings)

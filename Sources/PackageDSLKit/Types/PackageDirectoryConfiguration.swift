@@ -58,13 +58,13 @@ extension PackageDirectoryConfiguration {
   internal init(from packageInfo: PackageInfo) throws(PackageDSLError) {
     // Convert SPM products to PackageDSLKit products
     let products = packageInfo.products.compactMap { Product(spmProduct: $0) }
-    
+
     // Convert SPM targets to PackageDSLKit targets (excluding test targets)
     let targets = packageInfo.targets.compactMap { Target(spmTarget: $0) }
-    
+
     // Convert SPM targets to PackageDSLKit test targets (only test targets)
     let testTargets = packageInfo.targets.compactMap { TestTarget(spmTarget: $0) }
-    
+
     // Convert SPM dependencies to PackageDSLKit dependencies
     let dependencies = packageInfo.dependencies.compactMap { spmDependency -> Dependency? in
       switch spmDependency {
@@ -84,27 +84,28 @@ extension PackageDirectoryConfiguration {
         )
       }
     }
-    
+
     // Convert SPM platforms to PackageDSLKit supported platform sets
-    let supportedPlatformSets = packageInfo.platforms.compactMap { platform -> SupportedPlatformSet? in
+    let supportedPlatformSets = packageInfo.platforms.compactMap {
+      platform -> SupportedPlatformSet? in
       // Create a single platform set for all platforms
       guard let platformSet = SupportedPlatformSet(spmPlatforms: [platform]) else {
         return nil
       }
       return platformSet
     }
-    
+
     // Create index from the converted components
     let entries = products.map { EntryRef(name: $0.typeName) }
     let dependencyRefs = dependencies.map { DependencyRef(name: $0.typeName) }
     let testTargetRefs = testTargets.map { TestTargetRef(name: $0.typeName) }
-    
+
     // Create swift settings from tools version
     let swiftSettings: [SwiftSettingRef] = []
-    
+
     // Create modifiers (empty for now, can be extended later)
     let modifiers: [Modifier] = []
-    
+
     let index = Index(
       entries: entries,
       dependencies: dependencyRefs,
@@ -112,7 +113,7 @@ extension PackageDirectoryConfiguration {
       swiftSettings: swiftSettings,
       modifiers: modifiers
     )
-    
+
     self.init(
       index: index,
       products: products,

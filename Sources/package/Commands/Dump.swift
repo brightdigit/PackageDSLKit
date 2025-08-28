@@ -31,13 +31,13 @@ import ArgumentParser
 import PackageDSLKit
 
 extension Package {
-  internal struct Dump: AsyncParsableCommand, Sendable {
-    @OptionGroup internal var settings: Settings
-    internal func run() async throws {
-      print(settings.dslSourcesURL)
-      let parser = PackageParser()
-      let package = try await parser.parse(at: settings.dslSourcesURL, with: .default)
-      dump(package)
+  #if canImport(Foundation) && (os(macOS) || os(Linux))
+    internal struct Dump: AsyncParsableCommand, Sendable {
+      @OptionGroup internal var settings: Settings
+      internal func run() async throws {
+        let parser = PackageParser()
+        let package = try await parser.parse(at: settings.dslSourcesURL, with: .default)
+      }
     }
-  }
+  #endif
 }

@@ -149,88 +149,97 @@ struct PackageDSLManagerTests {
     .disabled(
       if: ProcessInfo.processInfo.shouldDisableSPMValidation(),
       "SPM commands unreliable in GitHub CI via Xcode"
+    ),
+    .enabled(
+      if: Platform.allowsProcess,
+      "Unable to run SPM commands in non-macOS platforms"
     )
   )
   func validateGeneratedPackageWithSPMValidation() async throws {
-    let tempDirectory = FileManager.default.temporaryDirectory
-      .appendingPathComponent("PackageDSLManagerTests-SPMValidation-\(UUID().uuidString)")
-    let packageManager = await PackageDSLManager(
-      packageURL: tempDirectory, packageName: "SPMValidationTest")
+    #if canImport(Foundation) && (os(macOS) || os(Linux))
+      let tempDirectory = FileManager.default.temporaryDirectory
+        .appendingPathComponent("PackageDSLManagerTests-SPMValidation-\(UUID().uuidString)")
+      let packageManager = await PackageDSLManager(
+        packageURL: tempDirectory, packageName: "SPMValidationTest")
 
-    defer {
-      if FileManager.default.fileExists(atPath: tempDirectory.path) {
-        try? FileManager.default.removeItem(at: tempDirectory)
-      }
-    }
-
-    // Create package directory and Sources subdirectory
-    try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
-    let sourcesDirectory = tempDirectory.appendingPathComponent("Sources/SPMValidationTest")
-    try FileManager.default.createDirectory(at: sourcesDirectory, withIntermediateDirectories: true)
-
-    // Create a simple Swift source file
-    let sourceFile = sourcesDirectory.appendingPathComponent("SPMValidationTest.swift")
-    try """
-    public struct SPMValidationTest {
-        public init() {}
-
-        public func hello() -> String {
-            return "Hello, World!"
+      defer {
+        if FileManager.default.fileExists(atPath: tempDirectory.path) {
+          try? FileManager.default.removeItem(at: tempDirectory)
         }
-    }
-    """.write(to: sourceFile, atomically: true, encoding: .utf8)
+      }
 
-    // Configure a simple package without external dependencies for faster testing
-    try await packageManager.createPackage(type: .library)
+      // Create package directory and Sources subdirectory
+      try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
+      let sourcesDirectory = tempDirectory.appendingPathComponent("Sources/SPMValidationTest")
+      try FileManager.default.createDirectory(
+        at: sourcesDirectory, withIntermediateDirectories: true)
 
-    // Create a Package.swift file that SPM can understand for testing SPM commands
-    let packageSwiftContent = """
-      // swift-tools-version: 5.9
-      import PackageDescription
+      // Create a simple Swift source file
+      let sourceFile = sourcesDirectory.appendingPathComponent("SPMValidationTest.swift")
+      try """
+      public struct SPMValidationTest {
+          public init() {}
 
-      let package = Package(
-          name: "SPMValidationTest",
-          products: [
-              .library(name: "SPMValidationTest", targets: ["SPMValidationTest"]),
-          ],
-          targets: [
-              .target(name: "SPMValidationTest", dependencies: []),
-          ]
-      )
-      """
+          public func hello() -> String {
+              return "Hello, World!"
+          }
+      }
+      """.write(to: sourceFile, atomically: true, encoding: .utf8)
 
-    let packageSwiftFile = tempDirectory.appendingPathComponent("Package.swift")
-    try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
+      // Configure a simple package without external dependencies for faster testing
+      try await packageManager.createPackage(type: .library)
 
-    // Test SPM commands through our SPMExecutor
-    let spmExecutor = try Executor(packageDirectory: tempDirectory, defaultTimeout: 60)
+      // Create a Package.swift file that SPM can understand for testing SPM commands
+      let packageSwiftContent = """
+        // swift-tools-version: 5.9
+        import PackageDescription
 
-    // Test package dump-package
-    let packageInfo = try await spmExecutor.dumpPackage()
-    #expect(packageInfo.name == "SPMValidationTest")
-    #expect(packageInfo.products.count == 1)
-    #expect(packageInfo.products.first?.name == "SPMValidationTest")
-    #expect(packageInfo.targets.count == 1)
-    #expect(packageInfo.targets.first?.name == "SPMValidationTest")
+        let package = Package(
+            name: "SPMValidationTest",
+            products: [
+                .library(name: "SPMValidationTest", targets: ["SPMValidationTest"]),
+            ],
+            targets: [
+                .target(name: "SPMValidationTest", dependencies: []),
+            ]
+        )
+        """
 
-    // Test package resolve (should be quick since no external dependencies)
-    try await spmExecutor.resolvePackage()
+      let packageSwiftFile = tempDirectory.appendingPathComponent("Package.swift")
+      try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
 
-    // Test build (this ensures the package structure is correct)
-    try await spmExecutor.buildPackage()
+      // Test SPM commands through our SPMExecutor
+      let spmExecutor = try Executor(packageDirectory: tempDirectory, defaultTimeout: 60)
 
-    // Verify build artifacts were created
-    let buildDirectory = tempDirectory.appendingPathComponent(".build")
-    #expect(FileManager.default.fileExists(atPath: buildDirectory.path))
+      // Test package dump-package
+      let packageInfo = try await spmExecutor.dumpPackage()
+      #expect(packageInfo.name == "SPMValidationTest")
+      #expect(packageInfo.products.count == 1)
+      #expect(packageInfo.products.first?.name == "SPMValidationTest")
+      #expect(packageInfo.targets.count == 1)
+      #expect(packageInfo.targets.first?.name == "SPMValidationTest")
 
-    // Test that our PackageDSLManager can detect the traditional Package.swift
-    #expect(await packageManager.hasTraditionalPackageSwift())
+      // Test package resolve (should be quick since no external dependencies)
+      try await spmExecutor.resolvePackage()
 
-    // Generate DSL files alongside the Package.swift
-    try await packageManager.generatePackageSwift()
+      // Test build (this ensures the package structure is correct)
+      try await spmExecutor.buildPackage()
 
-    // Verify both formats coexist
-    #expect(await packageManager.hasTraditionalPackageSwift())
-    #expect(await packageManager.hasDSLComponents())
+      // Verify build artifacts were created
+      let buildDirectory = tempDirectory.appendingPathComponent(".build")
+      #expect(FileManager.default.fileExists(atPath: buildDirectory.path))
+
+      // Test that our PackageDSLManager can detect the traditional Package.swift
+      #expect(await packageManager.hasTraditionalPackageSwift())
+
+      // Generate DSL files alongside the Package.swift
+      try await packageManager.generatePackageSwift()
+
+      // Verify both formats coexist
+      #expect(await packageManager.hasTraditionalPackageSwift())
+      #expect(await packageManager.hasDSLComponents())
+    #else
+      Issue.record("Unable to create and run a Process in this environment.")
+    #endif
   }
 }

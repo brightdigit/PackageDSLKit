@@ -67,7 +67,7 @@ extension FileManager: PackageFilesInterface {
     to pathURL: URL
   ) throws {
     let contents = try self.readDirectoryContents(
-      at: dslSourcesURL.path(),
+      at: dslSourcesURL.polyfill().path(),
       fileExtension: "swift"
     )
 
@@ -78,7 +78,7 @@ extension FileManager: PackageFilesInterface {
         SupportCodeBlock.syntaxNode.trimmedDescription,
       ] + contents
     let data = Data(strings.joined(separator: "\n").utf8)
-    self.createFile(atPath: packageFileURL.path(), contents: data)
+    self.createFile(atPath: packageFileURL.polyfill().path(), contents: data)
     // TODO: log error if file creation fails
   }
 
@@ -93,11 +93,11 @@ extension FileManager: PackageFilesInterface {
   }
 
   public func createFile(at url: URL, text: String) {
-    self.createFile(atPath: url.path(), contents: Data(text.utf8))
+    self.createFile(atPath: url.polyfill().path(), contents: Data(text.utf8))
   }
   public func swiftVersion(from directoryURL: URL) -> SwiftVersion? {
-    let swiftVersionURL = directoryURL.appending(component: ".swift-version")
-    let packageSwiftURL = directoryURL.appending(component: "Package.swift")
+    let swiftVersionURL = directoryURL.polyfill().appending(component: ".swift-version")
+    let packageSwiftURL = directoryURL.polyfill().appending(component: "Package.swift")
 
     let swiftVersionText: String?
     do {
@@ -141,7 +141,7 @@ extension FileManager: PackageFilesInterface {
     }
 
     self.createFile(
-      atPath: sourcesDirURL.appendingPathComponent(fileName).path(),
+      atPath: sourcesDirURL.appendingPathComponent(fileName).polyfill().path(),
       contents: Data(sourceCode.utf8)
     )
   }
@@ -175,7 +175,7 @@ extension FileManager: PackageFilesInterface {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.
       }
       """
-    self.createFile(atPath: testFileURL.path(), contents: Data(testCode.utf8))
+    self.createFile(atPath: testFileURL.polyfill().path(), contents: Data(testCode.utf8))
   }
   private func createTargetSourceAt(
     _ pathURL: URL, productName: String, _ packageType: PackageType

@@ -30,48 +30,49 @@
 import ArgumentParser
 import PackageDSLKit
 
-extension Package {
-  @available(iOS 16.0, *)
-  internal struct Product: ParsableCommand, Sendable {
-    internal static let configuration: CommandConfiguration = .init(
-      subcommands: [Add.self]
-    )
-  }
-}
-@available(iOS 16.0, *)
-extension Package.Product {
-  @available(iOS 16.0, *)
-  internal struct Add: AsyncParsableCommand, Sendable {
-    @Argument internal var name: String
-    @OptionGroup internal var settings: Settings
-
-    @Option internal var type: ProductType = .library
-
-    internal func run() async throws {
-      let parser = PackageParser()
-      let package = try await parser.parse(at: settings.dslSourcesURL, with: .default)
-      let newPackage = package.updating(descriptor: Product.self) { products in
-        var newProducts = products
-        newProducts.append(.init(typeName: name))
-        return newProducts
-      }
-      let writer = PackageWriter()
-      try writer.write(newPackage, to: self.settings.dslSourcesURL)
-
-      print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
-
-      if let swiftVersion = self.settings.fileManager.swiftVersion(from: self.settings.pathURL) {
-        try self.settings.fileManager.writePackageSwiftFile(
-          swiftVersion: swiftVersion,
-          from: self.settings.dslSourcesURL,
-          to: self.settings.pathURL
-        )
-      }
-
-      try settings.fileManager.createTargetSourceAt(self.settings.pathURL, productName: name, type)
+#if canImport(Foundation) && (os(macOS) || os(Linux))
+  extension Package {
+    internal struct Product: ParsableCommand, Sendable {
+      internal static let configuration: CommandConfiguration = .init(
+        subcommands: [Add.self]
+      )
     }
   }
 
-  internal struct Remove: ParsableCommand, Sendable {
+  extension Package.Product {
+    internal struct Add: AsyncParsableCommand, Sendable {
+      @Argument internal var name: String
+      @OptionGroup internal var settings: Settings
+
+      @Option internal var type: ProductType = .library
+
+      internal func run() async throws {
+        let parser = PackageParser()
+        let package = try await parser.parse(at: settings.dslSourcesURL, with: .default)
+        let newPackage = package.updating(descriptor: Product.self) { products in
+          var newProducts = products
+          newProducts.append(.init(typeName: name))
+          return newProducts
+        }
+        let writer = PackageWriter()
+        try writer.write(newPackage, to: self.settings.dslSourcesURL)
+
+        print("Written to:", "\(self.settings.pathURL.standardizedFileURL.polyfill().path())")
+
+        if let swiftVersion = self.settings.fileManager.swiftVersion(from: self.settings.pathURL) {
+          try self.settings.fileManager.writePackageSwiftFile(
+            swiftVersion: swiftVersion,
+            from: self.settings.dslSourcesURL,
+            to: self.settings.pathURL
+          )
+        }
+
+        try settings.fileManager.createTargetSourceAt(
+          self.settings.pathURL, productName: name, type)
+      }
+    }
+
+    internal struct Remove: ParsableCommand, Sendable {
+    }
   }
-}
+#endif

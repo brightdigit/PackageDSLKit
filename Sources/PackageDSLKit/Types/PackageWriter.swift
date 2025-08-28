@@ -66,7 +66,7 @@ public struct PackageWriter: Sendable {
     let filesInterface = self.fileAccessor.interface(for: self.fileInterfaceType)
     let configuration = PackageDirectoryConfiguration(specifications: specification)
 
-    let indexFileURL = url.appending(component: "Index.swift")
+    let indexFileURL = url.polyfill().appending(component: "Index.swift")
     do {
       try indexWriter.writeIndex(configuration.index).write(
         to: indexFileURL,
@@ -99,7 +99,8 @@ public struct PackageWriter: Sendable {
 
       let filePath =
         directoryURL
-        .appending(path: component.name)
+        .polyfill()
+        .appending(component: component.name)
         .appendingPathExtension("swift")
         .standardizedFileURL
 

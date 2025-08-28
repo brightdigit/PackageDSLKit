@@ -36,7 +36,7 @@ public struct Executor: Sendable {
 
   /// Default timeout for SPM commands (in seconds)
   public let defaultTimeout: TimeInterval
-  
+
   /// Closure type for executing Swift commands
   public typealias SwiftCommandExecutor = @Sendable (
     _ arguments: [String],
@@ -53,7 +53,7 @@ public struct Executor: Sendable {
   ///   - defaultTimeout: Default timeout for commands (default: 60 seconds)
   ///   - swiftExecutor: Closure to execute Swift commands (defaults to ProcessRunner.swift)
   public init(
-    packageDirectory: URL, 
+    packageDirectory: URL,
     defaultTimeout: TimeInterval = 60,
     swiftExecutor: @escaping SwiftCommandExecutor
   ) throws {
@@ -68,12 +68,16 @@ public struct Executor: Sendable {
     self.defaultTimeout = defaultTimeout
     self.swiftExecutor = swiftExecutor
   }
-  
-#if canImport(Foundation) && (os(macOS) || os(Linux))
-  public init (
-    packageDirectory: URL) throws {
-      try self.init(packageDirectory: packageDirectory, swiftExecutor: ProcessRunner.swift)
-  }
+
+  #if canImport(Foundation) && (os(macOS) || os(Linux))
+    public init(
+      packageDirectory: URL,
+      defaultTimeout: TimeInterval = 60
+    ) throws {
+      try self.init(
+        packageDirectory: packageDirectory, defaultTimeout: defaultTimeout,
+        swiftExecutor: ProcessRunner.swift)
+    }
   #endif
 
   /// Execute `swift package dump-package` and return parsed package info
@@ -242,29 +246,27 @@ public struct Executor: Sendable {
   }
 }
 
-
-
 // MARK: - Convenience Extensions
 #if canImport(Foundation) && (os(macOS) || os(Linux))
-extension Executor {
-  /// Create Executor for the current working directory
-  /// - Parameter defaultTimeout: Default timeout for commands
-  /// - Returns: Executor instance
-  /// - Throws: ExecutorError if no Package.swift found
-  public static func current(defaultTimeout: TimeInterval = 60) throws -> Executor {
-    let currentDirectory = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-    return try Executor(packageDirectory: currentDirectory, defaultTimeout: defaultTimeout)
-  }
+  extension Executor {
+    /// Create Executor for the current working directory
+    /// - Parameter defaultTimeout: Default timeout for commands
+    /// - Returns: Executor instance
+    /// - Throws: ExecutorError if no Package.swift found
+    public static func current(defaultTimeout: TimeInterval = 60) throws -> Executor {
+      let currentDirectory = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+      return try Executor(packageDirectory: currentDirectory, defaultTimeout: defaultTimeout)
+    }
 
-  /// Create Executor for a specific path
-  /// - Parameters:
-  ///   - path: Path to package directory
-  ///   - defaultTimeout: Default timeout for commands
-  /// - Returns: Executor instance
-  /// - Throws: ExecutorError if path invalid or no Package.swift found
-  public static func at(path: String, defaultTimeout: TimeInterval = 60) throws -> Executor {
-    let url = URL(fileURLWithPath: path)
-    return try Executor(packageDirectory: url, defaultTimeout: defaultTimeout)
+    /// Create Executor for a specific path
+    /// - Parameters:
+    ///   - path: Path to package directory
+    ///   - defaultTimeout: Default timeout for commands
+    /// - Returns: Executor instance
+    /// - Throws: ExecutorError if path invalid or no Package.swift found
+    public static func at(path: String, defaultTimeout: TimeInterval = 60) throws -> Executor {
+      let url = URL(fileURLWithPath: path)
+      return try Executor(packageDirectory: url, defaultTimeout: defaultTimeout)
+    }
   }
-}
 #endif

@@ -33,13 +33,18 @@ public import SwiftPackageManagerKit
 public struct PackageParser: Sendable, Hashable, Codable {
   public init() {
   }
-#if canImport(Foundation) && (os(macOS) || os(Linux))
-  public func parse(at directoryURL: URL, with fileManager: FileManager) async throws(PackageDSLError)
-  -> PackageSpecifications{
-    try await self.parse(at: directoryURL, with: fileManager, swiftExecutor: ProcessRunner.swift)
-  }
+  #if canImport(Foundation) && (os(macOS) || os(Linux))
+    public func parse(at directoryURL: URL, with fileManager: FileManager)
+      async throws(PackageDSLError)
+      -> PackageSpecifications
+    {
+      try await self.parse(at: directoryURL, with: fileManager, swiftExecutor: ProcessRunner.swift)
+    }
   #endif
-  public func parse(at directoryURL: URL, with fileManager: FileManager, swiftExecutor: @escaping Executor.SwiftCommandExecutor)
+  public func parse(
+    at directoryURL: URL, with fileManager: FileManager,
+    swiftExecutor: @escaping Executor.SwiftCommandExecutor
+  )
     async throws(PackageDSLError)
     -> PackageSpecifications
   {

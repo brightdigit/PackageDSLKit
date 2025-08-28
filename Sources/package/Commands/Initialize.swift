@@ -74,9 +74,9 @@ extension Package {
       )
       let writer = PackageWriter()
       try writer.write(spec, to: self.settings.dslSourcesURL)
-      print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
+      print("Written to:", "\(self.settings.pathURL.standardizedFileURL.polyfill().path())")
 
-      let swiftVersionFile = settings.pathURL.appending(component: ".swift-version")
+      let swiftVersionFile = settings.pathURL.polyfill().appending(component: ".swift-version")
       settings.fileManager.createFile(
         at: swiftVersionFile,
         text: self.swiftVersion.description

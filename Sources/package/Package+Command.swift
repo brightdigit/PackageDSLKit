@@ -42,7 +42,13 @@ import PackageDSLKit
 
 @main
 internal struct Package: AsyncParsableCommand, Sendable {
-  internal static let configuration: CommandConfiguration = .init(
-    subcommands: [Initialize.self, Dump.self, Product.self]
-  )
+  #if canImport(Foundation) && (os(macOS) || os(Linux))
+    internal static let configuration: CommandConfiguration = .init(
+      subcommands: [Initialize.self, Dump.self, Product.self]
+    )
+  #else
+    internal static let configuration: CommandConfiguration = .init(
+      subcommands: [Initialize.self]
+    )
+  #endif
 }

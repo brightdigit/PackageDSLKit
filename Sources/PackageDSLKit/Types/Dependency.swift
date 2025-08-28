@@ -48,5 +48,3 @@ public struct Dependency: TypeSource, Sendable {
     self.package = package
   }
 }
-
-
