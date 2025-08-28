@@ -38,7 +38,7 @@ extension ComponentBuildable {
   }
 
   internal static func directoryURL(relativeTo packageDSLURL: URL) -> URL {
-    packageDSLURL.appending(path: self.directoryName, directoryHint: .isDirectory)
+    packageDSLURL.polyfill().appending(component: self.directoryName, isDirectory: true)
   }
 }
 
