@@ -44,10 +44,6 @@ extension Package {
     @Option
     internal var packageType: PackageType = .empty
 
-    internal var packageName: String {
-      self.name ?? self.settings.pathURL.lastPathComponent
-    }
-
     internal var shouldCreateDirectory: Bool {
       self.settings.path != nil
     }
@@ -55,10 +51,6 @@ extension Package {
     internal static let configuration: CommandConfiguration = .init(
       commandName: "init"
     )
-
-    private var productName: String {
-      name ?? settings.rootName
-    }
 
     internal func run() throws {
       if shouldCreateDirectory {
@@ -90,7 +82,7 @@ extension Package {
 
       try settings.fileManager.createFileStructure(
         forPackageType: packageType,
-        forProductName: productName,
+        forProductName: name ?? settings.rootName,
         at: settings.pathURL
       )
     }

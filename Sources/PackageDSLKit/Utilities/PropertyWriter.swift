@@ -29,9 +29,6 @@
 
 public import SyntaxKit
 
-// Use SyntaxKit's Literal for string code blocks
-private typealias StringCodeBlock = Literal
-
 public enum PropertyWriter: Sendable {
   /// Creates a property variable using SyntaxKit
   public static func syntaxKitNode(from property: Property) -> ComputedProperty {

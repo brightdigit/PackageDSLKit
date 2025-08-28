@@ -28,7 +28,6 @@
 //
 
 public import Foundation
-import SwiftPackageManagerKit
 
 /// The main SDK entry point for package manipulation using PackageDSL
 @MainActor

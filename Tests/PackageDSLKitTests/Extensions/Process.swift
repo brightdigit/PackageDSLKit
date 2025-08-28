@@ -13,7 +13,6 @@ extension ProcessInfo {
   // MARK: - Environment Variable Keys
 
   private static let gitHubActionsKey = "GITHUB_ACTIONS"
-  private static let ciKey = "CI"
   private static let xcodeVersionKey = "XCODE_VERSION"
   private static let xcodeProductBuildVersionKey = "XCODE_PRODUCT_BUILD_VERSION"
   private static let srcRootKey = "SRCROOT"
@@ -38,11 +37,6 @@ extension ProcessInfo {
   /// Check if running in GitHub Actions CI
   internal var isGitHubCI: Bool {
     self.environment[Self.gitHubActionsKey] != nil
-  }
-
-  /// Check if running in any CI environment
-  internal var isCI: Bool {
-    self.environment[Self.ciKey] != nil
   }
 
   /// Check if running via Xcode (vs SPM)

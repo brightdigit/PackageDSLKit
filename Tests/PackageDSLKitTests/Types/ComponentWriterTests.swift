@@ -10,20 +10,8 @@ import Testing
 @testable import PackageDSLKit
 
 internal struct ComponentWriterTests {
-  private final class Indicies: @unchecked Sendable {
-    private var set: Set<Int> = .init()
-
-    fileprivate func contains(_ index: Int) -> Bool {
-      set.contains(index)
-    }
-
-    fileprivate func insert(_ index: Int) {
-      set.insert(index)
-    }
-  }
-
   @Test(arguments: 1...100)
-  internal func testSyntaxKitNodeGeneration(index: Int) async {
+  internal func testSyntaxKitNodeGeneration(_: Int) async {
     let propertyValues: [Property] = (1...5).map { _ in
       .init(
         name: .randomIdentifier(),

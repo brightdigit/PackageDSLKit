@@ -71,8 +71,5 @@ import PackageDSLKit
           self.settings.pathURL, productName: name, type)
       }
     }
-
-    internal struct Remove: ParsableCommand, Sendable {
-    }
   }
 #endif

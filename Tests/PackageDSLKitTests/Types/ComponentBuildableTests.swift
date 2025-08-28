@@ -12,7 +12,7 @@ import Testing
 
 internal struct ComponentBuildableTests {
   @Test(arguments: zip(1...100, [true, false])) internal func initialize(
-    index: Int, containsRequirements: Bool
+    _: Int, containsRequirements: Bool
   ) throws {
     // Write your test here and use APIs like `#expect(...)` to check expected conditions.
     let name = UUID().uuidString
@@ -33,7 +33,7 @@ internal struct ComponentBuildableTests {
   }
 
   @Test(arguments: 1...100)
-  internal func directoryURL(index: Int) async throws {
+  internal func directoryURL(_: Int) async throws {
     // Write your test here and use APIs like `#expect(...)` to check expected conditions.
     let packageDSLName = UUID().uuidString
     let packageDSLURL: URL
@@ -57,7 +57,7 @@ internal struct ComponentBuildableTests {
   }
 
   @Test(arguments: zip(1...100, [true, false]))
-  internal func isType(index: Int, containsRequirements: Bool) async throws {
+  internal func isType(_: Int, containsRequirements: Bool) async throws {
     let name = UUID().uuidString
     let component = MockComponentBuildable.component(
       name: name, containsRequirements: containsRequirements)

@@ -36,7 +36,6 @@ extension Property {
     self.init(name: name, type: type, code: code)
   }
 }
-
 extension Property {
   internal struct MissingFieldsError: OptionSet, Error, Sendable {
     internal var rawValue: Int
@@ -64,3 +63,4 @@ extension Property {
     }
   }
 }
+

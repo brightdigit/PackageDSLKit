@@ -38,11 +38,11 @@ public struct PackageParser: Sendable, Hashable, Codable {
       async throws(PackageDSLError)
       -> PackageSpecifications
     {
-      try await self.parse(at: directoryURL, with: fileManager, swiftExecutor: ProcessRunner.swift)
+      try await self.parse(at: directoryURL, swiftExecutor: ProcessRunner.swift)
     }
   #endif
   public func parse(
-    at directoryURL: URL, with fileManager: FileManager,
+    at directoryURL: URL,
     swiftExecutor: @escaping Executor.SwiftCommandExecutor
   )
     async throws(PackageDSLError)
