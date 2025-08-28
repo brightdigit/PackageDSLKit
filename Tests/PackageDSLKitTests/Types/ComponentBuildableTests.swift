@@ -36,8 +36,15 @@ internal struct ComponentBuildableTests {
   internal func directoryURL(index: Int) async throws {
     // Write your test here and use APIs like `#expect(...)` to check expected conditions.
     let packageDSLName = UUID().uuidString
-    let packageDSLURL = URL.temporaryDirectory.appending(
-      path: packageDSLName, directoryHint: .isDirectory)
+    let packageDSLURL: URL
+    if #available(iOS 16.0, watchOS 9.0, tvOS 16.0, macOS 13.0, *) {
+      packageDSLURL = URL.temporaryDirectory.appending(
+        path: packageDSLName, directoryHint: .isDirectory)
+    } else {
+      packageDSLURL =
+        FileManager.default.temporaryDirectory.appendingPathComponent(
+          packageDSLName, isDirectory: true)
+    }
     let componentDirectoryURL = MockComponentBuildable.directoryURL(relativeTo: packageDSLURL)
 
     let expectedDirectoryName = componentDirectoryURL.lastPathComponent
