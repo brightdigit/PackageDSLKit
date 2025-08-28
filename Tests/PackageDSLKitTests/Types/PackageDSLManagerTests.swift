@@ -150,8 +150,8 @@ struct PackageDSLManagerTests {
       if: ProcessInfo.processInfo.shouldDisableSPMValidation(),
       "SPM commands unreliable in GitHub CI via Xcode"
     ),
-    .enabled(
-      if: Platform.allowsProcess,
+    .disabled(
+      if: !Platform.allowsProcess,
       "Unable to run SPM commands in non-macOS platforms"
     )
   )
