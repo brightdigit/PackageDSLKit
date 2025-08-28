@@ -1,6 +1,6 @@
 //
 //  Settings.swift
-//  SyntaxKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
