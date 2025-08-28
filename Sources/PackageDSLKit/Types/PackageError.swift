@@ -38,7 +38,7 @@ public enum PackageError: Error, LocalizedError, Sendable {
   case productNotFound(String)
   case dependencyNotFound(String)
   case invalidConfiguration(String)
-  // case validationFailed([ValidationIssue])
+
   case packageGenerationFailed(String)
   case cascadeRemovalRequired(String, [String])
 
@@ -58,9 +58,7 @@ public enum PackageError: Error, LocalizedError, Sendable {
       return "Dependency '\(name)' not found"
     case .invalidConfiguration(let message):
       return "Invalid configuration: \(message)"
-    //    case .validationFailed(let issues):
-    //      let errorCount = issues.filter { $0.severity == .error }.count
-    //      return "Package validation failed with \(errorCount) error\(errorCount == 1 ? "" : "s")"
+
     case .packageGenerationFailed(let message):
       return "Failed to generate Package.swift: \(message)"
     case .cascadeRemovalRequired(let item, let dependents):

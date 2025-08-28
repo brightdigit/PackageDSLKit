@@ -33,36 +33,36 @@ public import Foundation
 @MainActor
 public final class PackageDSLManager {
   // MARK: - Properties
-
+  
   /// The URL of the package directory
   public let packageURL: URL
-
+  
   /// The name of the package
   public private(set) var packageName: String
-
+  
   /// Products in the package
   public private(set) var products: [Product]
-
+  
   /// Targets in the package
   public private(set) var targets: [Target]
-
+  
   /// Test targets in the package
   public private(set) var testTargets: [TestTarget]
-
+  
   /// Package dependencies
   public private(set) var dependencies: [Dependency]
-
+  
   /// Supported platform sets
   public private(set) var supportedPlatformSets: [SupportedPlatformSet]
-
+  
   /// Swift settings
   public private(set) var swiftSettings: [SwiftSettingRef]
-
+  
   /// Package modifiers
   public private(set) var modifiers: [Modifier]
-
+  
   // MARK: - Initialization
-
+  
   /// Initialize PackageDSLManager with a package URL
   /// - Parameter packageURL: The URL to the package directory
   public init(packageURL: URL) {
@@ -76,7 +76,7 @@ public final class PackageDSLManager {
     self.swiftSettings = []
     self.modifiers = []
   }
-
+  
   /// Initialize PackageDSLManager with a package URL and name
   /// - Parameters:
   ///   - packageURL: The URL to the package directory
@@ -92,9 +92,9 @@ public final class PackageDSLManager {
     self.swiftSettings = []
     self.modifiers = []
   }
-
+  
   // MARK: - Package Configuration
-
+  
   /// Set the package name
   /// - Parameter name: The new package name
   /// - Returns: Self for method chaining
@@ -103,9 +103,9 @@ public final class PackageDSLManager {
     self.packageName = name
     return self
   }
-
+  
   // MARK: - Internal Specifications
-
+  
   /// Get the current package specifications
   internal var specifications: PackageSpecifications {
     PackageSpecifications(
@@ -118,63 +118,18 @@ public final class PackageDSLManager {
       modifiers: modifiers
     )
   }
-}
-
-// MARK: - Validation
-
-extension PackageDSLManager {
-  //  /// Validate the current package configuration against SPM
-  //  /// - Returns: ValidationResult containing any issues found
-  //  /// - Throws: PackageError on validation setup failures
-  //  public func validate() async throws -> ValidationResult {
-  //    // Create a temporary Package.swift file for validation
-  //    let tempDirectory = FileManager.default.temporaryDirectory
-  //      .appendingPathComponent("PackageDSLKit-validation-\(UUID().uuidString)")
-  //
-  //    do {
-  //      // Create temporary directory
-  //      try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
-  //
-  //      // Generate traditional Package.swift for SPM validation
-  //      let packageSwiftContent = generateTraditionalPackageSwift()
-  //      let packageSwiftFile = tempDirectory.appendingPathComponent("Package.swift")
-  //      try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
-  //
-  //      // Execute swift package dump-package
-  //      let executor = try Executor(packageDirectory: tempDirectory)
-  //      let spmPackageInfo = try await executor.dumpPackage()
-  //
-  //      // Validate using SPMValidator
-  //      let validator = Validator()
-  //      let result = validator.validate(spmPackageInfo)
-  //
-  //      // Clean up temporary directory
-  //      try? FileManager.default.removeItem(at: tempDirectory)
-  //
-  //      return result
-  //    } catch let error as ExecutorError {
-  //      // Clean up on error
-  //      try? FileManager.default.removeItem(at: tempDirectory)
-  //      throw PackageError.packageGenerationFailed(
-  //        "SPM execution failed: \(error.localizedDescription)")
-  //    } catch {
-  //      // Clean up on error
-  //      try? FileManager.default.removeItem(at: tempDirectory)
-  //      throw PackageError.packageGenerationFailed("Validation failed: \(error.localizedDescription)")
-  //    }
-  //  }
-
+  
   /// Generate traditional Package.swift content from current configuration
   /// - Returns: String containing Package.swift content
   public func generateTraditionalPackageSwift() -> String {
     var content = """
       // swift-tools-version: 5.9
       import PackageDescription
-
+      
       let package = Package(
           name: "\(packageName)"
       """
-
+    
     // Add products if any
     if !products.isEmpty {
       content += ",\n        products: [\n"
@@ -183,7 +138,7 @@ extension PackageDSLManager {
           separator: ", ")
         let productTypeString = product.productType == .library ? "library" : "executable"
         content +=
-          "            .\(productTypeString)(name: \"\(product.typeName)\", targets: [\(productTargets)])"
+        "            .\(productTypeString)(name: \"\(product.typeName)\", targets: [\(productTargets)])"
         if index < products.count - 1 {
           content += ","
         }
@@ -191,7 +146,7 @@ extension PackageDSLManager {
       }
       content += "        ]"
     }
-
+    
     // Add dependencies if any
     if !dependencies.isEmpty {
       content += ",\n        dependencies: [\n"
@@ -199,9 +154,9 @@ extension PackageDSLManager {
         let dependencyString = dependency.dependency ?? ""
         // Remove quotes if they exist around the dependency string
         let cleanDependency =
-          dependencyString.hasPrefix("\"") && dependencyString.hasSuffix("\"")
-          ? String(dependencyString.dropFirst().dropLast())
-          : dependencyString
+        dependencyString.hasPrefix("\"") && dependencyString.hasSuffix("\"")
+        ? String(dependencyString.dropFirst().dropLast())
+        : dependencyString
         content += "            " + cleanDependency
         if index < dependencies.count - 1 {
           content += ","
@@ -210,28 +165,28 @@ extension PackageDSLManager {
       }
       content += "        ]"
     }
-
+    
     // Add targets
     let allTargets =
-      targets
-      + testTargets.map { testTarget in
-        Target(typeName: testTarget.typeName, dependencies: testTarget.dependencies)
-      }
-
+    targets
+    + testTargets.map { testTarget in
+      Target(typeName: testTarget.typeName, dependencies: testTarget.dependencies)
+    }
+    
     if !allTargets.isEmpty {
       content += ",\n        targets: [\n"
       for (index, target) in allTargets.enumerated() {
         let isTestTarget = testTargets.contains { $0.typeName == target.typeName }
         let targetType = isTestTarget ? "testTarget" : "target"
-
+        
         if target.dependencies.isEmpty {
           content += "            .\(targetType)(name: \"\(target.typeName)\")"
         } else {
           let targetDeps = target.dependencies.map { "\"" + $0.name + "\"" }.joined(separator: ", ")
           content +=
-            "            .\(targetType)(name: \"\(target.typeName)\", dependencies: [\(targetDeps)])"
+          "            .\(targetType)(name: \"\(target.typeName)\", dependencies: [\(targetDeps)])"
         }
-
+        
         if index < allTargets.count - 1 {
           content += ","
         }
@@ -239,22 +194,11 @@ extension PackageDSLManager {
       }
       content += "        ]"
     }
-
+    
     content += "\n    )\n"
     return content
   }
-
-  //  /// Validate the package and throw if there are any error-level issues
-  //  /// - Throws: PackageError.validationFailed if validation errors are found
-  //  public func validateOrThrow() async throws {
-  //    let result = try await validate()
-  //    let errors = result.issues.filter { $0.severity == .error }
-  //    if !errors.isEmpty {
-  //      throw PackageError.validationFailed(errors)
-  //    }
-  //  }
 }
-
 // MARK: - Package Type Creation
 
 extension PackageDSLManager {
