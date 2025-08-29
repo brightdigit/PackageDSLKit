@@ -56,7 +56,7 @@ struct PackageDSLManagerSPMTests {
     try createSimpleSourceFile(at: sourceFile)
 
     // Configure a simple package without external dependencies for faster testing
-    try await packageManager.createPackage(type: .library)
+    await packageManager.createPackage(type: .library)
 
     // Create a Package.swift file that SPM can understand for testing SPM commands
     try createPackageSwiftFile(at: tempDirectory)
@@ -94,6 +94,7 @@ struct PackageDSLManagerSPMTests {
     try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
   }
 
+#if canImport(Foundation) && (os(macOS) || os(Linux))
   private func validateWithSPMCommands(_ tempDirectory: URL) async throws -> Executor {
     // Test SPM commands through our SPMExecutor
     let spmExecutor = try Executor(packageDirectory: tempDirectory, defaultTimeout: 60)
@@ -135,4 +136,5 @@ struct PackageDSLManagerSPMTests {
     #expect(await packageManager.hasTraditionalPackageSwift())
     #expect(await packageManager.hasDSLComponents())
   }
+  #endif
 }
