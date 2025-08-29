@@ -30,10 +30,6 @@
 package import Foundation
 
 extension URL {
-  package func polyfill() -> Polyfill {
-    Polyfill(url: self)
-  }
-
   package struct Polyfill: Sendable {
     private let url: URL
 
@@ -67,5 +63,8 @@ extension URL {
         url.path
       }
     }
+  }
+  package func polyfill() -> Polyfill {
+    Polyfill(url: self)
   }
 }

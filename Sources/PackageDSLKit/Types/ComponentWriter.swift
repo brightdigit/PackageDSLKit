@@ -31,7 +31,7 @@ import SyntaxKit
 
 internal struct ComponentWriter: Sendable, StructureWriter {
   /// Creates a struct using SyntaxKit
-  func syntaxKitNode(from component: Component) -> Struct {
+  internal func syntaxKitNode(from component: Component) -> Struct {
     // Convert properties to SyntaxKit CodeBlocks
     let properties: [CodeBlock] = component.properties.values.map { property in
       PropertyWriter.syntaxKitNode(from: property)

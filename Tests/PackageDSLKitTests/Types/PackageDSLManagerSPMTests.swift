@@ -5,7 +5,7 @@ import Testing
 @testable import SwiftPackageManagerKit
 
 @Suite
-struct PackageDSLManagerSPMTests {
+internal struct PackageDSLManagerSPMTests {
   @Test(
     .disabled(
       if: ProcessInfo.processInfo.shouldDisableSPMValidation(),
@@ -16,8 +16,9 @@ struct PackageDSLManagerSPMTests {
       "Unable to run SPM commands in non-macOS platforms"
     )
   )
-  func validateGeneratedPackageWithSPMValidation() async throws {
-    print("Is running Xcode Test in Github CI? \(ProcessInfo.processInfo.shouldDisableSPMValidation())")
+  internal func validateGeneratedPackageWithSPMValidation() async throws {
+    print(
+      "Is running Xcode Test in Github CI? \(ProcessInfo.processInfo.shouldDisableSPMValidation())")
     print("Does allow Process API? \(Platform.allowsProcess)")
     #if canImport(Foundation) && (os(macOS) || os(Linux))
       let tempDirectory = FileManager.default.temporaryDirectory
@@ -95,47 +96,47 @@ struct PackageDSLManagerSPMTests {
     try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
   }
 
-#if canImport(Foundation) && (os(macOS) || os(Linux))
-  private func validateWithSPMCommands(_ tempDirectory: URL) async throws -> Executor {
-    // Test SPM commands through our SPMExecutor
-    let spmExecutor = try Executor(packageDirectory: tempDirectory, defaultTimeout: 60)
+  #if canImport(Foundation) && (os(macOS) || os(Linux))
+    private func validateWithSPMCommands(_ tempDirectory: URL) async throws -> Executor {
+      // Test SPM commands through our SPMExecutor
+      let spmExecutor = try Executor(packageDirectory: tempDirectory, defaultTimeout: 60)
 
-    // Test package dump-package
-    let packageInfo = try await spmExecutor.dumpPackage()
-    #expect(packageInfo.name == "SPMValidationTest")
-    #expect(packageInfo.products.count == 1)
-    #expect(packageInfo.products.first?.name == "SPMValidationTest")
-    #expect(packageInfo.targets.count == 1)
-    #expect(packageInfo.targets.first?.name == "SPMValidationTest")
+      // Test package dump-package
+      let packageInfo = try await spmExecutor.dumpPackage()
+      #expect(packageInfo.name == "SPMValidationTest")
+      #expect(packageInfo.products.count == 1)
+      #expect(packageInfo.products.first?.name == "SPMValidationTest")
+      #expect(packageInfo.targets.count == 1)
+      #expect(packageInfo.targets.first?.name == "SPMValidationTest")
 
-    // Test package resolve (should be quick since no external dependencies)
-    try await spmExecutor.resolvePackage()
+      // Test package resolve (should be quick since no external dependencies)
+      try await spmExecutor.resolvePackage()
 
-    // Test build (this ensures the package structure is correct)
-    try await spmExecutor.buildPackage()
+      // Test build (this ensures the package structure is correct)
+      try await spmExecutor.buildPackage()
 
-    // Verify build artifacts were created
-    let buildDirectory = tempDirectory.appendingPathComponent(".build")
-    #expect(FileManager.default.fileExists(atPath: buildDirectory.path))
+      // Verify build artifacts were created
+      let buildDirectory = tempDirectory.appendingPathComponent(".build")
+      #expect(FileManager.default.fileExists(atPath: buildDirectory.path))
 
-    return spmExecutor
-  }
-
-  private func validateCoexistenceOfFormats(_ packageManager: PackageDSLManager) async {
-    // Test that our PackageDSLManager can detect the traditional Package.swift
-    #expect(await packageManager.hasTraditionalPackageSwift())
-
-    // Generate DSL files alongside the Package.swift
-    do {
-      try await packageManager.generatePackageSwift()
-    } catch {
-      Issue.record("Failed to generate DSL files: \(error)")
-      return
+      return spmExecutor
     }
 
-    // Verify both formats coexist
-    #expect(await packageManager.hasTraditionalPackageSwift())
-    #expect(await packageManager.hasDSLComponents())
-  }
+    private func validateCoexistenceOfFormats(_ packageManager: PackageDSLManager) async {
+      // Test that our PackageDSLManager can detect the traditional Package.swift
+      #expect(await packageManager.hasTraditionalPackageSwift())
+
+      // Generate DSL files alongside the Package.swift
+      do {
+        try await packageManager.generatePackageSwift()
+      } catch {
+        Issue.record("Failed to generate DSL files: \(error)")
+        return
+      }
+
+      // Verify both formats coexist
+      #expect(await packageManager.hasTraditionalPackageSwift())
+      #expect(await packageManager.hasDSLComponents())
+    }
   #endif
 }

@@ -33,6 +33,9 @@ import PackageDSLKit
 
 extension Package {
   internal struct Initialize: ParsableCommand, Sendable {
+    internal static let configuration: CommandConfiguration = .init(
+      commandName: "init"
+    )
     @OptionGroup internal var settings: Settings
 
     @Option
@@ -47,10 +50,6 @@ extension Package {
     internal var shouldCreateDirectory: Bool {
       self.settings.path != nil
     }
-
-    internal static let configuration: CommandConfiguration = .init(
-      commandName: "init"
-    )
 
     internal func run() throws {
       if shouldCreateDirectory {

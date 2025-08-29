@@ -4,9 +4,9 @@ import Testing
 @testable import PackageDSLKit
 
 @Suite
-struct PackageDSLManagerBasicTests {
+internal struct PackageDSLManagerBasicTests {
   @Test
-  func generatePackageSwiftCreatesFiles() async throws {
+  internal func generatePackageSwiftCreatesFiles() async throws {
     let tempDirectory = FileManager.default.temporaryDirectory
       .appendingPathComponent("PackageDSLManagerTests-\(UUID().uuidString)")
     let packageManager = await PackageDSLManager(
@@ -39,7 +39,7 @@ struct PackageDSLManagerBasicTests {
   }
 
   @Test
-  func hasDSLComponentsReturnsFalseWhenNoFiles() async {
+  internal func hasDSLComponentsReturnsFalseWhenNoFiles() async {
     let tempDirectory = FileManager.default.temporaryDirectory
       .appendingPathComponent("PackageDSLManagerTests-\(UUID().uuidString)")
     let packageManager = await PackageDSLManager(
@@ -58,7 +58,7 @@ struct PackageDSLManagerBasicTests {
   }
 
   @Test
-  func hasTraditionalPackageSwiftDetectsFile() async throws {
+  internal func hasTraditionalPackageSwiftDetectsFile() async throws {
     let tempDirectory = FileManager.default.temporaryDirectory
       .appendingPathComponent("PackageDSLManagerTests-\(UUID().uuidString)")
     let packageManager = await PackageDSLManager(

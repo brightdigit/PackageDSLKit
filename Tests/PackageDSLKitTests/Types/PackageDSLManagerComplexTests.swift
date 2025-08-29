@@ -4,9 +4,9 @@ import Testing
 @testable import PackageDSLKit
 
 @Suite
-struct PackageDSLManagerComplexTests {
+internal struct PackageDSLManagerComplexTests {
   @Test
-  func generateAndValidateComplexPackage() async throws {
+  internal func generateAndValidateComplexPackage() async throws {
     let tempDirectory = FileManager.default.temporaryDirectory
       .appendingPathComponent("PackageDSLManagerTests-ComplexPackage-\(UUID().uuidString)")
     let packageManager = await PackageDSLManager(

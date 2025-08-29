@@ -31,18 +31,18 @@ public import Foundation
 
 /// Executor for Swift Package Manager commands
 public struct Executor: Sendable {
-  /// The package directory
-  public let packageDirectory: URL
-
-  /// Default timeout for SPM commands (in seconds)
-  public let defaultTimeout: TimeInterval
-
   /// Closure type for executing Swift commands
   public typealias SwiftCommandExecutor = @Sendable (
     _ arguments: [String],
     _ workingDirectory: URL?,
     _ timeout: TimeInterval
   ) async throws -> ProcessResult
+
+  /// The package directory
+  public let packageDirectory: URL
+
+  /// Default timeout for SPM commands (in seconds)
+  public let defaultTimeout: TimeInterval
 
   /// The Swift command executor
   private let swiftExecutor: SwiftCommandExecutor
