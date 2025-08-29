@@ -35,17 +35,29 @@ public struct ToolsVersion: Codable, Hashable, Sendable {
     case version = "_version"
   }
 
+  /// The version string of the Swift tools.
   public let version: String
 
+  /// Creates a new ToolsVersion instance with the specified version.
+  ///
+  /// - Parameter version: The version string of the Swift tools.
   public init(version: String) {
     self.version = version
   }
 
+  /// Creates a new ToolsVersion instance from a decoder.
+  ///
+  /// - Parameter decoder: The decoder to read from.
+  /// - Throws: An error if the decoding fails.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     self.version = try container.decode(String.self, forKey: .version)
   }
 
+  /// Encodes this ToolsVersion instance to an encoder.
+  ///
+  /// - Parameter encoder: The encoder to write to.
+  /// - Throws: An error if the encoding fails.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(version, forKey: .version)

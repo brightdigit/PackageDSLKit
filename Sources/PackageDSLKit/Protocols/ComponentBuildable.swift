@@ -29,10 +29,31 @@
 
 import Foundation
 
+/// A protocol for components that can be built with specific requirements.
+///
+/// This protocol defines the contract for components that can be constructed
+/// from a base component and additional requirements, typically used for
+/// creating specialized component instances.
 internal protocol ComponentBuildable: Sendable {
+  /// The type of requirements needed to build this component.
+  /// Defaults to `Void` if no requirements are needed.
   associatedtype Requirements = Void
+
+  /// The directory name associated with this component type.
   static var directoryName: String { get }
+
+  /// Creates a new instance of this component with the given component and requirements.
+  ///
+  /// - Parameters:
+  ///   - component: The base component to build from.
+  ///   - requirements: The specific requirements for building this component.
   init(component: Component, requirements: Requirements)
+
+  /// Extracts requirements from a component if possible.
+  ///
+  /// - Parameter component: The component to extract requirements from.
+  /// - Returns: The extracted requirements, or `nil` if extraction is not possible.
   static func requirements(from component: Component) -> Requirements?
+
   // func createComponent() -> Component
 }

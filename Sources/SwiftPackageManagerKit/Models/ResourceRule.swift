@@ -39,6 +39,8 @@ public enum ResourceRule: Codable, Hashable, Sendable {
     case process
   }
 
+  /// Decodes the resource rules for targets from the Decoder.
+  /// - Parameter decoder:Decoder.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -55,6 +57,13 @@ public enum ResourceRule: Codable, Hashable, Sendable {
     }
   }
 
+  /// Encodes this ResourceRule instance to an encoder.
+  ///
+  /// This method handles the encoding logic for different resource rule types,
+  /// which are encoded as presence indicators with empty dictionaries as values.
+  ///
+  /// - Parameter encoder: The encoder to write to.
+  /// - Throws: An error if the encoding fails.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
 

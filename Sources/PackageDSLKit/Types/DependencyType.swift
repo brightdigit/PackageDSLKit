@@ -88,8 +88,6 @@ public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
   /// Creates a dependency type from an array of string representations
   ///
   /// - Parameter strings: Array of strings representing dependency types
-  ///
-  /// - Returns: A dependency type if the strings are valid, nil otherwise
   public init?(strings: [String]) {
     do {
       try self.init(stringsThrows: strings)

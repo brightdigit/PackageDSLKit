@@ -27,8 +27,23 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// A protocol that describes package properties and provides methods for retrieving and updating them.
+///
+/// This protocol defines the contract for package property descriptors that can extract specific
+/// property types from package specifications and update them with transformations.
 public protocol PackagePropertyDescriptor: Sendable {
+  /// Retrieves all instances of this property type from the given package specifications.
+  ///
+  /// - Parameter specifications: The package specifications to extract properties from.
+  /// - Returns: An array of property instances found in the specifications.
   static func get(from specifications: PackageSpecifications) -> [Self]
+
+  /// Updates the original package specifications by transforming the properties of this type.
+  ///
+  /// - Parameters:
+  ///   - original: The original package specifications to update.
+  ///   - transform: A closure that transforms the array of properties.
+  /// - Returns: Updated package specifications with the transformed properties.
   static func update(original: PackageSpecifications, transform: ([Self]) -> [Self])
     -> PackageSpecifications
 }

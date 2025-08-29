@@ -33,12 +33,20 @@ public import Foundation
 /// **Note:** This utility is only available on macOS and Linux platforms.
 /// It is not available on iOS, watchOS, tvOS, or visionOS due to platform limitations.
 
+/// Errors that can occur during process execution.
+///
+/// This enum defines various error conditions that may arise when running
+/// external processes, including timeouts, execution failures, and non-zero exit codes.
 public enum ProcessRunnerError: Error, LocalizedError, Sendable {
   case timeout
   case executionFailed(String)
   case nonZeroExit(Int32, String)
   case unknownError(any Error)
 
+  /// A localized description of the error.
+  ///
+  /// This property provides a human-readable description of the process runner error,
+  /// including specific details about what went wrong during process execution.
   public var errorDescription: String? {
     switch self {
     case .timeout:

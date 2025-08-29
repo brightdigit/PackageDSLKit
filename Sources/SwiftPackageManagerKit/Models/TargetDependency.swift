@@ -30,8 +30,15 @@
 import Foundation
 
 /// Represents a target dependency (can be by name or product)
+///
+/// This enum defines the different ways a target can depend on other targets,
+/// either by directly referencing a target name or by specifying a product
+/// from a package. Each dependency can optionally include platform-specific
+/// conditions.
 public enum TargetDependency: Codable, Hashable, Sendable {
+  /// A dependency on a target by its name, with optional platform conditions.
   case byName(String, condition: TargetDependencyCondition?)
+  /// A dependency on a specific product from a package, with optional platform conditions.
   case product(String, String, condition: TargetDependencyCondition?)
 
   private enum CodingKeys: String, CodingKey {
@@ -39,6 +46,10 @@ public enum TargetDependency: Codable, Hashable, Sendable {
     case product
   }
 
+  /// Creates a new TargetDependency instance from a decoder.
+  ///
+  /// - Parameter decoder: The decoder to read from.
+  /// - Throws: A `DecodingError` if the target dependency type cannot be determined.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -73,13 +84,17 @@ public enum TargetDependency: Codable, Hashable, Sendable {
     }
   }
 
+  /// Encodes the TargetDependency instance to an encoder.
+  ///
+  /// - Parameter encoder: The encoder to write to.
+  /// - Throws: An error if the encoding fails.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
 
     switch self {
     case .byName(let name, _):
       try container.encode([name, nil], forKey: .byName)
-    case let .product(productName, packageName, _):
+    case .product(let productName, let packageName, _):
       try container.encode([productName, packageName, nil, nil], forKey: .product)
     }
   }

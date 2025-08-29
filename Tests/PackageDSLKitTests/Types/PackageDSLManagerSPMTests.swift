@@ -79,6 +79,7 @@ internal struct PackageDSLManagerSPMTests {
   }
 
   private func createPackageSwiftFile(at tempDirectory: URL) throws {
+    // swiftlint:disable indentation_width
     let packageSwiftContent = """
       // swift-tools-version: 5.9
       import PackageDescription
@@ -93,7 +94,7 @@ internal struct PackageDSLManagerSPMTests {
           ]
       )
       """
-
+    // swiftlint:enable indentation_width
     let packageSwiftFile = tempDirectory.appendingPathComponent("Package.swift")
     try packageSwiftContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
   }

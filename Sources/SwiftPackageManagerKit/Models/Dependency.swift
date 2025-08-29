@@ -39,6 +39,10 @@ public enum Dependency: Codable, Hashable, Sendable {
     case fileSystem
   }
 
+  /// The unique identity of this dependency.
+  ///
+  /// This computed property returns the identity of the underlying dependency,
+  /// whether it's a source control dependency or a file system dependency.
   public var identity: String {
     switch self {
     case .sourceControl(let dependency):
@@ -48,6 +52,10 @@ public enum Dependency: Codable, Hashable, Sendable {
     }
   }
 
+  /// Creates a new Dependency instance from a decoder.
+  ///
+  /// - Parameter decoder: The decoder to read from.
+  /// - Throws: A `DecodingError` if the dependency type cannot be determined.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -83,6 +91,13 @@ public enum Dependency: Codable, Hashable, Sendable {
     }
   }
 
+  /// Encodes this Dependency instance to an encoder.
+  ///
+  /// This method handles the encoding logic for different dependency types,
+  /// including source control and file system dependencies which are encoded as arrays.
+  ///
+  /// - Parameter encoder: The encoder to write to.
+  /// - Throws: An error if the encoding fails.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
 

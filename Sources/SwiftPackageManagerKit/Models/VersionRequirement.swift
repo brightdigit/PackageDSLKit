@@ -53,6 +53,8 @@ public enum VersionRequirement: Codable, Hashable, Sendable {
     let upperBound: String
   }
 
+  /// Decodes the version requirements for dependencies.
+  /// - Parameter decoder: The decoder.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -82,6 +84,14 @@ public enum VersionRequirement: Codable, Hashable, Sendable {
     }
   }
 
+  /// Encodes this VersionRequirement instance to an encoder.
+  ///
+  /// This method handles the encoding logic for different version requirement types,
+  /// including ranges which are encoded as nested containers and other types which are
+  /// encoded as strings.
+  ///
+  /// - Parameter encoder: The encoder to write to.
+  /// - Throws: An error if the encoding fails.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
 

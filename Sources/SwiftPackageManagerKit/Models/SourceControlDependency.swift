@@ -30,13 +30,30 @@
 import Foundation
 
 /// Represents a source control dependency
+///
+/// This struct defines a dependency that is managed through source control systems
+/// like Git, including information about the dependency's identity, location,
+/// product filtering, version requirements, and associated traits.
 public struct SourceControlDependency: Codable, Hashable, Sendable {
+  /// The unique identity of this source control dependency.
   public let identity: String
+  /// The location where this dependency can be found (e.g., remote URL, local path).
   public let location: DependencyLocation
+  /// Optional filter to limit which products from this dependency are used.
   public let productFilter: String?
+  /// The version requirement that must be satisfied by this dependency.
   public let requirement: VersionRequirement
+  /// Additional traits or characteristics associated with this dependency.
   public let traits: [DependencyTrait]
 
+  /// Creates a new SourceControlDependency instance with the specified configuration.
+  ///
+  /// - Parameters:
+  ///   - identity: The unique identity of this dependency.
+  ///   - location: The location where this dependency can be found.
+  ///   - productFilter: Optional filter to limit which products are used (default: nil).
+  ///   - requirement: The version requirement that must be satisfied.
+  ///   - traits: Additional traits associated with this dependency (default: empty array).
   public init(
     identity: String,
     location: DependencyLocation,

@@ -69,7 +69,7 @@ internal struct DependencyTypeTests {
       #expect(error.invalidCount == expected)
     case (.none, .success(.none)):
       break
-    case let (.rawValue(expectedRawValue), .success(.some(actual))):
+    case (.rawValue(let expectedRawValue), .success(.some(let actual))):
       #expect(actual.rawValue == expectedRawValue)
     default:
       Issue.record("Result mismatch: \(value.expectedRawValue) != \(actualResult)")

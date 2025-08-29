@@ -70,7 +70,6 @@ extension TestTarget {
   /// but only for test targets. Regular and executable targets are excluded.
   ///
   /// - Parameter spmTarget: The SwiftPackageManagerKit target to convert.
-  /// - Returns: A new TestTarget instance, or nil if the target type is not a test target.
   public init?(spmTarget: SwiftPackageManagerKit.Target) {
     // Only convert test targets
     guard spmTarget.type == .test else {

@@ -31,20 +31,61 @@ import Foundation
 
 /// Represents the complete package information from swift package dump-package
 public struct PackageInfo: Codable, Hashable, Sendable {
+  /// The name of the package.
   public let name: String
+
+  /// The kind of package (local, remote, etc.).
   public let packageKind: PackageKind
+
+  /// The platforms this package supports.
   public let platforms: [Platform]
+
+  /// The products defined in this package.
   public let products: [Product]
+
+  /// The dependencies of this package.
   public let dependencies: [Dependency]
+
+  /// The targets defined in this package.
   public let targets: [Target]
+
+  /// The Swift tools version required by this package.
   public let toolsVersion: ToolsVersion
+
+  /// Additional traits or characteristics of this package.
   public let traits: [String]
+
+  /// The C language standard used by this package.
   public let cLanguageStandard: String?
+
+  /// The C++ language standard used by this package.
   public let cxxLanguageStandard: String?
+
+  /// The Swift language versions supported by this package.
   public let swiftLanguageVersions: [String]?
+
+  /// The pkg-config configuration for this package.
   public let pkgConfig: String?
+
+  /// The system package providers for this package.
   public let providers: [String]?
 
+  /// Creates a new PackageInfo instance with the specified configuration.
+  ///
+  /// - Parameters:
+  ///   - name: The name of the package.
+  ///   - packageKind: The kind of package (local, remote, etc.).
+  ///   - platforms: The platforms this package supports. Defaults to an empty array.
+  ///   - products: The products defined in this package. Defaults to an empty array.
+  ///   - dependencies: The dependencies of this package. Defaults to an empty array.
+  ///   - targets: The targets defined in this package. Defaults to an empty array.
+  ///   - toolsVersion: The Swift tools version required by this package.
+  ///   - traits: Additional traits or characteristics of this package. Defaults to an empty array.
+  ///   - cLanguageStandard: The C language standard used by this package. Defaults to nil.
+  ///   - cxxLanguageStandard: The C++ language standard used by this package. Defaults to nil.
+  ///   - swiftLanguageVersions: The Swift language versions supported by this package. Defaults to nil.
+  ///   - pkgConfig: The pkg-config configuration for this package. Defaults to nil.
+  ///   - providers: The system package providers for this package. Defaults to nil.
   public init(
     name: String,
     packageKind: PackageKind,

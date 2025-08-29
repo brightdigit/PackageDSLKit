@@ -31,6 +31,10 @@
 /// **Note:** This utility is only available on macOS and Linux platforms.
 /// It is not available on iOS, watchOS, tvOS, or visionOS due to platform limitations.
 
+/// Represents the result of a completed process execution.
+///
+/// This struct contains information about a process that has finished running,
+/// including its exit code, output streams, and process identifier.
 public struct ProcessResult: Sendable {
   /// The process identifier
   public let processIdentifier: Int32
@@ -49,6 +53,13 @@ public struct ProcessResult: Sendable {
     exitCode == 0
   }
 
+  /// Creates a new ProcessResult instance with the specified process information.
+  ///
+  /// - Parameters:
+  ///   - processIdentifier: The process identifier (PID).
+  ///   - exitCode: The termination status/exit code of the process.
+  ///   - standardOutput: The standard output captured from the process.
+  ///   - standardError: The standard error captured from the process.
   public init(
     processIdentifier: Int32,
     exitCode: Int32,

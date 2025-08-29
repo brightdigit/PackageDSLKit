@@ -30,10 +30,18 @@
 import Foundation
 
 /// Represents target types
+///
+/// This enum defines the different types of targets that can be defined
+/// in a Swift package, each serving a specific purpose in the build process.
 public enum TargetType: String, Codable, Hashable, Sendable {
+  /// A regular library target that provides code for other targets to use.
   case regular
+  /// An executable target that produces a runnable binary.
   case executable
+  /// A test target that contains unit tests or integration tests.
   case test
+  /// A plugin target that extends the build system with custom functionality.
   case plugin
+  /// A macro target that provides compile-time code generation capabilities.
   case macro
 }

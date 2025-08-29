@@ -61,7 +61,6 @@ extension SupportedPlatform {
   /// This initializer parses strings in formats like "macOS(.v14)" or "SupportedPlatform.iOS(.v15)".
   ///
   /// - Parameter string: The string to parse.
-  /// - Returns: A new SupportedPlatform instance, or nil if the string cannot be parsed.
   public init?(string: String) {
     // Remove any whitespace and optional "SupportedPlatform." prefix
     let cleanString = string.trimmingCharacters(in: .whitespaces)

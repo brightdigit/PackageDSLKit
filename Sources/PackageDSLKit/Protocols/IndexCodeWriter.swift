@@ -27,6 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// A protocol for writing package index code to a string representation.
+///
+/// This protocol defines the contract for components that can convert package index structures
+/// into string-based code representations, typically for file generation or serialization.
 public protocol IndexCodeWriter: Sendable {
+  /// Writes the given index to a string representation.
+  ///
+  /// - Parameter index: The index to convert to a string.
+  /// - Returns: A string representation of the index.
+  /// - Throws: A `PackageDSLError` if the writing operation fails.
   func writeIndex(_ index: Index) throws(PackageDSLError) -> String
 }

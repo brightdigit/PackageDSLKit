@@ -43,6 +43,8 @@ public enum DependencyLocation: Codable, Hashable, Sendable {
     let urlString: String
   }
 
+  /// Decodes the ependency location from the Decoder.
+  /// - Parameter decoder:Decoder.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -68,6 +70,14 @@ public enum DependencyLocation: Codable, Hashable, Sendable {
     }
   }
 
+  /// Encodes this DependencyLocation instance to an encoder.
+  ///
+  /// This method handles the encoding logic for different dependency location types,
+  /// including remote dependencies which are encoded as arrays and file system dependencies
+  /// which are encoded as strings.
+  ///
+  /// - Parameter encoder: The encoder to write to.
+  /// - Throws: An error if the encoding fails.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
 

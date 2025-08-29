@@ -52,6 +52,7 @@ public struct Executor: Sendable {
   ///   - packageDirectory: URL to the directory containing Package.swift
   ///   - defaultTimeout: Default timeout for commands (default: 60 seconds)
   ///   - swiftExecutor: Closure to execute Swift commands (defaults to ProcessRunner.swift)
+  /// - Throws: ExecutorError if the package directory is invalid or Package.swift is not found
   public init(
     packageDirectory: URL,
     defaultTimeout: TimeInterval = 60,
@@ -70,6 +71,14 @@ public struct Executor: Sendable {
   }
 
   #if canImport(Foundation) && (os(macOS) || os(Linux))
+    /// Initialize with a package directory using the default Swift command executor.
+    ///
+    /// This initializer is only available on macOS and Linux platforms.
+    ///
+    /// - Parameters:
+    ///   - packageDirectory: URL to the directory containing Package.swift
+    ///   - defaultTimeout: Default timeout for commands (default: 60 seconds)
+    /// - Throws: ExecutorError if the package directory is invalid or Package.swift is not found
     public init(
       packageDirectory: URL,
       defaultTimeout: TimeInterval = 60

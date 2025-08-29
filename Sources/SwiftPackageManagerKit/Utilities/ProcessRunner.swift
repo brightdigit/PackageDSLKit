@@ -32,6 +32,12 @@
 /// It is not available on iOS, watchOS, tvOS, or visionOS due to platform limitations.
 #if canImport(Foundation) && (os(macOS) || os(Linux))
   public import Foundation
+
+  /// A utility for running processes asynchronously with timeout and error handling.
+  ///
+  /// This enum provides static methods for executing external processes with proper
+  /// resource management, timeout handling, and result processing. It's designed to
+  /// work with the swift-subprocess library for cross-platform process execution.
   public enum ProcessRunner {
     // MARK: - Private Helper Functions
 

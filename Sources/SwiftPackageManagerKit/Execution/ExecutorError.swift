@@ -37,6 +37,10 @@ public enum ExecutorError: Error, LocalizedError, Sendable {
   case invalidJSON(String)
   case commandFailed(String, String)  // command, error message
 
+  /// A localized description of the error.
+  ///
+  /// This property provides a human-readable description of the executor error,
+  /// including specific details about what went wrong during command execution.
   public var errorDescription: String? {
     switch self {
     case .invalidPackagePath:

@@ -30,9 +30,17 @@
 import Foundation
 
 /// Represents the package kind
+///
+/// This enum defines the different types of packages that can be managed,
+/// including root packages (the main package being built), local packages
+/// (packages in the local file system), and remote packages (packages
+/// fetched from remote sources).
 public enum PackageKind: Codable, Hashable, Sendable {
+  /// A root package with the specified path.
   case root(String)
+  /// A local package with the specified path.
   case local(String)
+  /// A remote package fetched from a remote source.
   case remote
 
   private enum CodingKeys: String, CodingKey {
@@ -41,6 +49,10 @@ public enum PackageKind: Codable, Hashable, Sendable {
     case remote
   }
 
+  /// Creates a new PackageKind instance from a decoder.
+  ///
+  /// - Parameter decoder: The decoder to read from.
+  /// - Throws: A `DecodingError` if the package kind cannot be determined.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -61,6 +73,10 @@ public enum PackageKind: Codable, Hashable, Sendable {
     }
   }
 
+  /// Encodes the PackageKind instance to an encoder.
+  ///
+  /// - Parameter encoder: The encoder to write to.
+  /// - Throws: An error if the encoding fails.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
 

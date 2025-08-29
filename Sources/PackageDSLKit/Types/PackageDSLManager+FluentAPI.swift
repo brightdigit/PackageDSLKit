@@ -35,6 +35,7 @@ extension PackageDSLManager {
   /// Fluent API method to add multiple dependencies at once
   /// - Parameter dependencies: Array of (url, requirement) tuples
   /// - Returns: Self for method chaining
+  /// - Throws: PackageError if any dependency addition fails
   @discardableResult
   public func addDependencies(_ dependencies: [(url: String, requirement: VersionRequirement)])
     throws -> PackageDSLManager
@@ -48,6 +49,7 @@ extension PackageDSLManager {
   /// Fluent API method to add multiple path dependencies at once
   /// - Parameter paths: Array of local paths
   /// - Returns: Self for method chaining
+  /// - Throws: PackageError if any path dependency addition fails
   @discardableResult
   public func addPathDependencies(_ paths: [String]) throws -> PackageDSLManager {
     for path in paths {

@@ -31,9 +31,17 @@ import Foundation
 
 /// Represents a resource in a target
 public struct Resource: Codable, Hashable, Sendable {
+  /// The file path to the resource.
   public let path: String
+
+  /// The rule that determines how this resource should be processed.
   public let rule: ResourceRule
 
+  /// Creates a new Resource instance with the specified path and rule.
+  ///
+  /// - Parameters:
+  ///   - path: The file path to the resource.
+  ///   - rule: The rule that determines how this resource should be processed.
   public init(path: String, rule: ResourceRule) {
     self.path = path
     self.rule = rule

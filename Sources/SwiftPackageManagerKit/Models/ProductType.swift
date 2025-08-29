@@ -35,6 +35,12 @@ public enum ProductType: Codable, Hashable, Sendable {
   case executable
   case plugin
 
+  /// Represents the type of library product.
+  ///
+  /// This enum defines the different linking strategies available for library products:
+  /// - `automatic`: The system decides the best linking strategy
+  /// - `dynamic`: Creates a dynamically linked library
+  /// - `static`: Creates a statically linked library
   public enum LibraryType: String, Codable, Hashable, Sendable {
     case automatic
     case dynamic
@@ -47,6 +53,13 @@ public enum ProductType: Codable, Hashable, Sendable {
     case plugin
   }
 
+  /// Creates a new ProductType instance from a decoder.
+  ///
+  /// This initializer handles the complex decoding logic for different product types,
+  /// particularly for library types which can have multiple values.
+  ///
+  /// - Parameter decoder: The decoder to read from.
+  /// - Throws: A `DecodingError` if the product type cannot be determined.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -66,6 +79,13 @@ public enum ProductType: Codable, Hashable, Sendable {
     }
   }
 
+  /// Encodes the ProductType instance to an encoder.
+  ///
+  /// This method handles the encoding logic for different product types,
+  /// particularly for library types which can have multiple values.
+  ///
+  /// - Parameter encoder: The encoder to write to.
+  /// - Throws: An error if the encoding fails.
   public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
 

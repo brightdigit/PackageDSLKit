@@ -77,8 +77,12 @@ internal struct PackageDSLManagerBasicTests {
 
     // Create a Package.swift file
     let packageSwiftFile = tempDirectory.appendingPathComponent("Package.swift")
-    let packageContent =
-      "// swift-tools-version: 5.9\nimport PackageDescription\n\nlet package = Package(name: \"TestPackage\")"
+    let packageContent = """
+      // swift-tools-version: 5.9
+      import PackageDescription
+
+      let package = Package(name: "TestPackage")
+      """
     try packageContent.write(to: packageSwiftFile, atomically: true, encoding: .utf8)
 
     // Verify detection

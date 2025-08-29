@@ -31,6 +31,12 @@ import ArgumentParser
 import PackageDSLKit
 
 extension SwiftVersion: ExpressibleByArgument {
+  /// Creates a SwiftVersion instance from a command line argument.
+  ///
+  /// This initializer allows SwiftVersion to be used as a command line argument
+  /// in ArgumentParser-based command line tools.
+  ///
+  /// - Parameter value: The string value from the command line argument.
   public init(argument value: String) {
     self.init(stringLiteral: value)
   }

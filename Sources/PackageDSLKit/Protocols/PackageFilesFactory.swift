@@ -27,6 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// A factory protocol for creating package file interfaces.
+///
+/// This protocol defines the contract for creating different types of package file interfaces
+/// based on the specified interface type. It allows for flexible creation of file handling
+/// components for various package operations.
 public protocol PackageFilesFactory: Sendable {
+  /// Creates a package files interface for the specified type.
+  ///
+  /// - Parameter type: The type of package files interface to create.
+  /// - Returns: A package files interface implementation for the specified type.
   func interface(for type: PackageFilesInterfaceType) -> any PackageFilesInterface
 }

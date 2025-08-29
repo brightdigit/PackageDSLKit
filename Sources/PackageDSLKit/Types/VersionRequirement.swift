@@ -129,7 +129,7 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
       return formatUpToNextMajor(version)
     case .upToNextMinor(let version):
       return formatUpToNextMinor(version)
-    case let .range(from, toVersion):
+    case .range(let from, let toVersion):
       return formatRange(from: from, toVersion: toVersion)
     case .exact(let version):
       return formatExact(version)

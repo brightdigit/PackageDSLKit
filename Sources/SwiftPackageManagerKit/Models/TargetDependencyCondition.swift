@@ -31,8 +31,16 @@ import Foundation
 
 /// Represents platform-specific conditions for dependencies
 public struct TargetDependencyCondition: Codable, Hashable, Sendable {
+  /// The platform names for which this dependency condition applies.
+  ///
+  /// If nil, the dependency applies to all platforms. If specified, the dependency
+  /// only applies when building for the listed platforms.
   public let platformNames: [String]?
 
+  /// Creates a new TargetDependencyCondition instance.
+  ///
+  /// - Parameter platformNames: The platform names for which this condition applies.
+  /// Defaults to nil (all platforms).
   public init(platformNames: [String]? = nil) {
     self.platformNames = platformNames
   }

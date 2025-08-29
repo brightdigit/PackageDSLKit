@@ -30,7 +30,12 @@
 public import Foundation
 
 /// Build configuration options
+///
+/// This enum defines the available build configurations for Swift packages,
+/// allowing developers to specify whether they want debug or release builds.
 public enum BuildConfiguration: Sendable {
+  /// Debug build configuration with additional debugging information and optimizations disabled.
   case debug
+  /// Release build configuration with optimizations enabled and debugging information removed.
   case release
 }

@@ -31,10 +31,21 @@ import Foundation
 
 /// Represents a platform requirement in a Swift package
 public struct Platform: Codable, Hashable, Sendable {
+  /// The name of the platform (e.g., "macOS", "iOS", "Linux").
   public let platformName: String
+
+  /// The minimum version requirement for this platform.
   public let version: String
+
+  /// Additional platform-specific options or configurations.
   public let options: [String]
 
+  /// Creates a new Platform instance with the specified configuration.
+  ///
+  /// - Parameters:
+  ///   - platformName: The name of the platform.
+  ///   - version: The minimum version requirement for this platform.
+  ///   - options: Additional platform-specific options. Defaults to an empty array.
   public init(platformName: String, version: String, options: [String] = []) {
     self.platformName = platformName
     self.version = version

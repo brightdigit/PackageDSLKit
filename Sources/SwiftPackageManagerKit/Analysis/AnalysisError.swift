@@ -35,6 +35,10 @@ public enum AnalysisError: Error, LocalizedError, Sendable {
   case malformedPackageStructure(String)
   case unsupportedFormat(String)
 
+  /// A localized description of the error.
+  ///
+  /// This property provides a human-readable description of the analysis error,
+  /// including specific details about what went wrong during the analysis process.
   public var errorDescription: String? {
     switch self {
     case .invalidJSON(let details):

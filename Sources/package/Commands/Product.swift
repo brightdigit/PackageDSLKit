@@ -68,7 +68,10 @@ import PackageDSLKit
         }
 
         try settings.fileManager.createTargetSourceAt(
-          self.settings.pathURL, productName: name, type)
+          self.settings.pathURL,
+          productName: name,
+          type
+        )
       }
     }
   }

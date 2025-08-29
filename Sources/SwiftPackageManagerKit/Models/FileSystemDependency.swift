@@ -31,11 +31,25 @@ import Foundation
 
 /// Represents a file system dependency
 public struct FileSystemDependency: Codable, Hashable, Sendable {
+  /// The unique identity of this file system dependency.
   public let identity: String
+
+  /// The file system path to the dependency.
   public let path: String
+
+  /// Optional filter for specific products within the dependency.
   public let productFilter: String?
+
+  /// Additional traits or characteristics of this dependency.
   public let traits: [DependencyTrait]
 
+  /// Creates a new FileSystemDependency instance with the specified configuration.
+  ///
+  /// - Parameters:
+  ///   - identity: The unique identity of this dependency.
+  ///   - path: The file system path to the dependency.
+  ///   - productFilter: Optional filter for specific products. Defaults to nil.
+  ///   - traits: Additional traits or characteristics. Defaults to an empty array.
   public init(
     identity: String,
     path: String,

@@ -75,7 +75,6 @@ extension Product {
   /// - Parameters:
   ///   - name: The name of the product.
   ///   - type: The package type to infer the product type from.
-  /// - Returns: A new Product instance, or nil if the package type cannot be converted.
   public init?(name: String, type: PackageType) {
     guard let productType = ProductType(type: type) else {
       return nil
@@ -91,7 +90,6 @@ extension Product {
   /// Plugin products are currently not supported and will return nil.
   ///
   /// - Parameter spmProduct: The SwiftPackageManagerKit product to convert.
-  /// - Returns: A new Product instance, or nil if the product type is not supported.
   public init?(spmProduct: SwiftPackageManagerKit.Product) {
     // Convert SPMProductType to ProductType
     let productType: ProductType

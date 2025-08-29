@@ -31,8 +31,12 @@ import Foundation
 
 /// Represents a trait for a dependency
 public struct DependencyTrait: Codable, Hashable, Sendable {
+  /// The name of the dependency trait.
   public let name: String
 
+  /// Creates a new DependencyTrait instance with the specified name.
+  ///
+  /// - Parameter name: The name of the dependency trait.
   public init(name: String) {
     self.name = name
   }

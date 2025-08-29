@@ -1,5 +1,5 @@
 //
-//  FileManager.swift
+//  FileManager+PackageFilesInterface.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,39 +29,13 @@
 
 public import Foundation
 
+// MARK: - PackageFilesInterface Implementation
 extension FileManager: PackageFilesInterface {
   /// The current working directory as a URL
   public var currentDirectoryURL: URL {
     URL(fileURLWithPath: currentDirectoryPath)
   }
 
-  private func readDirectoryContents(at path: String, fileExtension: String = "swift") throws
-    -> [String]
-  {
-    var contents: [String] = []
-    let items = try contentsOfDirectory(atPath: path)
-
-    // Process subdirectories (post-order)
-    for item in items {
-      let itemPath = (path as NSString).appendingPathComponent(item)
-      var isDirectory: ObjCBool = false
-      let fileExists = fileExists(atPath: itemPath, isDirectory: &isDirectory)
-
-      if fileExists && isDirectory.boolValue {
-        contents += try readDirectoryContents(at: itemPath, fileExtension: fileExtension)
-      }
-    }
-
-    // Process files
-    for item in items where item.hasSuffix(".\(fileExtension)") {
-      let itemPath = (path as NSString).appendingPathComponent(item)
-
-      let fileContents = try String(contentsOfFile: itemPath, encoding: .utf8)
-      contents.append(fileContents)
-    }
-
-    return contents
-  }
   /// Writes a Package.swift file with the specified Swift version and DSL sources
   ///
   /// - Parameters:
@@ -116,6 +90,7 @@ extension FileManager: PackageFilesInterface {
   public func createFile(at url: URL, text: String) {
     self.createFile(atPath: url.polyfill().path(), contents: Data(text.utf8))
   }
+
   /// Reads the Swift version from a directory, checking both .swift-version file and Package.swift
   ///
   /// - Parameter directoryURL: The directory URL to check for Swift version information
@@ -142,6 +117,7 @@ extension FileManager: PackageFilesInterface {
 
     return .readFrom(packageSwiftFileURL: packageSwiftURL)
   }
+
   /// Creates target source files at the specified path for a product
   ///
   /// - Parameters:
@@ -179,6 +155,7 @@ extension FileManager: PackageFilesInterface {
       contents: Data(sourceCode.utf8)
     )
   }
+
   /// Creates the complete file structure for a package at the specified path
   ///
   /// - Parameters:
@@ -203,39 +180,5 @@ extension FileManager: PackageFilesInterface {
     }
 
     try createTestTargetAt(pathURL, productName)
-  }
-  private func createTestTargetAt(_ pathURL: URL, _ productName: String) throws {
-    let testingDirURL = pathURL.appendingPathComponent("Tests/\(productName)Tests")
-    try self.createDirectory(at: testingDirURL, withIntermediateDirectories: true)
-
-    let testFileURL = testingDirURL.appendingPathComponent("\(productName)Tests.swift")
-    let testCode = """
-      import Testing
-      @testable import \(productName)
-
-      @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-      }
-      """
-    self.createFile(atPath: testFileURL.polyfill().path(), contents: Data(testCode.utf8))
-  }
-  private func createTargetSourceAt(
-    _ pathURL: URL, productName: String, _ packageType: PackageType
-  ) throws {
-    let productType: ProductType?
-
-    switch packageType {
-    case .empty:
-      productType = nil
-    case .library:
-      productType = .library
-    case .executable:
-      productType = .executable
-    }
-    assert(productType != nil, "Unknown package type \(packageType)")
-    guard let productType else {
-      return
-    }
-    try self.createTargetSourceAt(pathURL, productName: productName, productType)
   }
 }

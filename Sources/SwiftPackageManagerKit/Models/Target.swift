@@ -35,14 +35,37 @@ public struct Target: Codable, Hashable, Sendable {
     case name, type, dependencies, exclude, resources, settings, packageAccess
   }
 
+  /// The name of the target.
   public let name: String
+
+  /// The type of the target (regular, executable, test, etc.).
   public let type: TargetType
+
+  /// The dependencies of this target on other targets.
   public let dependencies: [TargetDependency]
+
+  /// Paths to exclude from this target's source files.
   public let exclude: [String]
+
+  /// Resources associated with this target.
   public let resources: [Resource]
-  public let settings: [String]  // Target-specific settings
+
+  /// Target-specific settings as string key-value pairs.
+  public let settings: [String]
+
+  /// Whether this target can access other packages.
   public let packageAccess: Bool
 
+  /// Creates a new Target instance with the specified configuration.
+  ///
+  /// - Parameters:
+  ///   - name: The name of the target.
+  ///   - type: The type of the target.
+  ///   - dependencies: The dependencies of this target. Defaults to an empty array.
+  ///   - exclude: Paths to exclude from this target's source files. Defaults to an empty array.
+  ///   - resources: Resources associated with this target. Defaults to an empty array.
+  ///   - settings: Target-specific settings. Defaults to an empty array.
+  ///   - packageAccess: Whether this target can access other packages. Defaults to true.
   public init(
     name: String,
     type: TargetType,
@@ -61,7 +84,13 @@ public struct Target: Codable, Hashable, Sendable {
     self.packageAccess = packageAccess
   }
 
-  // Custom decoding to handle missing optional fields gracefully
+  /// Creates a new Target instance from a decoder.
+  ///
+  /// This initializer handles custom decoding to gracefully handle missing optional fields
+  /// by providing sensible defaults when certain keys are not present in the decoded data.
+  ///
+  /// - Parameter decoder: The decoder to read from.
+  /// - Throws: A `DecodingError` if required fields cannot be decoded.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 

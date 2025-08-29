@@ -35,11 +35,25 @@ public struct Product: Codable, Hashable, Sendable {
     case name, type, targets, settings
   }
 
+  /// The name of the product.
   public let name: String
-  public let type: ProductType
-  public let targets: [String]
-  public let settings: [String]  // Product-specific settings
 
+  /// The type of the product (library, executable, plugin, etc.).
+  public let type: ProductType
+
+  /// The target names that this product depends on.
+  public let targets: [String]
+
+  /// Product-specific settings as string key-value pairs.
+  public let settings: [String]
+
+  /// Creates a new Product instance with the specified configuration.
+  ///
+  /// - Parameters:
+  ///   - name: The name of the product.
+  ///   - type: The type of the product.
+  ///   - targets: The target names that this product depends on.
+  ///   - settings: Product-specific settings. Defaults to an empty array.
   public init(
     name: String,
     type: ProductType,
@@ -52,7 +66,13 @@ public struct Product: Codable, Hashable, Sendable {
     self.settings = settings
   }
 
-  // Custom decoding to handle missing settings field
+  /// Creates a new Product instance from a decoder.
+  ///
+  /// This initializer handles custom decoding to gracefully handle missing optional fields
+  /// by providing sensible defaults when certain keys are not present in the decoded data.
+  ///
+  /// - Parameter decoder: The decoder to read from.
+  /// - Throws: A `DecodingError` if required fields cannot be decoded.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
