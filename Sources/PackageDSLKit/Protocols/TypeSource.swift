@@ -27,6 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// A protocol for types that have a name and can be used as sources
+///
+/// This protocol defines the basic requirement for types that can be
+/// referenced by name in package configurations.
 public protocol TypeSource: Sendable, Hashable, Codable {
+  /// The name of this type
   var typeName: String { get }
 }

@@ -30,6 +30,7 @@
 public import Foundation
 
 extension FileManager: PackageFilesInterface {
+  /// The current working directory as a URL
   public var currentDirectoryURL: URL {
     URL(fileURLWithPath: currentDirectoryPath)
   }
@@ -61,6 +62,14 @@ extension FileManager: PackageFilesInterface {
 
     return contents
   }
+  /// Writes a Package.swift file with the specified Swift version and DSL sources
+  ///
+  /// - Parameters:
+  ///   - swiftVersion: The Swift tools version to use
+  ///   - dslSourcesURL: The URL containing DSL source files
+  ///   - pathURL: The destination URL where the Package.swift file will be created
+  ///
+  /// - Throws: An error if reading the directory contents fails
   public func writePackageSwiftFile(
     swiftVersion: SwiftVersion,
     from dslSourcesURL: URL,
@@ -82,6 +91,13 @@ extension FileManager: PackageFilesInterface {
     // TODO: log error if file creation fails
   }
 
+  /// Creates a directory at the specified URL
+  ///
+  /// - Parameters:
+  ///   - url: The URL where the directory should be created
+  ///   - createIntermediates: Whether to create intermediate directories if they don't exist
+  ///
+  /// - Throws: An error if directory creation fails
   public func createDirectory(at url: URL, withIntermediateDirectories createIntermediates: Bool)
     throws
   {
@@ -92,9 +108,19 @@ extension FileManager: PackageFilesInterface {
     )
   }
 
+  /// Creates a file at the specified URL with the given text content
+  ///
+  /// - Parameters:
+  ///   - url: The URL where the file should be created
+  ///   - text: The text content to write to the file
   public func createFile(at url: URL, text: String) {
     self.createFile(atPath: url.polyfill().path(), contents: Data(text.utf8))
   }
+  /// Reads the Swift version from a directory, checking both .swift-version file and Package.swift
+  ///
+  /// - Parameter directoryURL: The directory URL to check for Swift version information
+  ///
+  /// - Returns: The Swift version if found, nil otherwise
   public func swiftVersion(from directoryURL: URL) -> SwiftVersion? {
     let swiftVersionURL = directoryURL.polyfill().appending(component: ".swift-version")
     let packageSwiftURL = directoryURL.polyfill().appending(component: "Package.swift")
@@ -116,6 +142,14 @@ extension FileManager: PackageFilesInterface {
 
     return .readFrom(packageSwiftFileURL: packageSwiftURL)
   }
+  /// Creates target source files at the specified path for a product
+  ///
+  /// - Parameters:
+  ///   - pathURL: The base path URL where source files should be created
+  ///   - productName: The name of the product
+  ///   - productType: The type of product (library, executable, etc.)
+  ///
+  /// - Throws: An error if directory or file creation fails
   public func createTargetSourceAt(
     _ pathURL: URL, productName: String, _ productType: ProductType
   ) throws {
@@ -145,6 +179,14 @@ extension FileManager: PackageFilesInterface {
       contents: Data(sourceCode.utf8)
     )
   }
+  /// Creates the complete file structure for a package at the specified path
+  ///
+  /// - Parameters:
+  ///   - packageType: The type of package to create
+  ///   - productName: The name of the product
+  ///   - pathURL: The base path URL where the file structure should be created
+  ///
+  /// - Throws: An error if directory or file creation fails
   public func createFileStructure(
     forPackageType packageType: PackageType,
     forProductName productName: String,

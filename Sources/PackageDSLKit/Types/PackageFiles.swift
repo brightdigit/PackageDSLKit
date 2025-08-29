@@ -29,7 +29,12 @@
 
 import Foundation
 
+/// A factory for creating package file interfaces
+///
+/// This struct provides access to different types of file interfaces
+/// for package operations, with FileManager as the default implementation.
 public struct PackageFiles: PackageFilesFactory, Sendable {
+  /// The default package files factory instance
   public static let `default`: any PackageFilesFactory = PackageFiles()
 
   private static let defaultTypes:
@@ -45,6 +50,11 @@ public struct PackageFiles: PackageFilesFactory, Sendable {
     self.types = types ?? Self.defaultTypes
   }
 
+  /// Creates a file interface for the specified type
+  ///
+  /// - Parameter type: The type of file interface to create
+  ///
+  /// - Returns: A file interface implementation
   public func interface(for type: PackageFilesInterfaceType) -> any PackageFilesInterface {
     let interface = self.types[type]?()
     assert(interface != nil)

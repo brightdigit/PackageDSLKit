@@ -28,6 +28,7 @@
 //
 
 extension Product: ComponentBuildable {
+  /// The directory name where product configurations are stored
   public static let directoryName: String = "Products"
   internal init(component: Component, requirements: Void) {
     let dependencies =

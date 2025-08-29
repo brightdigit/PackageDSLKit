@@ -30,7 +30,11 @@
 import Foundation
 
 /// Represents the type of dependency
+///
+/// This struct uses an option set to represent different types of dependencies
+/// that can be combined to create complex dependency relationships.
 public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
+  /// The raw integer value representing the dependency type
   public typealias RawValue = Int
 
   internal struct InvalidValueError: Error, Sendable {
@@ -49,12 +53,18 @@ public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
     }
   }
 
+  /// Represents a package dependency
   public static let package = DependencyType(rawValue: 1)
+  /// Represents a target dependency
   public static let target = DependencyType(rawValue: 2)
   private static let strings: [String] = ["PackageDependency", "TargetDependency"]
 
+  /// The raw integer value of this dependency type
   public var rawValue: Int
 
+  /// Creates a new dependency type with the specified raw value
+  ///
+  /// - Parameter rawValue: The integer value representing the dependency type
   public init(rawValue: Int) {
     self.rawValue = rawValue
   }
@@ -75,6 +85,11 @@ public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
     self.init(rawValue: rawValue)
   }
 
+  /// Creates a dependency type from an array of string representations
+  ///
+  /// - Parameter strings: Array of strings representing dependency types
+  ///
+  /// - Returns: A dependency type if the strings are valid, nil otherwise
   public init?(strings: [String]) {
     do {
       try self.init(stringsThrows: strings)

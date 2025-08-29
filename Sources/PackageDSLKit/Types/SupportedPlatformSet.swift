@@ -30,12 +30,24 @@
 internal import Foundation
 public import SwiftPackageManagerKit
 
+/// A set of supported platforms for a package
+///
+/// This struct represents a collection of platforms that a package supports,
+/// providing both the type name and the set of platform requirements.
 public struct SupportedPlatformSet: TypeSource, ComponentBuildable, Sendable {
+  /// The directory name where platform configurations are stored
   public static let directoryName: String = "Platforms"
 
+  /// The name of this platform set type
   public let typeName: String
+  /// The set of platforms that are supported
   public let platforms: Set<SupportedPlatform>
 
+  /// Creates a new supported platform set
+  ///
+  /// - Parameters:
+  ///   - typeName: The name of this platform set type
+  ///   - platforms: The set of platforms that are supported
   public init(typeName: String, platforms: Set<SupportedPlatform>) {
     self.typeName = typeName
     self.platforms = platforms

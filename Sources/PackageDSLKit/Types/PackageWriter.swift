@@ -30,6 +30,11 @@
 public import Foundation
 import SyntaxKit
 
+/// A writer that generates complete package structures from specifications
+///
+/// This struct handles the complete process of writing package files,
+/// including index files and component source files, using various
+/// specialized writers and file interfaces.
 public struct PackageWriter: Sendable {
   private static let compoenentTypes: [any ComponentBuildable.Type] = [
     Product.self,
@@ -44,6 +49,7 @@ public struct PackageWriter: Sendable {
   private let indexWriter: any IndexCodeWriter
   private let componentWriter: any StructureWriter
 
+  /// Creates a new package writer with default components
   public init() {
     self.init(componentWriter: ComponentWriter())
   }
@@ -59,6 +65,13 @@ public struct PackageWriter: Sendable {
     self.componentWriter = componentWriter
   }
 
+  /// Writes a complete package structure to the specified URL
+  ///
+  /// - Parameters:
+  ///   - specification: The package specifications to write
+  ///   - url: The destination URL where the package should be created
+  ///
+  /// - Throws: `PackageDSLError` if any part of the writing process fails
   public func write(
     _ specification: PackageSpecifications,
     to url: URL

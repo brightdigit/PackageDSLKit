@@ -30,13 +30,20 @@
 public import Foundation
 
 /// Content for support code blocks
+///
+/// This struct wraps support code content and provides utilities for working with it.
 public struct SupportCodeBlockContent: Sendable {
+  /// The raw content string
   public let content: String
 
+  /// The content with leading and trailing whitespace removed
   public var trimmedDescription: String {
     content.trimmingCharacters(in: .whitespacesAndNewlines)
   }
 
+  /// Creates a new support code block content
+  ///
+  /// - Parameter content: The content string to wrap
   public init(content: String) {
     self.content = content
   }

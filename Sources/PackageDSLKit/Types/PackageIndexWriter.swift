@@ -29,10 +29,20 @@
 
 import SyntaxKit
 
+/// A writer that generates Package.swift index code using SyntaxKit
+///
+/// This struct implements the IndexCodeWriter protocol to generate Swift code
+/// for package indices, delegating the actual code generation to SyntaxKit.
 public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
+  /// Creates a new package index writer
   public init() {
   }
-  // IndexCodeWriter protocol implementation - delegates to SyntaxKit version
+  /// Writes an index to Swift code string
+  ///
+  /// - Parameter index: The index to convert to Swift code
+  ///
+  /// - Returns: A Swift code string representing the index
+  /// - Throws: `PackageDSLError` if code generation fails
   public func writeIndex(_ index: Index) throws(PackageDSLError) -> String {
     try syntaxKitWriteIndex(index)
   }

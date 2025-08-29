@@ -27,6 +27,11 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Types of file interfaces that can be used for package operations
+///
+/// This enum defines the different file interface implementations
+/// available for package file operations.
 public enum PackageFilesInterfaceType: String, CaseIterable, Sendable, Hashable, Codable {
+  /// Uses the system's file manager for file operations
   case fileManager
 }

@@ -42,6 +42,7 @@ public enum PackageError: Error, LocalizedError, Sendable {
   case packageGenerationFailed(String)
   case cascadeRemovalRequired(String, [String])
 
+  /// A localized description of the error
   public var errorDescription: String? {
     switch self {
     case .duplicateTargetName(let name):

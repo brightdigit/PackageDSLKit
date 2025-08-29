@@ -27,8 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Errors that can occur during package DSL operations
+///
+/// This enum defines the various error types that can be thrown when working with
+/// package DSL operations, including validation failures and custom errors.
 public enum PackageDSLError: Error, Sendable {
+  /// A custom error with a message and optional associated data
   case custom(String, (any Sendable)?)
+  /// An error that wraps another error type
   case other(any Error)
+  /// An error indicating validation failures with details about missing sources
   case validationFailure([MissingSource])
 }

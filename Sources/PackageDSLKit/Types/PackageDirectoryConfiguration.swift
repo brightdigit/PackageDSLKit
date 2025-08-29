@@ -29,13 +29,34 @@
 
 import SwiftPackageManagerKit
 
+/// Configuration for a package directory structure containing all package components
+///
+/// This struct represents the complete configuration of a Swift package directory,
+/// including products, dependencies, targets, test targets, and supported platforms.
+/// It serves as the central configuration object for package generation and validation.
 public struct PackageDirectoryConfiguration: Sendable, Hashable, Codable {
+  /// The index containing references to all package components
   public let index: Index
+  /// Array of products defined in the package
   public let products: [Product]
+  /// Array of dependencies required by the package
   public let dependencies: [Dependency]
+  /// Array of targets that make up the package
   public let targets: [Target]
+  /// Array of test targets for the package
   public let testTargets: [TestTarget]
+  /// Array of supported platform configurations
   public let supportedPlatformSets: [SupportedPlatformSet]
+
+  /// Creates a new package directory configuration
+  ///
+  /// - Parameters:
+  ///   - index: The index containing component references
+  ///   - products: Products to include (default: empty array)
+  ///   - dependencies: Dependencies to include (default: empty array)
+  ///   - targets: Targets to include (default: empty array)
+  ///   - testTargets: Test targets to include (default: empty array)
+  ///   - supportedPlatformSets: Platform configurations to include (default: empty array)
   public init(
     index: Index,
     products: [Product] = [],
@@ -136,6 +157,9 @@ extension PackageDirectoryConfiguration {
 }
 
 extension PackageDirectoryConfiguration {
+  /// Creates a package directory configuration from package specifications
+  ///
+  /// - Parameter specifications: The package specifications to convert
   public init(specifications: PackageSpecifications) {
     let entries = specifications.products.map(EntryRef.init)
     let dependencies = specifications.dependencies.map(DependencyRef.init)
@@ -202,6 +226,13 @@ extension PackageDirectoryConfiguration {
     }
     return missingSources
   }
+
+  /// Validates the package configuration for completeness and consistency
+  ///
+  /// This method checks that all referenced components exist and that there are
+  /// no missing dependencies or sources that would prevent the package from building.
+  ///
+  /// - Throws: `PackageDSLError.validationFailure` if validation fails
   public func validate() throws(PackageDSLError) {
     var missingSources = validateDependencies()
     for sourceType in SourceType.allCases {

@@ -29,13 +29,28 @@
 
 import Foundation
 
+/// A dependency relationship between package components
+///
+/// This struct represents a dependency that one component has on another,
+/// including the type of dependency and optional package references.
 public struct Dependency: TypeSource, Sendable {
+  /// The name of the dependency type
   public let typeName: String
 
+  /// The type of dependency relationship
   public let type: DependencyType
+  /// The name of the specific dependency, if applicable
   public let dependency: String?
+  /// Reference to the package containing the dependency, if applicable
   public let package: DependencyRef?
 
+  /// Creates a new dependency
+  ///
+  /// - Parameters:
+  ///   - typeName: The name of the dependency type
+  ///   - type: The type of dependency relationship
+  ///   - dependency: The name of the specific dependency (default: nil)
+  ///   - package: Reference to the package containing the dependency (default: nil)
   public init(
     typeName: String,
     type: DependencyType,

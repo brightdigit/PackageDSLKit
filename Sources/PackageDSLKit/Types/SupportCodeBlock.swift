@@ -29,13 +29,17 @@
 
 import Foundation
 
+/// A code block containing support code for package generation
+///
+/// This enum provides access to support code that is included in generated packages.
+/// It contains both the raw string content and a structured representation for backward compatibility.
 public enum SupportCodeBlock: Sendable {
-  // Replaced SwiftSyntax parsing with direct string reading
+  /// The raw string content of the support code
   public static let content: String = {
     readSupportCode()
   }()
 
-  // For backward compatibility - returns the same content as .content
+  /// A structured representation of the support code for backward compatibility
   nonisolated(unsafe) public static var syntaxNode: SupportCodeBlockContent = {
     SupportCodeBlockContent(content: content)
   }()

@@ -27,8 +27,15 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// A generic component that can be used to represent various package elements
+///
+/// This struct provides a flexible way to represent components with names,
+/// inherited types, and properties, making it suitable for different use cases.
 public struct Component: Sendable, Hashable, Codable {
+  /// The name of the component
   public let name: String
+  /// Types that this component inherits from
   public let inheritedTypes: [String]
+  /// Properties associated with this component
   public let properties: [String: Property]
 }

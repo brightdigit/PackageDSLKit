@@ -29,6 +29,7 @@
 
 extension Dependency: ComponentBuildable {
   internal typealias Requirements = DependencyType
+  /// The directory name where dependency configurations are stored
   public static let directoryName: String = "Dependencies"
 
   internal init(component: Component, requirements: Requirements) {

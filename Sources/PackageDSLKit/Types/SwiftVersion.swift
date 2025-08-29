@@ -29,6 +29,10 @@
 
 import Foundation
 
+/// A Swift version representation with major and minor components
+///
+/// This struct represents a Swift version in the format "major.minor" (e.g., "5.9").
+/// It provides parsing from strings and can be used in string literals.
 public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, CustomStringConvertible
 {
   internal struct ParsingError: OptionSet, Error, Sendable {
@@ -59,13 +63,21 @@ public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, Cust
     }
   }
 
+  /// The major version number
   public let major: Int
+  /// The minor version number
   public let minor: Int
 
+  /// A string representation of the version in "major.minor" format
   public var description: String {
     [major, minor].map(\.description).joined(separator: ".")
   }
 
+  /// Creates a new Swift version
+  ///
+  /// - Parameters:
+  ///   - major: The major version number
+  ///   - minor: The minor version number
   public init(major: Int, minor: Int) {
     self.major = major
     self.minor = minor
@@ -89,6 +101,12 @@ public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, Cust
     }
   }
 
+  /// Creates a Swift version from a string literal
+  ///
+  /// - Parameter value: The version string in "major.minor" format
+  ///
+  /// - Note: This initializer will crash if the string format is invalid.
+  ///   Use `init(throwing:)` for safe parsing.
   public init(stringLiteral value: String) {
     do {
       try self.init(throwing: value)

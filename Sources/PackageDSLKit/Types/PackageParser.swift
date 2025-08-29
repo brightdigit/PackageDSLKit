@@ -30,10 +30,21 @@
 public import Foundation
 public import SwiftPackageManagerKit
 
+/// A parser that reads package specifications from directory structures
+///
+/// This struct parses Swift package directories to extract package specifications,
+/// using Swift Package Manager's JSON output for reliable parsing.
 public struct PackageParser: Sendable, Hashable, Codable {
+  /// Creates a new package parser
   public init() {
   }
   #if canImport(Foundation) && (os(macOS) || os(Linux))
+    /// Parses a package directory using the default Swift executor
+    ///
+    /// - Parameter directoryURL: The URL of the package directory to parse
+    ///
+    /// - Returns: Package specifications extracted from the directory
+    /// - Throws: `PackageDSLError` if parsing fails
     public func parse(at directoryURL: URL)
       async throws(PackageDSLError)
       -> PackageSpecifications
@@ -41,6 +52,14 @@ public struct PackageParser: Sendable, Hashable, Codable {
       try await self.parse(at: directoryURL, swiftExecutor: ProcessRunner.swift)
     }
   #endif
+  /// Parses a package directory using a custom Swift executor
+  ///
+  /// - Parameters:
+  ///   - directoryURL: The URL of the package directory to parse
+  ///   - swiftExecutor: A custom Swift command executor function
+  ///
+  /// - Returns: Package specifications extracted from the directory
+  /// - Throws: `PackageDSLError` if parsing fails
   public func parse(
     at directoryURL: URL,
     swiftExecutor: @escaping Executor.SwiftCommandExecutor

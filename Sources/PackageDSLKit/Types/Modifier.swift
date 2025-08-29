@@ -27,7 +27,13 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// A modifier that can be applied to package components
+///
+/// This struct represents a modification that can be made to a component,
+/// including the type of modification and the code to apply.
 public struct Modifier: Sendable, Hashable, Codable {
+  /// The type of modification to apply
   public let type: ModifierType
+  /// The code lines that implement the modification
   public let code: [String]
 }

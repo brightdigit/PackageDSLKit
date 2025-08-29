@@ -27,7 +27,13 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Types of modifications that can be applied to package components
+///
+/// This enum defines the different categories of modifications
+/// that can be made to package components during generation.
 public enum ModifierType: String, Sendable, Hashable, Codable {
+  /// Modifies supported platforms configuration
   case supportedPlatforms
+  /// Modifies default localization settings
   case defaultLocalization
 }

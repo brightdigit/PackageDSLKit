@@ -29,6 +29,10 @@
 
 public import SyntaxKit
 
+/// A utility for writing property definitions using SyntaxKit
+///
+/// This enum provides functionality to convert Property objects into
+/// SyntaxKit-compatible representations for code generation.
 public enum PropertyWriter: Sendable {
   /// Creates a property variable using SyntaxKit
   public static func syntaxKitNode(from property: Property) -> ComputedProperty {
