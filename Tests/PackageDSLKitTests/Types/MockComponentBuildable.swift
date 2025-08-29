@@ -43,7 +43,7 @@ internal struct MockComponentBuildable: ComponentBuildable {
     )
   }
 
-  internal func createComponent() -> PackageDSLKit.Component {
-    component
-  }
+  //  internal func createComponent() -> PackageDSLKit.Component {
+  //    component
+  //  }
 }

@@ -36,7 +36,7 @@ extension Package {
       @OptionGroup internal var settings: Settings
       internal func run() async throws {
         let parser = PackageParser()
-        let package = try await parser.parse(at: settings.dslSourcesURL, with: .default)
+        let package = try await parser.parse(at: settings.dslSourcesURL)
       }
     }
   #endif

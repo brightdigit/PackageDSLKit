@@ -39,7 +39,7 @@ public enum TargetDependency: Codable, Hashable, Sendable {
     case product
   }
 
-  public init(from decoder: Decoder) throws {
+  public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
     if container.contains(.byName) {
@@ -72,7 +72,7 @@ public enum TargetDependency: Codable, Hashable, Sendable {
     }
   }
 
-  public func encode(to encoder: Encoder) throws {
+  public func encode(to encoder: any Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
 
     switch self {

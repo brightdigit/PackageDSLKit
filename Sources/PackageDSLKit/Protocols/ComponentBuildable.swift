@@ -34,5 +34,5 @@ internal protocol ComponentBuildable: Sendable {
   static var directoryName: String { get }
   init(component: Component, requirements: Requirements)
   static func requirements(from component: Component) -> Requirements?
-  func createComponent() -> Component
+  // func createComponent() -> Component
 }

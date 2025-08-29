@@ -48,10 +48,10 @@ import PackageDSLKit
 
       internal func run() async throws {
         let parser = PackageParser()
-        let package = try await parser.parse(at: settings.dslSourcesURL, with: .default)
+        let package = try await parser.parse(at: settings.dslSourcesURL)
         let newPackage = package.updating(descriptor: Product.self) { products in
           var newProducts = products
-          newProducts.append(.init(typeName: name))
+          newProducts.append(Product(typeName: name))
           return newProducts
         }
         let writer = PackageWriter()

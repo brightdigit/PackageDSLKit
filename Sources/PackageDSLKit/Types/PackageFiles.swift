@@ -30,7 +30,7 @@
 import Foundation
 
 public struct PackageFiles: PackageFilesFactory, Sendable {
-  public static let `default`: PackageFilesFactory = PackageFiles()
+  public static let `default`: any PackageFilesFactory = PackageFiles()
 
   private static let defaultTypes:
     [PackageFilesInterfaceType: @Sendable () -> any PackageFilesInterface] = [

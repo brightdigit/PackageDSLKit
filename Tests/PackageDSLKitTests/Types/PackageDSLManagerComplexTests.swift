@@ -2,7 +2,6 @@ import Foundation
 import Testing
 
 @testable import PackageDSLKit
-@testable import SwiftPackageManagerKit
 
 @Suite
 struct PackageDSLManagerComplexTests {
@@ -52,7 +51,7 @@ struct PackageDSLManagerComplexTests {
   }
 
   private func validateComplexPackageGeneration(
-    _ packageManager: PackageDSLManager,
+    _ _: PackageDSLManager,
     _ tempDirectory: URL
   ) async throws {
     // Verify core DSL files were created

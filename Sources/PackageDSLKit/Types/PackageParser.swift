@@ -34,7 +34,7 @@ public struct PackageParser: Sendable, Hashable, Codable {
   public init() {
   }
   #if canImport(Foundation) && (os(macOS) || os(Linux))
-    public func parse(at directoryURL: URL, with fileManager: FileManager)
+    public func parse(at directoryURL: URL)
       async throws(PackageDSLError)
       -> PackageSpecifications
     {

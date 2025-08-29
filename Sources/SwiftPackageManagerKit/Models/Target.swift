@@ -62,7 +62,7 @@ public struct Target: Codable, Hashable, Sendable {
   }
 
   // Custom decoding to handle missing optional fields gracefully
-  public init(from decoder: Decoder) throws {
+  public init(from decoder: any Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
     self.name = try container.decode(String.self, forKey: .name)

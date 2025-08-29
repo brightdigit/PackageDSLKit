@@ -2,7 +2,6 @@ import Foundation
 import Testing
 
 @testable import PackageDSLKit
-@testable import SwiftPackageManagerKit
 
 @Suite
 struct PackageDSLManagerBasicTests {

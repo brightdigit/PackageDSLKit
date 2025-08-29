@@ -40,9 +40,9 @@ public struct PackageWriter: Sendable {
   ]
 
   private let fileInterfaceType: PackageFilesInterfaceType
-  private let fileAccessor: PackageFilesFactory
-  private let indexWriter: IndexCodeWriter
-  private let componentWriter: StructureWriter
+  private let fileAccessor: any PackageFilesFactory
+  private let indexWriter: any IndexCodeWriter
+  private let componentWriter: any StructureWriter
 
   public init() {
     self.init(componentWriter: ComponentWriter())

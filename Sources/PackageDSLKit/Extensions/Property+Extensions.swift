@@ -36,30 +36,30 @@ extension Property {
     self.init(name: name, type: type, code: code)
   }
 }
-extension Property {
-  internal struct MissingFieldsError: OptionSet, Error, Sendable {
-    internal typealias RawValue = Int
-
-    internal static let name = MissingFieldsError(rawValue: 1)
-    internal static let type = MissingFieldsError(rawValue: 2)
-    // static let code = MissingFieldsError(rawValue: 4)
-
-    internal var rawValue: Int
-  }
-
-  internal init(name: String?, type: String?, code: [String]) throws(MissingFieldsError) {
-    var error: MissingFieldsError = []
-    if name == nil {
-      error.insert(.name)
-    }
-    if type == nil {
-      error.insert(.type)
-    }
-    if !error.isEmpty {
-      throw error
-    } else {
-      assert(name != nil && type != nil)
-      self.init(name: name ?? "", type: type ?? "", code: code)
-    }
-  }
-}
+// extension Property {
+//  internal struct MissingFieldsError: OptionSet, Error, Sendable {
+//    internal typealias RawValue = Int
+//
+//    internal static let name = MissingFieldsError(rawValue: 1)
+//    internal static let type = MissingFieldsError(rawValue: 2)
+//    // static let code = MissingFieldsError(rawValue: 4)
+//
+//    internal var rawValue: Int
+//  }
+//
+//  internal init(name: String?, type: String?, code: [String]) throws(MissingFieldsError) {
+//    var error: MissingFieldsError = []
+//    if name == nil {
+//      error.insert(.name)
+//    }
+//    if type == nil {
+//      error.insert(.type)
+//    }
+//    if !error.isEmpty {
+//      throw error
+//    } else {
+//      assert(name != nil && type != nil)
+//      self.init(name: name ?? "", type: type ?? "", code: code)
+//    }
+//  }
+// }
