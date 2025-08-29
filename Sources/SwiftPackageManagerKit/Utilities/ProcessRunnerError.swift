@@ -37,7 +37,7 @@ public enum ProcessRunnerError: Error, LocalizedError, Sendable {
   case timeout
   case executionFailed(String)
   case nonZeroExit(Int32, String)
-  case unknownError(Error)
+  case unknownError(any Error)
 
   public var errorDescription: String? {
     switch self {
@@ -47,9 +47,8 @@ public enum ProcessRunnerError: Error, LocalizedError, Sendable {
       return "Process execution failed: \(message)"
     case .nonZeroExit(let code, let stderr):
       return "Process exited with code \(code): \(stderr)"
-    case .unknownError(let error) :
+    case .unknownError(let error):
       return "Process unknown error: \(error.localizedDescription)"
     }
-
   }
 }

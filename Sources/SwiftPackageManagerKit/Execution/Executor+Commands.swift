@@ -7,7 +7,7 @@
 //
 //  Permission is hereby granted, free of charge, to any person
 //  obtaining a copy of this software and associated documentation
-//  files (the "Software"), to deal in the Software without
+//  files (the “Software”), to deal in the Software without
 //  restriction, including without limitation the rights to use,
 //  copy, modify, merge, publish, distribute, sublicense, and/or
 //  sell copies of the Software, and to permit persons to whom the
@@ -17,7 +17,7 @@
 //  The above copyright notice and this permission notice shall be
 //  included in all copies or substantial portions of the Software.
 //
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
 //  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 //  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
 //  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -37,20 +37,18 @@ extension Executor {
   /// - Throws: ExecutorError on failure
   public func dumpPackage(timeout: TimeInterval? = nil) async throws(ExecutorError) -> PackageInfo {
     let actualTimeout = timeout ?? defaultTimeout
-    let result : ProcessResult
+    let result: ProcessResult
     do {
-       result = try await swiftExecutor(
+      result = try await swiftExecutor(
         ["package", "dump-package"],
         packageDirectory,
         actualTimeout
       )
-    } catch let error  {
+    } catch {
       throw handleProcessRunnerError(error, command: "package dump-package", timeout: actualTimeout)
     }
-    
-    do {
-      
 
+    do {
       return try parsePackageInfo(from: result.standardOutput)
     } catch let error as ExecutorError {
       throw error
@@ -76,7 +74,6 @@ extension Executor {
   /// - Parameter timeout: Optional timeout override
   /// - Throws: ExecutorError on failure
   public func resolvePackage(timeout: TimeInterval? = nil) async throws(ExecutorError) {
-
     let actualTimeout = timeout ?? defaultTimeout
     do {
       _ = try await swiftExecutor(
@@ -109,7 +106,7 @@ extension Executor {
         packageDirectory,
         actualTimeout
       )
-    } catch let error {
+    } catch {
       let command = "build" + (target.map { " --target \($0)" } ?? "")
       throw handleProcessRunnerError(error, command: command, timeout: actualTimeout)
     }
@@ -174,7 +171,7 @@ extension Executor {
         packageDirectory,
         actualTimeout
       )
-    } catch let error {
+    } catch {
       let command = "test" + (target.map { " --target \($0)" } ?? "")
       throw handleProcessRunnerError(error, command: command, timeout: actualTimeout)
     }

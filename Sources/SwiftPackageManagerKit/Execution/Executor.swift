@@ -36,7 +36,7 @@ public struct Executor: Sendable {
     _ arguments: [String],
     _ workingDirectory: URL?,
     _ timeout: TimeInterval
-  ) async throws(ProcessRunnerError)  -> ProcessResult
+  ) async throws(ProcessRunnerError) -> ProcessResult
 
   /// The package directory
   public let packageDirectory: URL
