@@ -53,12 +53,14 @@ public enum Dependency: Codable, Hashable, Sendable {
 
     if container.contains(.sourceControl) {
       let sourceControlArray = try container.decode(
-        [SourceControlDependency].self, forKey: .sourceControl)
+        [SourceControlDependency].self, forKey: .sourceControl
+      )
       guard let dependency = sourceControlArray.first else {
         throw DecodingError.dataCorrupted(
           DecodingError.Context(
             codingPath: decoder.codingPath,
-            debugDescription: "Empty source control dependency array")
+            debugDescription: "Empty source control dependency array"
+          )
         )
       }
       self = .sourceControl(dependency)
@@ -67,14 +69,16 @@ public enum Dependency: Codable, Hashable, Sendable {
       guard let dependency = fileSystemArray.first else {
         throw DecodingError.dataCorrupted(
           DecodingError.Context(
-            codingPath: decoder.codingPath, debugDescription: "Empty file system dependency array")
+            codingPath: decoder.codingPath, debugDescription: "Empty file system dependency array"
+          )
         )
       }
       self = .fileSystem(dependency)
     } else {
       throw DecodingError.dataCorrupted(
         DecodingError.Context(
-          codingPath: decoder.codingPath, debugDescription: "Unknown dependency type")
+          codingPath: decoder.codingPath, debugDescription: "Unknown dependency type"
+        )
       )
     }
   }

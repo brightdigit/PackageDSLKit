@@ -16,7 +16,9 @@ extension Bundle {
 
   /// Check if running in Xcode test bundle
   internal var isXcodeTestBundle: Bool {
-    guard let bundleIdentifier = bundleIdentifier else { return false }
+    guard let bundleIdentifier = bundleIdentifier else {
+      return false
+    }
     return bundleIdentifier.contains(Self.xctestPattern)
   }
 }

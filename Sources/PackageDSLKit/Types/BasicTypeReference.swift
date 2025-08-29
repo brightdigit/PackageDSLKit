@@ -29,10 +29,17 @@
 
 public import Foundation
 
-/// Basic type reference implementation
+/// A basic implementation of a type reference.
+///
+/// This structure provides a simple concrete implementation of the TypeReference protocol,
+/// containing just a name identifier for the referenced type.
 public struct BasicTypeReference: TypeReference, Sendable {
+  /// The name of the referenced type.
   public let name: String
 
+  /// Creates a new basic type reference with the specified name.
+  ///
+  /// - Parameter name: The name of the referenced type.
   public init(name: String) {
     self.name = name
   }

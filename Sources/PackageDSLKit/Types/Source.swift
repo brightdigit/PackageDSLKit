@@ -27,8 +27,19 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents different source types that can be referenced in a Swift package.
+///
+/// This enumeration defines the various sources that can be used to identify
+/// components within a Swift package structure.
 public enum Source: Sendable, Hashable, Codable {
+  /// Represents an index source.
   case index
+
+  /// Represents a product source with the given product name.
+  /// - Parameter String: The name of the product.
   case product(String)
+
+  /// Represents a target source with the given target name.
+  /// - Parameter String: The name of the target.
   case target(String)
 }

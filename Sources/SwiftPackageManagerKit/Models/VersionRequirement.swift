@@ -62,7 +62,8 @@ public enum VersionRequirement: Codable, Hashable, Sendable {
       guard let rangeInfo = rangeArray.first else {
         throw DecodingError.dataCorrupted(
           DecodingError.Context(
-            codingPath: decoder.codingPath, debugDescription: "Empty range array")
+            codingPath: decoder.codingPath, debugDescription: "Empty range array"
+          )
         )
       }
       self = .range(lowerBound: rangeInfo.lowerBound, upperBound: rangeInfo.upperBound)
@@ -75,7 +76,8 @@ public enum VersionRequirement: Codable, Hashable, Sendable {
     } else {
       throw DecodingError.dataCorrupted(
         DecodingError.Context(
-          codingPath: decoder.codingPath, debugDescription: "Unknown version requirement type")
+          codingPath: decoder.codingPath, debugDescription: "Unknown version requirement type"
+        )
       )
     }
   }

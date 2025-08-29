@@ -27,17 +27,34 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// A protocol for representing references to types within a Swift package.
+///
+/// This protocol defines the basic interface for any type reference, providing
+/// a name property that can be used to identify and work with types.
 public protocol TypeReference: Sendable, Hashable, Codable {
+  /// The name of the referenced type.
   var name: String { get }
 }
 
 extension TypeReference {
+  /// Converts the type reference to a function call string.
+  ///
+  /// This method generates a string representation of the type reference as a
+  /// function call, appending empty parentheses to the type name.
+  ///
+  /// - Returns: A string representing the type reference as a function call.
   public func asFunctionCall() -> String {
     "\(name)()"
   }
 }
 
 extension BasicTypeReference {
+  /// Creates a BasicTypeReference from a TypeSource.
+  ///
+  /// This convenience initializer creates a type reference using the type name
+  /// from any object conforming to TypeSource.
+  ///
+  /// - Parameter source: The type source to create a reference from.
   public init(source: any TypeSource) {
     self.init(name: source.typeName)
   }

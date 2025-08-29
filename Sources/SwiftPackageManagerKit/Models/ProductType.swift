@@ -60,7 +60,8 @@ public enum ProductType: Codable, Hashable, Sendable {
     } else {
       throw DecodingError.dataCorrupted(
         DecodingError.Context(
-          codingPath: decoder.codingPath, debugDescription: "Unknown product type")
+          codingPath: decoder.codingPath, debugDescription: "Unknown product type"
+        )
       )
     }
   }

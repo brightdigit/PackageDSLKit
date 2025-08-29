@@ -65,7 +65,7 @@ internal struct DependencyTypeTests {
     }
 
     switch (value.expectedRawValue, actualResult) {
-    case let (.invalid(expected), .failure(error)):
+    case (.invalid(let expected), .failure(let error)):
       #expect(error.invalidCount == expected)
     case (.none, .success(.none)):
       break

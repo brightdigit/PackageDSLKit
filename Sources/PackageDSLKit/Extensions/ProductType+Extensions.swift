@@ -28,6 +28,12 @@
 //
 
 extension ProductType {
+  /// Creates a ProductType from a PackageType.
+  ///
+  /// This convenience initializer maps package types to their corresponding product types.
+  /// Empty package types cannot be converted to product types.
+  ///
+  /// - Parameter type: The package type to convert.
   public init?(type: PackageType) {
     switch type {
     case .empty:

@@ -27,15 +27,42 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents the complete specifications for a Swift package.
+///
+/// This structure contains all the components that define a Swift package,
+/// including products, dependencies, targets, and platform requirements.
 public struct PackageSpecifications: Sendable, Hashable, Codable {
+  /// The products defined in the package.
   public let products: [Product]
+
+  /// The dependencies required by the package.
   public let dependencies: [Dependency]
+
+  /// The targets defined in the package.
   public let targets: [Target]
+
+  /// The test targets defined in the package.
   public let testTargets: [TestTarget]
+
+  /// The supported platform sets for the package.
   public let supportedPlatformSets: [SupportedPlatformSet]
+
+  /// The Swift settings applied to the package.
   public let swiftSettings: [SwiftSettingRef]
+
+  /// The modifiers applied to the package.
   public let modifiers: [Modifier]
 
+  /// Creates a new package specifications instance with the given components.
+  ///
+  /// - Parameters:
+  ///   - products: The products defined in the package. Defaults to an empty array.
+  ///   - dependencies: The dependencies required by the package. Defaults to an empty array.
+  ///   - targets: The targets defined in the package. Defaults to an empty array.
+  ///   - testTargets: The test targets defined in the package. Defaults to an empty array.
+  ///   - supportedPlatformSets: The supported platform sets for the package. Defaults to an empty array.
+  ///   - swiftSettings: The Swift settings applied to the package. Defaults to an empty array.
+  ///   - modifiers: The modifiers applied to the package. Defaults to an empty array.
   public init(
     products: [Product] = [],
     dependencies: [Dependency] = [],
@@ -56,6 +83,13 @@ public struct PackageSpecifications: Sendable, Hashable, Codable {
 }
 
 extension PackageSpecifications {
+  /// Creates package specifications from a package directory configuration.
+  ///
+  /// This initializer extracts the necessary components from a directory configuration
+  /// to create a complete package specification.
+  ///
+  /// - Parameter directoryConfiguration: The directory configuration to convert.
+  /// - Throws: A PackageDSLError if the conversion fails.
   public init(from directoryConfiguration: PackageDirectoryConfiguration) throws(PackageDSLError) {
     self.products = directoryConfiguration.products
     self.dependencies = directoryConfiguration.dependencies
@@ -68,6 +102,15 @@ extension PackageSpecifications {
 }
 
 extension PackageSpecifications {
+  /// Updates the package specifications using a property descriptor and transform function.
+  ///
+  /// This method provides a type-safe way to update specific components of the package
+  /// specifications using a descriptor type and transformation function.
+  ///
+  /// - Parameters:
+  ///   - descriptor: The property descriptor type to use for the update.
+  ///   - transform: A function that transforms the array of properties.
+  /// - Returns: A new PackageSpecifications instance with the transformed properties.
   public func updating<P: PackagePropertyDescriptor>(descriptor: P.Type, transform: ([P]) -> [P])
     -> PackageSpecifications
   {

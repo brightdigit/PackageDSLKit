@@ -27,10 +27,26 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents a property definition with its name, type, and implementation code.
+///
+/// This structure encapsulates a property's metadata including its name, type information,
+/// and the Swift code lines that implement the property.
 public struct Property: Sendable, Hashable, Codable {
+  /// The name of the property.
   public let name: String
+
+  /// The type of the property as a string.
   public let type: String
+
+  /// An array of Swift code lines that implement the property.
   public let code: [String]
+
+  /// Creates a new property with the specified name, type, and implementation code.
+  ///
+  /// - Parameters:
+  ///   - name: The name of the property.
+  ///   - type: The type of the property as a string.
+  ///   - code: An array of Swift code lines that implement the property.
   public init(
     name: String,
     type: String,

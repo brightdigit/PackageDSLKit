@@ -27,12 +27,34 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents an index containing package metadata and configuration.
+///
+/// The Index structure serves as a central repository for package information,
+/// including entries, dependencies, test targets, Swift settings, and modifiers.
 public struct Index: Sendable, Hashable, Codable {
+  /// An array of entry references contained in this index.
   public let entries: [EntryRef]
+
+  /// An array of dependency references for the package.
   public let dependencies: [DependencyRef]
+
+  /// An array of test target references for the package.
   public let testTargets: [TestTargetRef]
+
+  /// An array of Swift setting references for the package.
   public let swiftSettings: [SwiftSettingRef]
+
+  /// An array of modifiers applied to the package.
   public let modifiers: [Modifier]
+
+  /// Creates a new index with the specified components.
+  ///
+  /// - Parameters:
+  ///   - entries: An array of entry references contained in this index.
+  ///   - dependencies: An array of dependency references for the package.
+  ///   - testTargets: An array of test target references for the package.
+  ///   - swiftSettings: An array of Swift setting references for the package.
+  ///   - modifiers: An array of modifiers applied to the package.
   public init(
     entries: [EntryRef],
     dependencies: [DependencyRef],

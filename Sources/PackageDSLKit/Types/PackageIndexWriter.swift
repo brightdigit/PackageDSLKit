@@ -44,7 +44,9 @@ public struct PackageIndexWriter: IndexCodeWriter, Sendable, Hashable, Codable {
 
     // Helper function to create parameter for each section
     func createParameter(name: String, items: [String]) -> ParameterExp? {
-      guard !items.isEmpty else { return nil }
+      guard !items.isEmpty else {
+        return nil
+      }
 
       // Create closure with function calls
       // For simplicity, use the first item for now

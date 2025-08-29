@@ -51,7 +51,8 @@ public enum DependencyLocation: Codable, Hashable, Sendable {
       guard let remote = remoteArray.first else {
         throw DecodingError.dataCorrupted(
           DecodingError.Context(
-            codingPath: decoder.codingPath, debugDescription: "Empty remote array")
+            codingPath: decoder.codingPath, debugDescription: "Empty remote array"
+          )
         )
       }
       self = .remote(urlString: remote.urlString)
@@ -61,7 +62,8 @@ public enum DependencyLocation: Codable, Hashable, Sendable {
     } else {
       throw DecodingError.dataCorrupted(
         DecodingError.Context(
-          codingPath: decoder.codingPath, debugDescription: "Unknown dependency location type")
+          codingPath: decoder.codingPath, debugDescription: "Unknown dependency location type"
+        )
       )
     }
   }

@@ -75,8 +75,10 @@ public struct Executor: Sendable {
       defaultTimeout: TimeInterval = 60
     ) throws {
       try self.init(
-        packageDirectory: packageDirectory, defaultTimeout: defaultTimeout,
-        swiftExecutor: ProcessRunner.swift)
+        packageDirectory: packageDirectory,
+        defaultTimeout: defaultTimeout,
+        swiftExecutor: ProcessRunner.swift
+      )
     }
   #endif
 }

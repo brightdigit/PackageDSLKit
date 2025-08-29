@@ -27,8 +27,17 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents the type of Swift package that can be created.
+///
+/// This enumeration defines the different package types that can be initialized,
+/// each serving different purposes in the Swift package ecosystem.
 public enum PackageType: String, Sendable, Hashable, Codable {
+  /// An empty package with no predefined structure.
   case empty
+
+  /// A library package that provides reusable code.
   case library
+
+  /// An executable package that creates a runnable application.
   case executable
 }

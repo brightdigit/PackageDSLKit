@@ -28,7 +28,8 @@ internal struct PackageDSLManagerComplexTests {
       .createPackage(type: .library)
       .addTarget(name: "NetworkingCore", type: .library, dependencies: [])
       .addTarget(
-        name: "NetworkingCoreTests", type: .test,
+        name: "NetworkingCoreTests",
+        type: .test,
         dependencies: [DependencyRef(name: "NetworkingCore")]
       )
       .addTarget(

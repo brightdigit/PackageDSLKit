@@ -29,11 +29,30 @@
 
 public import SwiftPackageManagerKit
 
+/// Represents a product in a Swift package.
+///
+/// A product defines a publicly available target that can be used by clients
+/// of the package, such as a library or executable.
 public struct Product: TypeSource, Sendable {
+  /// The name of the product type.
   public let typeName: String
+
+  /// The optional name of the product, if different from the type name.
   public let name: String?
+
+  /// An array of dependency references that this product depends on.
   public let dependencies: [DependencyRef]
+
+  /// The type of product (library or executable).
   public let productType: ProductType?
+
+  /// Creates a new product with the specified configuration.
+  ///
+  /// - Parameters:
+  ///   - typeName: The name of the product type.
+  ///   - name: The optional name of the product. Defaults to nil.
+  ///   - dependencies: An array of dependency references. Defaults to an empty array.
+  ///   - productType: The type of product. Defaults to nil.
   public init(
     typeName: String,
     name: String? = nil,
@@ -48,6 +67,15 @@ public struct Product: TypeSource, Sendable {
 }
 
 extension Product {
+  /// Creates a product from a package type.
+  ///
+  /// This convenience initializer creates a product with the given name and
+  /// infers the product type from the package type.
+  ///
+  /// - Parameters:
+  ///   - name: The name of the product.
+  ///   - type: The package type to infer the product type from.
+  /// - Returns: A new Product instance, or nil if the package type cannot be converted.
   public init?(name: String, type: PackageType) {
     guard let productType = ProductType(type: type) else {
       return nil
@@ -57,7 +85,13 @@ extension Product {
 }
 
 extension Product {
-  /// Initialize Product from SPM data
+  /// Creates a Product from SwiftPackageManager product data.
+  ///
+  /// This initializer converts a SwiftPackageManagerKit.Product into a PackageDSLKit Product.
+  /// Plugin products are currently not supported and will return nil.
+  ///
+  /// - Parameter spmProduct: The SwiftPackageManagerKit product to convert.
+  /// - Returns: A new Product instance, or nil if the product type is not supported.
   public init?(spmProduct: SwiftPackageManagerKit.Product) {
     // Convert SPMProductType to ProductType
     let productType: ProductType
@@ -87,10 +121,20 @@ extension Product {
 }
 
 extension Product: PackagePropertyDescriptor {
+  /// Retrieves the products from package specifications.
+  ///
+  /// - Parameter specifications: The package specifications to retrieve products from.
+  /// - Returns: An array of products from the specifications.
   public static func get(from specifications: PackageSpecifications) -> [Product] {
     specifications.products
   }
 
+  /// Updates the products in package specifications using a transform function.
+  ///
+  /// - Parameters:
+  ///   - original: The original package specifications.
+  ///   - transform: A function that transforms the array of products.
+  /// - Returns: Updated package specifications with the transformed products.
   public static func update(original: PackageSpecifications, transform: ([Product]) -> [Product])
     -> PackageSpecifications
   {

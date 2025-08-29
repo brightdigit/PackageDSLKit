@@ -67,7 +67,8 @@ public enum TargetDependency: Codable, Hashable, Sendable {
     } else {
       throw DecodingError.dataCorrupted(
         DecodingError.Context(
-          codingPath: decoder.codingPath, debugDescription: "Unknown target dependency type")
+          codingPath: decoder.codingPath, debugDescription: "Unknown target dependency type"
+        )
       )
     }
   }

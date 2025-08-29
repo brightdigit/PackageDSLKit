@@ -39,11 +39,13 @@ internal struct ComponentBuildableTests {
     let packageDSLURL: URL
     if #available(iOS 16.0, watchOS 9.0, tvOS 16.0, macOS 13.0, *) {
       packageDSLURL = URL.temporaryDirectory.appending(
-        path: packageDSLName, directoryHint: .isDirectory)
+        path: packageDSLName, directoryHint: .isDirectory
+      )
     } else {
       packageDSLURL =
         FileManager.default.temporaryDirectory.appendingPathComponent(
-          packageDSLName, isDirectory: true)
+          packageDSLName, isDirectory: true
+        )
     }
     let componentDirectoryURL = MockComponentBuildable.directoryURL(relativeTo: packageDSLURL)
 
@@ -60,7 +62,8 @@ internal struct ComponentBuildableTests {
   internal func isType(_: Int, containsRequirements: Bool) async throws {
     let name = UUID().uuidString
     let component = MockComponentBuildable.component(
-      name: name, containsRequirements: containsRequirements)
+      name: name, containsRequirements: containsRequirements
+    )
     let isType = component.isType(of: MockComponentBuildable.self)
     #expect(isType == containsRequirements)
   }

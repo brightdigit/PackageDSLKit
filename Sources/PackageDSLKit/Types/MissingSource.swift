@@ -27,8 +27,17 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents a source that is missing or cannot be found in the package.
+///
+/// This structure tracks information about sources that were expected but are
+/// not present in the package configuration, helping with error reporting and debugging.
 public struct MissingSource: Sendable, Hashable, Codable {
+  /// The source reference that is missing.
   public let source: Source
+
+  /// The type of source that is missing.
   public let sourceType: SourceType
+
+  /// The name of the missing source.
   public let name: String
 }

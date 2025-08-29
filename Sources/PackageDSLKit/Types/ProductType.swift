@@ -27,7 +27,14 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents the type of product that can be created in a Swift package.
+///
+/// This enumeration defines the different types of products that can be built
+/// from a Swift package, such as libraries and executables.
 public enum ProductType: String, Sendable, Hashable, Codable {
+  /// A library product that can be imported by other packages or targets.
   case library
+
+  /// An executable product that can be run as a standalone application.
   case executable
 }

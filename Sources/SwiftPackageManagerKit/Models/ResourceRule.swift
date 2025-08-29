@@ -49,7 +49,8 @@ public enum ResourceRule: Codable, Hashable, Sendable {
     } else {
       throw DecodingError.dataCorrupted(
         DecodingError.Context(
-          codingPath: decoder.codingPath, debugDescription: "Unknown resource rule type")
+          codingPath: decoder.codingPath, debugDescription: "Unknown resource rule type"
+        )
       )
     }
   }

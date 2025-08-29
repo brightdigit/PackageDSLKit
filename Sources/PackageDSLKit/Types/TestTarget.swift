@@ -29,9 +29,22 @@
 
 public import SwiftPackageManagerKit
 
+/// Represents a test target in a Swift package.
+///
+/// A test target contains unit tests or integration tests for the package,
+/// and can depend on other targets or products.
 public struct TestTarget: TypeSource, Sendable {
+  /// The name of the test target type.
   public let typeName: String
+
+  /// An array of dependency references that this test target depends on.
   public let dependencies: [DependencyRef]
+
+  /// Creates a new test target with the specified type name and dependencies.
+  ///
+  /// - Parameters:
+  ///   - typeName: The name of the test target type.
+  ///   - dependencies: An array of dependency references. Defaults to an empty array.
   public init(typeName: String, dependencies: [DependencyRef] = []) {
     self.typeName = typeName
     self.dependencies = dependencies
@@ -39,13 +52,25 @@ public struct TestTarget: TypeSource, Sendable {
 }
 
 extension TestTarget {
+  /// Creates a test target for the specified product.
+  ///
+  /// This convenience initializer creates a test target with a name derived
+  /// from the product name by appending "Tests".
+  ///
+  /// - Parameter product: The product to create a test target for.
   public init(for product: Product) {
     self.init(typeName: product.typeName + "Tests")
   }
 }
 
 extension TestTarget {
-  /// Initialize TestTarget from SPM data (for test targets only)
+  /// Creates a TestTarget from SwiftPackageManager target data.
+  ///
+  /// This initializer converts a SwiftPackageManagerKit.Target into a PackageDSLKit TestTarget,
+  /// but only for test targets. Regular and executable targets are excluded.
+  ///
+  /// - Parameter spmTarget: The SwiftPackageManagerKit target to convert.
+  /// - Returns: A new TestTarget instance, or nil if the target type is not a test target.
   public init?(spmTarget: SwiftPackageManagerKit.Target) {
     // Only convert test targets
     guard spmTarget.type == .test else {

@@ -95,7 +95,8 @@ extension SupportedPlatformSet {
       spmPlatforms.compactMap { spmPlatform in
         SupportedPlatform(
           osName: spmPlatform.platformName,
-          version: Int(spmPlatform.version.components(separatedBy: ".").first ?? "0") ?? 0)
+          version: Int(spmPlatform.version.components(separatedBy: ".").first ?? "0") ?? 0
+        )
       }
     )
 

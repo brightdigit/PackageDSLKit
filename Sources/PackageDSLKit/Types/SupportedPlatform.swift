@@ -29,19 +29,39 @@
 
 internal import Foundation
 
+/// Represents a supported platform with its operating system name and version.
+///
+/// This structure defines a platform that a Swift package can target, including
+/// the OS name (like macOS, iOS, etc.) and the minimum version required.
 public struct SupportedPlatform: Sendable, Hashable, Codable {
+  /// The name of the operating system (e.g., "macOS", "iOS", "watchOS").
   public let osName: String
+
+  /// The minimum version number for this platform.
   public let version: Int
 
+  /// Hashes the essential components of this supported platform.
+  ///
+  /// - Parameter hasher: The hasher to use for combining values.
   public func hash(into hasher: inout Hasher) {
     hasher.combine(osName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())
     hasher.combine(version)
   }
 }
 extension SupportedPlatform {
+  /// Generates the Swift code representation of this supported platform.
+  ///
+  /// - Returns: A string representing the Swift code for this platform.
   public var code: String {
     "SupportedPlatform.\(osName)(.v\(version)"
   }
+
+  /// Creates a SupportedPlatform from a string representation.
+  ///
+  /// This initializer parses strings in formats like "macOS(.v14)" or "SupportedPlatform.iOS(.v15)".
+  ///
+  /// - Parameter string: The string to parse.
+  /// - Returns: A new SupportedPlatform instance, or nil if the string cannot be parsed.
   public init?(string: String) {
     // Remove any whitespace and optional "SupportedPlatform." prefix
     let cleanString = string.trimmingCharacters(in: .whitespaces)

@@ -18,7 +18,8 @@ internal struct PackageDSLManagerSPMTests {
   )
   internal func validateGeneratedPackageWithSPMValidation() async throws {
     print(
-      "Is running Xcode Test in Github CI? \(ProcessInfo.processInfo.shouldDisableSPMValidation())")
+      "Is running Xcode Test in Github CI? \(ProcessInfo.processInfo.shouldDisableSPMValidation())"
+    )
     print("Does allow Process API? \(Platform.allowsProcess)")
     #if canImport(Foundation) && (os(macOS) || os(Linux))
       let tempDirectory = FileManager.default.temporaryDirectory
@@ -51,7 +52,8 @@ internal struct PackageDSLManagerSPMTests {
     try FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
     let sourcesDirectory = tempDirectory.appendingPathComponent("Sources/SPMValidationTest")
     try FileManager.default.createDirectory(
-      at: sourcesDirectory, withIntermediateDirectories: true)
+      at: sourcesDirectory, withIntermediateDirectories: true
+    )
 
     // Create a simple Swift source file
     let sourceFile = sourcesDirectory.appendingPathComponent("SPMValidationTest.swift")
@@ -67,11 +69,11 @@ internal struct PackageDSLManagerSPMTests {
   private func createSimpleSourceFile(at sourceFile: URL) throws {
     try """
     public struct SPMValidationTest {
-        public init() {}
+      public init() {}
 
-        public func hello() -> String {
-            return "Hello, World!"
-        }
+      public func hello() -> String {
+        return "Hello, World!"
+      }
     }
     """.write(to: sourceFile, atomically: true, encoding: .utf8)
   }

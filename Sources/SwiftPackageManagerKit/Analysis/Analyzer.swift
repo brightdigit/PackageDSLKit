@@ -93,7 +93,8 @@ public struct Analyzer: Sendable {
       return try analyzePackage(data: data)
     } catch {
       throw AnalysisError.invalidJSON(
-        "Could not read file at \(filePath): \(error.localizedDescription)")
+        "Could not read file at \(filePath): \(error.localizedDescription)"
+      )
     }
   }
 

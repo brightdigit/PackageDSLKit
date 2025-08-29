@@ -115,7 +115,8 @@ extension PackageDSLManager {
   ///   - name: The dependency name to remove
   ///   - force: If true, remove even if targets depend on it
   /// - Returns: Self for method chaining
-  /// - Throws: PackageError.dependencyNotFound if dependency doesn't exist, or cascadeRemovalRequired if targets depend on it and force is false
+  /// - Throws: PackageError.dependencyNotFound if dependency doesn't exist, or cascadeRemovalRequired
+  ///   if targets depend on it and force is false
   @discardableResult
   public func removeDependency(name: String, force: Bool = false) throws -> PackageDSLManager {
     // Check if dependency exists

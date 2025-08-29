@@ -44,7 +44,8 @@ extension PackageDSLManager {
       return self
     } catch {
       throw PackageError.packageGenerationFailed(
-        "DSL generation failed: \(error.localizedDescription)")
+        "DSL generation failed: \(error.localizedDescription)"
+      )
     }
   }
 
@@ -67,12 +68,14 @@ extension PackageDSLManager {
     import PackageDescription
 
     let package = Package(
-        name: "\(packageName)"
+      name: "\(packageName)"
     """
   }
 
   private func addProductsSection() -> String {
-    guard !products.isEmpty else { return "" }
+    guard !products.isEmpty else {
+      return ""
+    }
 
     var section = ",\n        products: [\n"
 
@@ -98,7 +101,9 @@ extension PackageDSLManager {
   }
 
   private func addDependenciesSection() -> String {
-    guard !dependencies.isEmpty else { return "" }
+    guard !dependencies.isEmpty else {
+      return ""
+    }
 
     var section = ",\n        dependencies: [\n"
 
@@ -137,7 +142,9 @@ extension PackageDSLManager {
         Target(typeName: testTarget.typeName, dependencies: testTarget.dependencies)
       }
 
-    guard !allTargets.isEmpty else { return "" }
+    guard !allTargets.isEmpty else {
+      return ""
+    }
 
     var section = ",\n        targets: [\n"
 

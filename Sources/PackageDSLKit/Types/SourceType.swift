@@ -27,11 +27,24 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
+/// Represents the different types of sources in a Swift package.
+///
+/// This enumeration categorizes the various source components that can be part
+/// of a Swift package, providing methods to access related data.
 public enum SourceType: CaseIterable, Sendable, Hashable, Codable {
+  /// Represents a product source.
   case product
+
+  /// Represents a dependency source.
   case dependency
+
+  /// Represents a test target source.
   case testTarget
 
+  /// Retrieves sources from the package directory configuration for this source type.
+  ///
+  /// - Parameter configuration: The package directory configuration to retrieve sources from.
+  /// - Returns: An array of type sources corresponding to this source type.
   internal func sources(from configuration: PackageDirectoryConfiguration) -> [any TypeSource] {
     switch self {
     case .product: return configuration.products
@@ -39,6 +52,11 @@ public enum SourceType: CaseIterable, Sendable, Hashable, Codable {
     case .testTarget: return configuration.testTargets
     }
   }
+
+  /// Retrieves index references from the index for this source type.
+  ///
+  /// - Parameter index: The index to retrieve references from.
+  /// - Returns: An array of type references corresponding to this source type.
   internal func indexReferences(from index: Index) -> [any TypeReference] {
     switch self {
     case .product: return index.entries

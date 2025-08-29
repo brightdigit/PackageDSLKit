@@ -37,7 +37,7 @@
     ///   - arguments: Command line arguments (default: empty array)
     ///   - workingDirectory: Working directory for the process (default: nil)
     ///   - environment: Environment variables (default: nil)
-    convenience init(
+    internal convenience init(
       executable: String,
       arguments: [String] = [],
       workingDirectory: URL? = nil,
@@ -58,7 +58,7 @@
 
     /// Sets up pipes for stdout and stderr
     /// - Returns: Tuple containing stdout and stderr pipes
-    func setupPipes() -> (stdout: Pipe, stderr: Pipe) {
+    internal func setupPipes() -> (stdout: Pipe, stderr: Pipe) {
       let stdoutPipe = Pipe()
       let stderrPipe = Pipe()
       standardOutput = stdoutPipe
@@ -71,7 +71,7 @@
     ///   - timeout: Timeout duration in seconds
     ///   - onTimeout: Closure to execute when timeout occurs
     /// - Returns: The timeout task for cancellation
-    func createTimeoutTask(
+    internal func createTimeoutTask(
       timeout: TimeInterval,
       onTimeout: @Sendable @escaping () -> Void
     ) -> Task<Void, Never> {
@@ -94,7 +94,7 @@
     ///   - stdoutPipe: The stdout pipe
     ///   - stderrPipe: The stderr pipe
     /// - Returns: ProcessResult with output and status
-    func createProcessResult(
+    internal func createProcessResult(
       from stdoutPipe: Pipe,
       stderrPipe: Pipe
     ) -> ProcessResult {

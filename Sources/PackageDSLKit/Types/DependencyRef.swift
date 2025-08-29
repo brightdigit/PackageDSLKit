@@ -29,5 +29,9 @@
 
 public import Foundation
 
-/// Type alias for dependency reference types
+/// A type alias representing a reference to a dependency.
+///
+/// DependencyRef is a specialized type reference used specifically for referencing
+/// dependencies within a Swift package. It provides the same functionality as
+/// BasicTypeReference but with more specific semantic meaning.
 public typealias DependencyRef = BasicTypeReference

@@ -30,6 +30,13 @@
 public import Foundation
 
 extension SwiftVersion {
+  /// Reads the Swift version from a Package.swift file.
+  ///
+  /// This method attempts to extract the swift-tools-version from the first line
+  /// of a Package.swift file, which typically contains a comment with the version information.
+  ///
+  /// - Parameter packageSwiftFileURL: The URL of the Package.swift file to read from.
+  /// - Returns: A SwiftVersion instance parsed from the file, or nil if the version cannot be determined.
   public static func readFrom(packageSwiftFileURL: URL) -> SwiftVersion? {
     let versionText: String
     let fileHandle: FileHandle

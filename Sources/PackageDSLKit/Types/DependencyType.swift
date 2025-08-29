@@ -31,6 +31,8 @@ import Foundation
 
 /// Represents the type of dependency
 public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
+  public typealias RawValue = Int
+
   internal struct InvalidValueError: Error, Sendable {
     internal let invalidCount: Int
 
@@ -46,8 +48,6 @@ public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
       self.init(invalidCount: indiciesCount - valuesCount)
     }
   }
-
-  public typealias RawValue = Int
 
   public static let package = DependencyType(rawValue: 1)
   public static let target = DependencyType(rawValue: 2)

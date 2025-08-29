@@ -55,7 +55,8 @@ public enum PackageKind: Codable, Hashable, Sendable {
     } else {
       throw DecodingError.dataCorrupted(
         DecodingError.Context(
-          codingPath: decoder.codingPath, debugDescription: "Unknown package kind")
+          codingPath: decoder.codingPath, debugDescription: "Unknown package kind"
+        )
       )
     }
   }

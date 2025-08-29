@@ -34,7 +34,7 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
   case from(String)
   case upToNextMajor(from: String)
   case upToNextMinor(from: String)
-  case range(from: String, to: String)
+  case range(from: String, toVersion: String)
   case exact(String)
   case revision(String)
   case branch(String)
@@ -53,40 +53,54 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
   }
 
   private static func parseRange(from trimmed: String) -> VersionRequirement? {
-    guard trimmed.contains("..<") else { return nil }
+    guard trimmed.contains("..<") else {
+      return nil
+    }
     let components = trimmed.components(separatedBy: "..<")
-    guard components.count == 2 else { return nil }
+    guard components.count == 2 else {
+      return nil
+    }
     let from = components[0].trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-    let to = components[1].trimmingCharacters(in: CharacterSet(charactersIn: "\""))
-    return .range(from: from, to: to)
+    let toVersion = components[1].trimmingCharacters(in: CharacterSet(charactersIn: "\""))
+    return .range(from: from, toVersion: toVersion)
   }
 
   private static func parseExact(from trimmed: String) -> VersionRequirement? {
-    guard trimmed.hasPrefix("exact:") else { return nil }
+    guard trimmed.hasPrefix("exact:") else {
+      return nil
+    }
     let version = trimmed.dropFirst(6).trimmingCharacters(in: CharacterSet(charactersIn: " \""))
     return .exact(version)
   }
 
   private static func parseRevision(from trimmed: String) -> VersionRequirement? {
-    guard trimmed.hasPrefix("revision:") else { return nil }
+    guard trimmed.hasPrefix("revision:") else {
+      return nil
+    }
     let revision = trimmed.dropFirst(9).trimmingCharacters(in: CharacterSet(charactersIn: " \""))
     return .revision(revision)
   }
 
   private static func parseBranch(from trimmed: String) -> VersionRequirement? {
-    guard trimmed.hasPrefix("branch:") else { return nil }
+    guard trimmed.hasPrefix("branch:") else {
+      return nil
+    }
     let branch = trimmed.dropFirst(7).trimmingCharacters(in: CharacterSet(charactersIn: " \""))
     return .branch(branch)
   }
 
   private static func parseFrom(from trimmed: String) -> VersionRequirement? {
-    guard trimmed.hasPrefix("from:") else { return nil }
+    guard trimmed.hasPrefix("from:") else {
+      return nil
+    }
     let version = trimmed.dropFirst(5).trimmingCharacters(in: CharacterSet(charactersIn: " \""))
     return .from(version)
   }
 
   private static func parseDefaultVersion(from trimmed: String) -> VersionRequirement? {
-    guard isValidVersionString(trimmed) else { return nil }
+    guard isValidVersionString(trimmed) else {
+      return nil
+    }
     return .from(trimmed)
   }
 
@@ -115,8 +129,8 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
       return formatUpToNextMajor(version)
     case .upToNextMinor(let version):
       return formatUpToNextMinor(version)
-    case let .range(from, to):
-      return formatRange(from: from, to: to)
+    case let .range(from, toVersion):
+      return formatRange(from: from, toVersion: toVersion)
     case .exact(let version):
       return formatExact(version)
     default:
@@ -148,8 +162,8 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
     ".upToNextMinor(from: \"\(version)\")"
   }
 
-  private func formatRange(from: String, to: String) -> String {
-    "\"\(from)\"..<\"\(to)\""
+  private func formatRange(from: String, toVersion: String) -> String {
+    "\"\(from)\"..<\"\(toVersion)\""
   }
 
   private func formatExact(_ version: String) -> String {
