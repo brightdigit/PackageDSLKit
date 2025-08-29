@@ -1,5 +1,5 @@
 //
-//  ProcessRunnerError.swift
+//  Executor+Utilities.swift
 //  MistKit
 //
 //  Created by Leo Dion.
@@ -29,27 +29,16 @@
 
 public import Foundation
 
-/// Error types for ProcessRunner
-/// **Note:** This utility is only available on macOS and Linux platforms.
-/// It is not available on iOS, watchOS, tvOS, or visionOS due to platform limitations.
-
-public enum ProcessRunnerError: Error, LocalizedError, Sendable {
-  case timeout
-  case executionFailed(String)
-  case nonZeroExit(Int32, String)
-  case unknownError(Error)
-
-  public var errorDescription: String? {
-    switch self {
-    case .timeout:
-      return "Process execution timed out"
-    case .executionFailed(let message):
-      return "Process execution failed: \(message)"
-    case .nonZeroExit(let code, let stderr):
-      return "Process exited with code \(code): \(stderr)"
-    case .unknownError(let error) :
-      return "Process unknown error: \(error.localizedDescription)"
-    }
-
+// MARK: - Convenience Utilities
+extension Executor {
+  /// Get basic package information (name, tools version) quickly
+  /// - Parameter timeout: Optional timeout override
+  /// - Returns: Tuple of package name and tools version
+  /// - Throws: ExecutorError on failure
+  public func getPackageInfo(timeout: TimeInterval? = nil) async throws -> (
+    name: String, toolsVersion: String
+  ) {
+    let packageInfo = try await dumpPackage(timeout: timeout)
+    return (name: packageInfo.name, toolsVersion: packageInfo.toolsVersion.version)
   }
 }

@@ -36,7 +36,7 @@ public struct Executor: Sendable {
     _ arguments: [String],
     _ workingDirectory: URL?,
     _ timeout: TimeInterval
-  ) async throws -> ProcessResult
+  ) async throws(ProcessRunnerError)  -> ProcessResult
 
   /// The package directory
   public let packageDirectory: URL
@@ -45,7 +45,7 @@ public struct Executor: Sendable {
   public let defaultTimeout: TimeInterval
 
   /// The Swift command executor
-  private let swiftExecutor: SwiftCommandExecutor
+  internal let swiftExecutor: SwiftCommandExecutor
 
   /// Initialize with a package directory and Swift command executor
   /// - Parameters:
@@ -56,7 +56,7 @@ public struct Executor: Sendable {
     packageDirectory: URL,
     defaultTimeout: TimeInterval = 60,
     swiftExecutor: @escaping SwiftCommandExecutor
-  ) throws {
+  ) throws(ExecutorError) {
     // Verify the directory exists and contains a Package.swift
     let packageSwiftPath = packageDirectory.appendingPathComponent("Package.swift")
     print(packageSwiftPath)
@@ -79,171 +79,4 @@ public struct Executor: Sendable {
         swiftExecutor: ProcessRunner.swift)
     }
   #endif
-
-  /// Execute `swift package dump-package` and return parsed package info
-  /// - Parameter timeout: Optional timeout override
-  /// - Returns: Parsed PackageInfo
-  /// - Throws: ExecutorError on failure
-  public func dumpPackage(timeout: TimeInterval? = nil) async throws -> PackageInfo {
-    let actualTimeout = timeout ?? defaultTimeout
-
-    do {
-      let result = try await swiftExecutor(
-        ["package", "dump-package"],
-        packageDirectory,
-        actualTimeout
-      )
-
-      print(result.standardOutput)
-      guard let jsonData = result.standardOutput.data(using: .utf8) else {
-        throw ExecutorError.invalidJSON("Could not convert output to UTF-8 data")
-      }
-
-      let decoder = JSONDecoder()
-      do {
-        return try decoder.decode(PackageInfo.self, from: jsonData)
-      } catch {
-        dump(error)
-        throw ExecutorError.invalidJSON(error.localizedDescription)
-      }
-    } catch let error as ProcessRunnerError {
-      switch error {
-      case .timeout:
-        throw ExecutorError.commandFailed(
-          "package dump-package", "Command timed out after \(actualTimeout) seconds")
-      case .nonZeroExit(let code, let stderr):
-        throw ExecutorError.commandFailed("package dump-package", "Exit code \(code): \(stderr)")
-      case .executionFailed(let message):
-        throw ExecutorError.commandFailed("package dump-package", message)
-      }
-    }
-  }
-
-  /// Execute `swift package resolve` to resolve dependencies
-  /// - Parameter timeout: Optional timeout override
-  /// - Throws: ExecutorError on failure
-  public func resolvePackage(timeout: TimeInterval? = nil) async throws {
-    let actualTimeout = timeout ?? defaultTimeout
-
-    do {
-      _ = try await swiftExecutor(
-        ["package", "resolve"],
-        packageDirectory,
-        actualTimeout
-      )
-    } catch let error as ProcessRunnerError {
-      switch error {
-      case .timeout:
-        throw ExecutorError.commandFailed(
-          "package resolve", "Command timed out after \(actualTimeout) seconds")
-      case .nonZeroExit(let code, let stderr):
-        throw ExecutorError.commandFailed("package resolve", "Exit code \(code): \(stderr)")
-      case .executionFailed(let message):
-        throw ExecutorError.commandFailed("package resolve", message)
-      }
-    }
-  }
-
-  /// Execute `swift build` to build the package
-  /// - Parameters:
-  ///   - target: Optional specific target to build
-  ///   - configuration: Build configuration (.debug or .release)
-  ///   - timeout: Optional timeout override
-  /// - Throws: ExecutorError on failure
-  public func buildPackage(
-    target: String? = nil,
-    configuration: BuildConfiguration = .debug,
-    timeout: TimeInterval? = nil
-  ) async throws {
-    let actualTimeout = timeout ?? defaultTimeout
-
-    var arguments = ["build"]
-
-    // Add configuration
-    switch configuration {
-    case .debug:
-      arguments.append("--configuration")
-      arguments.append("debug")
-    case .release:
-      arguments.append("--configuration")
-      arguments.append("release")
-    }
-
-    // Add target if specified
-    if let target = target {
-      arguments.append("--target")
-      arguments.append(target)
-    }
-
-    do {
-      _ = try await swiftExecutor(
-        arguments,
-        packageDirectory,
-        actualTimeout
-      )
-    } catch let error as ProcessRunnerError {
-      let command = "build" + (target.map { " --target \($0)" } ?? "")
-      switch error {
-      case .timeout:
-        throw ExecutorError.commandFailed(
-          command, "Command timed out after \(actualTimeout) seconds")
-      case .nonZeroExit(let code, let stderr):
-        throw ExecutorError.commandFailed(command, "Exit code \(code): \(stderr)")
-      case .executionFailed(let message):
-        throw ExecutorError.commandFailed(command, message)
-      }
-    }
-  }
-
-  /// Execute `swift test` to run package tests
-  /// - Parameters:
-  ///   - target: Optional specific test target to run
-  ///   - timeout: Optional timeout override
-  /// - Throws: ExecutorError on failure
-  public func testPackage(
-    target: String? = nil,
-    timeout: TimeInterval? = nil
-  ) async throws {
-    let actualTimeout = timeout ?? defaultTimeout
-
-    var arguments = ["test"]
-
-    // Add target if specified
-    if let target = target {
-      arguments.append("--target")
-      arguments.append(target)
-    }
-
-    do {
-      _ = try await swiftExecutor(
-        arguments,
-        packageDirectory,
-        actualTimeout
-      )
-    } catch let error as ProcessRunnerError {
-      let command = "test" + (target.map { " --target \($0)" } ?? "")
-      switch error {
-      case .timeout:
-        throw ExecutorError.commandFailed(
-          command, "Command timed out after \(actualTimeout) seconds")
-      case .nonZeroExit(let code, let stderr):
-        throw ExecutorError.commandFailed(command, "Exit code \(code): \(stderr)")
-      case .executionFailed(let message):
-        throw ExecutorError.commandFailed(command, message)
-      }
-    }
-  }
-
-  /// Get basic package information (name, tools version) quickly
-  /// - Parameter timeout: Optional timeout override
-  /// - Returns: Tuple of package name and tools version
-  /// - Throws: ExecutorError on failure
-  public func getPackageInfo(timeout: TimeInterval? = nil) async throws -> (
-    name: String, toolsVersion: String
-  ) {
-    let packageInfo = try await dumpPackage(timeout: timeout)
-    return (name: packageInfo.name, toolsVersion: packageInfo.toolsVersion.version)
-  }
 }
-
-// MARK: - Convenience Extensions

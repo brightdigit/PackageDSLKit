@@ -100,6 +100,14 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
 
   /// Convert to SPM-compatible string representation
   internal func asSPMString() -> String {
+    // Split complex switch into smaller methods
+    if let versionString = formatVersionRequirement() {
+      return versionString
+    }
+    return formatNonVersionRequirement()
+  }
+
+  private func formatVersionRequirement() -> String? {
     switch self {
     case .from(let version):
       return formatFromVersion(version)
@@ -111,10 +119,20 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
       return formatRange(from: from, to: to)
     case .exact(let version):
       return formatExact(version)
+    default:
+      return nil
+    }
+  }
+
+  private func formatNonVersionRequirement() -> String {
+    switch self {
     case .revision(let revision):
       return formatRevision(revision)
     case .branch(let branch):
       return formatBranch(branch)
+    default:
+      // This should never happen as all cases are covered above
+      return ""
     }
   }
 

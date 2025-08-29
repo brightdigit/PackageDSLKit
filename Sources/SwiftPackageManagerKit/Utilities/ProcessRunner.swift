@@ -48,66 +48,77 @@
       workingDirectory: URL? = nil,
       environment: [String: String]? = nil,
       timeout: TimeInterval = 30
-    ) async throws -> ProcessResult {
-      try await withCheckedThrowingContinuation { continuation in
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = [executable] + arguments
-
-        if let workingDirectory = workingDirectory {
-          process.currentDirectoryURL = workingDirectory
-        }
-
-        if let environment = environment {
-          process.environment = environment
-        }
-
-        let stdoutPipe = Pipe()
-        let stderrPipe = Pipe()
-        process.standardOutput = stdoutPipe
-        process.standardError = stderrPipe
-
-        // Set up timeout
-        let timeoutTask = Task {
-          try await Task.sleep(for: .seconds(timeout))
-          if process.isRunning {
-            process.terminate()
-            continuation.resume(throwing: ProcessRunnerError.timeout)
+    ) async throws(ProcessRunnerError) -> ProcessResult {
+      do {
+        return try await withCheckedThrowingContinuation { continuation in
+          let process = Process()
+          process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+          process.arguments = [executable] + arguments
+          
+          if let workingDirectory = workingDirectory {
+            process.currentDirectoryURL = workingDirectory
           }
-        }
-
-        process.terminationHandler = { process in
-          timeoutTask.cancel()
-
-          let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
-          let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
-
-          let stdout = String(data: stdoutData, encoding: .utf8) ?? ""
-          let stderr = String(data: stderrData, encoding: .utf8) ?? ""
-
-          let result = ProcessResult(
-            processIdentifier: process.processIdentifier,
-            exitCode: process.terminationStatus,
-            standardOutput: stdout,
-            standardError: stderr
-          )
-
-          // Check for non-zero exit codes if needed
-          if !result.isSuccess && result.exitCode != 0 {
+          
+          if let environment = environment {
+            process.environment = environment
+          }
+          
+          let stdoutPipe = Pipe()
+          let stderrPipe = Pipe()
+          process.standardOutput = stdoutPipe
+          process.standardError = stderrPipe
+          
+          // Set up timeout
+          let timeoutTask = Task {
+            do {
+              try await Task.sleep(for: .seconds(timeout))
+            } catch {
+              print(error)
+            }
+            if process.isRunning {
+              process.terminate()
+              continuation.resume(throwing: ProcessRunnerError.timeout)
+            }
+          }
+          
+          process.terminationHandler = { process in
+            timeoutTask.cancel()
+            
+            let stdoutData = stdoutPipe.fileHandleForReading.readDataToEndOfFile()
+            let stderrData = stderrPipe.fileHandleForReading.readDataToEndOfFile()
+            
+            let stdout = String(data: stdoutData, encoding: .utf8) ?? ""
+            let stderr = String(data: stderrData, encoding: .utf8) ?? ""
+            
+            let result = ProcessResult(
+              processIdentifier: process.processIdentifier,
+              exitCode: process.terminationStatus,
+              standardOutput: stdout,
+              standardError: stderr
+            )
+            
+            // Check for non-zero exit codes if needed
+            if !result.isSuccess && result.exitCode != 0 {
+              continuation.resume(
+                throwing: ProcessRunnerError.nonZeroExit(result.exitCode, result.standardError))
+            } else {
+              continuation.resume(returning: result)
+            }
+          }
+          
+          do {
+            try process.run()
+          } catch {
+            timeoutTask.cancel()
             continuation.resume(
-              throwing: ProcessRunnerError.nonZeroExit(result.exitCode, result.standardError))
-          } else {
-            continuation.resume(returning: result)
+              throwing: ProcessRunnerError.executionFailed(error.localizedDescription))
           }
         }
-
-        do {
-          try process.run()
-        } catch {
-          timeoutTask.cancel()
-          continuation.resume(
-            throwing: ProcessRunnerError.executionFailed(error.localizedDescription))
-        }
+      } catch let processRunnerError as ProcessRunnerError {
+        throw processRunnerError
+      } catch {
+        assertionFailure("This error should never happen: \(error.localizedDescription)")
+        throw ProcessRunnerError.unknownError(error)
       }
     }
 
@@ -145,7 +156,7 @@
       arguments: [String],
       workingDirectory: URL? = nil,
       timeout: TimeInterval = 30
-    ) async throws -> ProcessResult {
+    ) async throws(ProcessRunnerError)  -> ProcessResult {
       try await execute(
         "swift",
         arguments: arguments,

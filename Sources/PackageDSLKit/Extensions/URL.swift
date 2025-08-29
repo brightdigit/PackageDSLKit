@@ -37,6 +37,7 @@ extension URL {
       self.url = url
     }
 
+    // swiftlint:disable:next discouraged_optional_boolean
     package func appending(component: String, isDirectory: Bool? = nil) -> URL {
       if #available(iOS 16.0, watchOS 9.0, tvOS 16.0, macOS 13.0, *) {
         switch isDirectory {
