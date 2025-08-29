@@ -17,6 +17,7 @@ struct PackageDSLManagerSPMTests {
     )
   )
   func validateGeneratedPackageWithSPMValidation() async throws {
+    dump(ProcessInfo.processInfo.environment)
     #if canImport(Foundation) && (os(macOS) || os(Linux))
       let tempDirectory = FileManager.default.temporaryDirectory
         .appendingPathComponent("PackageDSLManagerTests-SPMValidation-\(UUID().uuidString)")
