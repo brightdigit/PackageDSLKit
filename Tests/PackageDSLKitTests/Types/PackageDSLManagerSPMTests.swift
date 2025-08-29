@@ -17,7 +17,8 @@ struct PackageDSLManagerSPMTests {
     )
   )
   func validateGeneratedPackageWithSPMValidation() async throws {
-    dump(ProcessInfo.processInfo.environment)
+    print("Is running Xcode Test in Github CI? \(ProcessInfo.processInfo.shouldDisableSPMValidation())")
+    print("Does allow Process API? \(Platform.allowsProcess)")
     #if canImport(Foundation) && (os(macOS) || os(Linux))
       let tempDirectory = FileManager.default.temporaryDirectory
         .appendingPathComponent("PackageDSLManagerTests-SPMValidation-\(UUID().uuidString)")
