@@ -31,6 +31,10 @@ import Foundation
 
 /// Represents a product in a Swift package
 public struct Product: Codable, Hashable, Sendable {
+  private enum CodingKeys: String, CodingKey {
+    case name, type, targets, settings
+  }
+
   public let name: String
   public let type: ProductType
   public let targets: [String]
@@ -62,9 +66,5 @@ public struct Product: Codable, Hashable, Sendable {
     } else {
       self.settings = []
     }
-  }
-
-  private enum CodingKeys: String, CodingKey {
-    case name, type, targets, settings
   }
 }

@@ -39,6 +39,15 @@ public enum Dependency: Codable, Hashable, Sendable {
     case fileSystem
   }
 
+  public var identity: String {
+    switch self {
+    case .sourceControl(let dependency):
+      return dependency.identity
+    case .fileSystem(let dependency):
+      return dependency.identity
+    }
+  }
+
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -78,15 +87,6 @@ public enum Dependency: Codable, Hashable, Sendable {
       try container.encode([dependency], forKey: .sourceControl)
     case .fileSystem(let dependency):
       try container.encode([dependency], forKey: .fileSystem)
-    }
-  }
-
-  public var identity: String {
-    switch self {
-    case .sourceControl(let dependency):
-      return dependency.identity
-    case .fileSystem(let dependency):
-      return dependency.identity
     }
   }
 }

@@ -40,7 +40,7 @@ public enum SupportCodeBlock: Sendable {
     SupportCodeBlockContent(content: content)
   }()
 
-  // swift-format-ignore: NeverForceUnwrap NeverUseForceTry
+  // swift-format-ignore: NeverForceUnwrap, NeverUseForceTry
   private static func readSupportCode() -> String {
     // swiftlint:disable force_try force_unwrapping
     let url = Bundle.module.url(forResource: "PackageDSL.swift", withExtension: "txt")!

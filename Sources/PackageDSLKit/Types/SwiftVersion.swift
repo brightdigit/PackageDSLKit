@@ -32,11 +32,15 @@ import Foundation
 public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, CustomStringConvertible
 {
   internal struct ParsingError: OptionSet, Error, Sendable {
+    internal static let major: ParsingError = .init(rawValue: 1 << 0)
+    internal static let minor: ParsingError = .init(rawValue: 1 << 1)
+
     internal let rawValue: Int
 
     internal init(rawValue: Int) {
       self.rawValue = rawValue
     }
+
     fileprivate init?(major: Int?, minor: Int?) {
       var error = ParsingError()
 
@@ -53,16 +57,15 @@ public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, Cust
       }
       self = error
     }
-
-    internal static let major: ParsingError = .init(rawValue: 1 << 0)
-    internal static let minor: ParsingError = .init(rawValue: 1 << 1)
   }
+
   public let major: Int
   public let minor: Int
 
   public var description: String {
     [major, minor].map(\.description).joined(separator: ".")
   }
+
   public init(major: Int, minor: Int) {
     self.major = major
     self.minor = minor
@@ -74,6 +77,7 @@ public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, Cust
     let minor: Int? = .init(components[1])
     try self.init(major: major, minor: minor)
   }
+
   internal init(major: Int?, minor: Int?) throws(ParsingError) {
     if let major = major, let minor = minor {
       self.init(major: major, minor: minor)
@@ -84,6 +88,7 @@ public struct SwiftVersion: Sendable, Hashable, ExpressibleByStringLiteral, Cust
       throw .init(rawValue: 0)
     }
   }
+
   public init(stringLiteral value: String) {
     do {
       try self.init(throwing: value)

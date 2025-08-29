@@ -74,7 +74,7 @@ fi
 $PACKAGE_DIR/Scripts/header.sh -d  $PACKAGE_DIR/Sources -c "Leo Dion" -o "BrightDigit" -p "MistKit"
 
 if [ -z "$CI" ]; then
-  run_command $MINT_RUN periphery scan $PERIPHERY_OPTIONS --disable-update-check
+  run_command $MINT_RUN periphery scan $PERIPHERY_OPTIONS --index-exclude "Packages/**/*" --disable-update-check
 fi
 
 popd

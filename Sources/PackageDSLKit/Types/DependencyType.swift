@@ -31,19 +31,9 @@ import Foundation
 
 /// Represents the type of dependency
 public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
-  public typealias RawValue = Int
-
-  public static let package = DependencyType(rawValue: 1)
-  public static let target = DependencyType(rawValue: 2)
-
-  private static let strings: [String] = ["PackageDependency", "TargetDependency"]
-
-  public var rawValue: Int
-  public init(rawValue: Int) {
-    self.rawValue = rawValue
-  }
-
   internal struct InvalidValueError: Error, Sendable {
+    internal let invalidCount: Int
+
     internal init?(invalidCount: Int) {
       guard invalidCount != 0 else {
         return nil
@@ -55,8 +45,18 @@ public struct DependencyType: OptionSet, Sendable, Hashable, Codable {
     internal init?(valuesCount: Int, indiciesCount: Int) {
       self.init(invalidCount: indiciesCount - valuesCount)
     }
+  }
 
-    internal let invalidCount: Int
+  public typealias RawValue = Int
+
+  public static let package = DependencyType(rawValue: 1)
+  public static let target = DependencyType(rawValue: 2)
+  private static let strings: [String] = ["PackageDependency", "TargetDependency"]
+
+  public var rawValue: Int
+
+  public init(rawValue: Int) {
+    self.rawValue = rawValue
   }
 
   internal init?(stringsThrows strings: [String]) throws(InvalidValueError) {

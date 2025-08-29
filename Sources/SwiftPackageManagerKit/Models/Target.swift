@@ -31,6 +31,10 @@ import Foundation
 
 /// Represents a target in a Swift package
 public struct Target: Codable, Hashable, Sendable {
+  private enum CodingKeys: String, CodingKey {
+    case name, type, dependencies, exclude, resources, settings, packageAccess
+  }
+
   public let name: String
   public let type: TargetType
   public let dependencies: [TargetDependency]
@@ -89,9 +93,5 @@ public struct Target: Codable, Hashable, Sendable {
     } else {
       self.packageAccess = true
     }
-  }
-
-  private enum CodingKeys: String, CodingKey {
-    case name, type, dependencies, exclude, resources, settings, packageAccess
   }
 }

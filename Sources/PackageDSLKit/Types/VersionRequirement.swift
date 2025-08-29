@@ -27,7 +27,7 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 //
 
-public import Foundation
+internal import Foundation
 
 /// Represents version requirements for dependencies
 public enum VersionRequirement: Sendable, Hashable, Codable {
@@ -39,53 +39,7 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
   case revision(String)
   case branch(String)
 
-  /// Convert to SPM-compatible string representation
-  internal func asSPMString() -> String {
-    switch self {
-    case .from(let version):
-      return formatFromVersion(version)
-    case .upToNextMajor(let version):
-      return formatUpToNextMajor(version)
-    case .upToNextMinor(let version):
-      return formatUpToNextMinor(version)
-    case let .range(from, to):
-      return formatRange(from: from, to: to)
-    case .exact(let version):
-      return formatExact(version)
-    case .revision(let revision):
-      return formatRevision(revision)
-    case .branch(let branch):
-      return formatBranch(branch)
-    }
-  }
-
-  private func formatFromVersion(_ version: String) -> String {
-    "from: \"\(version)\""
-  }
-
-  private func formatUpToNextMajor(_ version: String) -> String {
-    ".upToNextMajor(from: \"\(version)\")"
-  }
-
-  private func formatUpToNextMinor(_ version: String) -> String {
-    ".upToNextMinor(from: \"\(version)\")"
-  }
-
-  private func formatRange(from: String, to: String) -> String {
-    "\"\(from)\"..<\"\(to)\""
-  }
-
-  private func formatExact(_ version: String) -> String {
-    "exact: \"\(version)\""
-  }
-
-  private func formatRevision(_ revision: String) -> String {
-    "revision: \"\(revision)\""
-  }
-
-  private func formatBranch(_ branch: String) -> String {
-    "branch: \"\(branch)\""
-  }
+  // MARK: - Type Methods
 
   /// Parse a version requirement from a string
   /// - Parameter string: String representation of version requirement
@@ -140,5 +94,55 @@ public enum VersionRequirement: Sendable, Hashable, Codable {
   private static func isValidVersionString(_ string: String) -> Bool {
     let versionPattern = #"^\d+\.\d+\.\d+(-[a-zA-Z0-9\.-]+)?(\+[a-zA-Z0-9\.-]+)?$"#
     return string.range(of: versionPattern, options: .regularExpression) != nil
+  }
+
+  // MARK: - Instance Methods
+
+  /// Convert to SPM-compatible string representation
+  internal func asSPMString() -> String {
+    switch self {
+    case .from(let version):
+      return formatFromVersion(version)
+    case .upToNextMajor(let version):
+      return formatUpToNextMajor(version)
+    case .upToNextMinor(let version):
+      return formatUpToNextMinor(version)
+    case let .range(from, to):
+      return formatRange(from: from, to: to)
+    case .exact(let version):
+      return formatExact(version)
+    case .revision(let revision):
+      return formatRevision(revision)
+    case .branch(let branch):
+      return formatBranch(branch)
+    }
+  }
+
+  private func formatFromVersion(_ version: String) -> String {
+    "from: \"\(version)\""
+  }
+
+  private func formatUpToNextMajor(_ version: String) -> String {
+    ".upToNextMajor(from: \"\(version)\")"
+  }
+
+  private func formatUpToNextMinor(_ version: String) -> String {
+    ".upToNextMinor(from: \"\(version)\")"
+  }
+
+  private func formatRange(from: String, to: String) -> String {
+    "\"\(from)\"..<\"\(to)\""
+  }
+
+  private func formatExact(_ version: String) -> String {
+    "exact: \"\(version)\""
+  }
+
+  private func formatRevision(_ revision: String) -> String {
+    "revision: \"\(revision)\""
+  }
+
+  private func formatBranch(_ branch: String) -> String {
+    "branch: \"\(branch)\""
   }
 }

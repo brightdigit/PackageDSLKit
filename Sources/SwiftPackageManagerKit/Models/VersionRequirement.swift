@@ -48,6 +48,11 @@ public enum VersionRequirement: Codable, Hashable, Sendable {
     case upperBound
   }
 
+  private struct RangeInfo: Codable, Sendable {
+    let lowerBound: String
+    let upperBound: String
+  }
+
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -73,11 +78,6 @@ public enum VersionRequirement: Codable, Hashable, Sendable {
           codingPath: decoder.codingPath, debugDescription: "Unknown version requirement type")
       )
     }
-  }
-
-  private struct RangeInfo: Codable, Sendable {
-    let lowerBound: String
-    let upperBound: String
   }
 
   public func encode(to encoder: Encoder) throws {

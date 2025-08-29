@@ -38,13 +38,13 @@ extension Property {
 }
 extension Property {
   internal struct MissingFieldsError: OptionSet, Error, Sendable {
-    internal var rawValue: Int
-
     internal typealias RawValue = Int
 
     internal static let name = MissingFieldsError(rawValue: 1)
     internal static let type = MissingFieldsError(rawValue: 2)
     // static let code = MissingFieldsError(rawValue: 4)
+
+    internal var rawValue: Int
   }
 
   internal init(name: String?, type: String?, code: [String]) throws(MissingFieldsError) {

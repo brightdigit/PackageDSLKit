@@ -61,6 +61,19 @@ public final class PackageDSLManager {
   /// Package modifiers
   public private(set) var modifiers: [Modifier]
 
+  /// Get the current package specifications
+  internal var specifications: PackageSpecifications {
+    PackageSpecifications(
+      products: products,
+      dependencies: dependencies,
+      targets: targets,
+      testTargets: testTargets,
+      supportedPlatformSets: supportedPlatformSets,
+      swiftSettings: swiftSettings,
+      modifiers: modifiers
+    )
+  }
+
   // MARK: - Initialization
 
   /// Initialize PackageDSLManager with a package URL
@@ -93,7 +106,7 @@ public final class PackageDSLManager {
     self.modifiers = []
   }
 
-  // MARK: - Package Configuration
+  // MARK: - Methods
 
   /// Set the package name
   /// - Parameter name: The new package name
@@ -102,20 +115,5 @@ public final class PackageDSLManager {
   public func setPackageName(_ name: String) -> PackageDSLManager {
     self.packageName = name
     return self
-  }
-
-  // MARK: - Internal Specifications
-
-  /// Get the current package specifications
-  internal var specifications: PackageSpecifications {
-    PackageSpecifications(
-      products: products,
-      dependencies: dependencies,
-      targets: targets,
-      testTargets: testTargets,
-      supportedPlatformSets: supportedPlatformSets,
-      swiftSettings: swiftSettings,
-      modifiers: modifiers
-    )
   }
 }

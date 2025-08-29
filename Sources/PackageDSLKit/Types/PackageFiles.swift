@@ -46,6 +46,8 @@ public struct PackageFiles: PackageFilesFactory, Sendable {
   }
 
   public func interface(for type: PackageFilesInterfaceType) -> any PackageFilesInterface {
-    self.types[type]!()
+    let interface = self.types[type]?()
+    assert(interface != nil)
+    return interface ?? FileManager.default
   }
 }

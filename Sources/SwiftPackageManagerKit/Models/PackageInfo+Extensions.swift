@@ -31,16 +31,6 @@ import Foundation
 
 /// Convenience extensions for working with PackageInfo
 extension PackageInfo {
-  /// Find a target by name
-  public func target(named name: String) -> Target? {
-    targets.first { $0.name == name }
-  }
-
-  /// Find a product by name
-  public func product(named name: String) -> Product? {
-    products.first { $0.name == name }
-  }
-
   /// Get all library products
   public var libraryProducts: [Product] {
     products.filter {
@@ -59,5 +49,15 @@ extension PackageInfo {
       }
       return false
     }
+  }
+
+  /// Find a target by name
+  public func target(named name: String) -> Target? {
+    targets.first { $0.name == name }
+  }
+
+  /// Find a product by name
+  public func product(named name: String) -> Product? {
+    products.first { $0.name == name }
   }
 }

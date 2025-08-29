@@ -33,11 +33,11 @@ public import Foundation
 public struct SupportCodeBlockContent: Sendable {
   public let content: String
 
-  public init(content: String) {
-    self.content = content
-  }
-
   public var trimmedDescription: String {
     content.trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
+  public init(content: String) {
+    self.content = content
   }
 }

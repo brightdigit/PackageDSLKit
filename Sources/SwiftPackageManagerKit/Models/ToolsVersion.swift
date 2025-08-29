@@ -31,11 +31,11 @@ import Foundation
 
 /// Represents the tools version
 public struct ToolsVersion: Codable, Hashable, Sendable {
-  public let version: String
-
   private enum CodingKeys: String, CodingKey {
     case version = "_version"
   }
+
+  public let version: String
 
   public init(version: String) {
     self.version = version
