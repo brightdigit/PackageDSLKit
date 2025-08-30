@@ -41,7 +41,7 @@ opt_in_rules:
   - legacy_random
   - literal_expression_end_indentation
   - lower_acl_than_parent
-#  - missing_docs
+  - missing_docs
   - modifier_order
   - multiline_arguments
   - multiline_arguments_brackets
@@ -57,6 +57,7 @@ opt_in_rules:
   - optional_enum_case_matching
   - overridden_super_call
   - override_in_extension
+  - pattern_matching_keywords
   - prefer_self_type_over_type_of_self
   - prefer_zero_over_explicit_init
   - private_action
@@ -116,7 +117,8 @@ identifier_name:
 excluded:
   - DerivedData
   - .build
-  - .temp
+  - Mint
+  - Packages
 indentation_width:
   indentation_width: 2
 file_name:
@@ -130,3 +132,4 @@ disabled_rules:
     - closure_parameter_position
     - trailing_comma
     - opening_brace
+    - pattern_matching_keywords

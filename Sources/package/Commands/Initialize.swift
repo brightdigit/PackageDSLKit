@@ -1,6 +1,6 @@
 //
 //  Initialize.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -32,7 +32,10 @@ import Foundation
 import PackageDSLKit
 
 extension Package {
-  internal struct Initialize: ParsableCommand {
+  internal struct Initialize: ParsableCommand, Sendable {
+    internal static let configuration: CommandConfiguration = .init(
+      commandName: "init"
+    )
     @OptionGroup internal var settings: Settings
 
     @Option
@@ -44,20 +47,8 @@ extension Package {
     @Option
     internal var packageType: PackageType = .empty
 
-    internal var packageName: String {
-      self.name ?? self.settings.pathURL.lastPathComponent
-    }
-
     internal var shouldCreateDirectory: Bool {
       self.settings.path != nil
-    }
-
-    internal static let configuration: CommandConfiguration = .init(
-      commandName: "init"
-    )
-
-    private var productName: String {
-      name ?? settings.rootName
     }
 
     internal func run() throws {
@@ -74,9 +65,9 @@ extension Package {
       )
       let writer = PackageWriter()
       try writer.write(spec, to: self.settings.dslSourcesURL)
-      print("Written to:", "\(self.settings.pathURL.standardizedFileURL.path())")
+      print("Written to:", "\(self.settings.pathURL.standardizedFileURL.polyfill().path())")
 
-      let swiftVersionFile = settings.pathURL.appending(component: ".swift-version")
+      let swiftVersionFile = settings.pathURL.polyfill().appending(component: ".swift-version")
       settings.fileManager.createFile(
         at: swiftVersionFile,
         text: self.swiftVersion.description
@@ -90,7 +81,7 @@ extension Package {
 
       try settings.fileManager.createFileStructure(
         forPackageType: packageType,
-        forProductName: productName,
+        forProductName: name ?? settings.rootName,
         at: settings.pathURL
       )
     }

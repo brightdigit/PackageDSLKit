@@ -1,6 +1,6 @@
 //
 //  Settings.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -31,7 +31,7 @@ import ArgumentParser
 import Foundation
 import PackageDSLKit
 
-internal struct Settings: ParsableArguments, FileManagerContainer {
+internal struct Settings: ParsableArguments, FileManagerContainer, Sendable {
   @Option(help: .hidden)
   internal var fileManagerType: PackageFilesInterfaceType = .fileManager
 
@@ -51,6 +51,6 @@ internal struct Settings: ParsableArguments, FileManagerContainer {
   }
 
   internal var dslSourcesURL: URL {
-    self.pathURL.appendingPathComponent("Package")
+    self.pathURL
   }
 }

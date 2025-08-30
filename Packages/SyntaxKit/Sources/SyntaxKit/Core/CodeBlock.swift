@@ -64,4 +64,8 @@ extension CodeBlock {
     )
     return PatternSyntax(ExpressionPatternSyntax(expression: expr))
   }
+  
+  public var trimmedDescription: String {
+    syntax.trimmedDescription
+  }
 }

@@ -1,0 +1,119 @@
+//
+//  PackageDSLManager.swift
+//  MistKit
+//
+//  Created by Leo Dion.
+//  Copyright © 2025 BrightDigit.
+//
+//  Permission is hereby granted, free of charge, to any person
+//  obtaining a copy of this software and associated documentation
+//  files (the “Software”), to deal in the Software without
+//  restriction, including without limitation the rights to use,
+//  copy, modify, merge, publish, distribute, sublicense, and/or
+//  sell copies of the Software, and to permit persons to whom the
+//  Software is furnished to do so, subject to the following
+//  conditions:
+//
+//  The above copyright notice and this permission notice shall be
+//  included in all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+//  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+//  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+//  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+//  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+//  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+//  OTHER DEALINGS IN THE SOFTWARE.
+//
+
+public import Foundation
+
+/// The main SDK entry point for package manipulation using PackageDSL
+@MainActor
+public final class PackageDSLManager {
+  // MARK: - Properties
+
+  /// The URL of the package directory
+  public let packageURL: URL
+
+  /// The name of the package
+  public internal(set) var packageName: String
+
+  /// Products in the package
+  public internal(set) var products: [Product]
+
+  /// Targets in the package
+  public internal(set) var targets: [Target]
+
+  /// Test targets in the package
+  public internal(set) var testTargets: [TestTarget]
+
+  /// Package dependencies
+  public internal(set) var dependencies: [Dependency]
+
+  /// Supported platform sets
+  public private(set) var supportedPlatformSets: [SupportedPlatformSet]
+
+  /// Swift settings
+  public private(set) var swiftSettings: [SwiftSettingRef]
+
+  /// Package modifiers
+  public private(set) var modifiers: [Modifier]
+
+  /// Get the current package specifications
+  internal var specifications: PackageSpecifications {
+    PackageSpecifications(
+      products: products,
+      dependencies: dependencies,
+      targets: targets,
+      testTargets: testTargets,
+      supportedPlatformSets: supportedPlatformSets,
+      swiftSettings: swiftSettings,
+      modifiers: modifiers
+    )
+  }
+
+  // MARK: - Initialization
+
+  /// Initialize PackageDSLManager with a package URL
+  /// - Parameter packageURL: The URL to the package directory
+  public init(packageURL: URL) {
+    self.packageURL = packageURL
+    self.packageName = packageURL.lastPathComponent
+    self.products = []
+    self.targets = []
+    self.testTargets = []
+    self.dependencies = []
+    self.supportedPlatformSets = []
+    self.swiftSettings = []
+    self.modifiers = []
+  }
+
+  /// Initialize PackageDSLManager with a package URL and name
+  /// - Parameters:
+  ///   - packageURL: The URL to the package directory
+  ///   - packageName: The custom name for the package
+  public init(packageURL: URL, packageName: String) {
+    self.packageURL = packageURL
+    self.packageName = packageName
+    self.products = []
+    self.targets = []
+    self.testTargets = []
+    self.dependencies = []
+    self.supportedPlatformSets = []
+    self.swiftSettings = []
+    self.modifiers = []
+  }
+
+  // MARK: - Methods
+
+  /// Set the package name
+  /// - Parameter name: The new package name
+  /// - Returns: Self for method chaining
+  @discardableResult
+  public func setPackageName(_ name: String) -> PackageDSLManager {
+    self.packageName = name
+    return self
+  }
+}

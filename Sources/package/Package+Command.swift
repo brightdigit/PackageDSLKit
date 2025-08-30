@@ -1,6 +1,6 @@
 //
 //  Package+Command.swift
-//  PackageDSLKit
+//  MistKit
 //
 //  Created by Leo Dion.
 //  Copyright © 2025 BrightDigit.
@@ -29,7 +29,6 @@
 
 import ArgumentParser
 import Foundation
-import PackageDSLKit
 
 // Usage
 
@@ -41,8 +40,14 @@ import PackageDSLKit
 // package test add "name"
 
 @main
-internal struct Package: ParsableCommand {
-  internal static let configuration: CommandConfiguration = .init(
-    subcommands: [Initialize.self, Dump.self, Product.self]
-  )
+internal struct Package: AsyncParsableCommand, Sendable {
+  #if canImport(Foundation) && (os(macOS) || os(Linux))
+    internal static let configuration: CommandConfiguration = .init(
+      subcommands: [Initialize.self, Dump.self, Product.self]
+    )
+  #else
+    internal static let configuration: CommandConfiguration = .init(
+      subcommands: [Initialize.self]
+    )
+  #endif
 }
